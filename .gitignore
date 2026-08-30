@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Data / uploads
+data/synthetic_labels/
+backend/uploads/
+backend/reports/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

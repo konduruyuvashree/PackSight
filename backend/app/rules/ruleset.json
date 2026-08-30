@@ -1,0 +1,53 @@
+{
+  "version": "2011-v1",
+  "source": "Legal Metrology (Packaged Commodities) Rules, 2011 — mandatory declarations under Rule 6",
+  "declarations": [
+    {
+      "code": "R6_MANUFACTURER_ADDRESS",
+      "name": "Manufacturer/Packer/Importer Name & Address",
+      "field": "manufacturer_address",
+      "required": true,
+      "min_length": 10
+    },
+    {
+      "code": "R6_NET_QUANTITY",
+      "name": "Net Quantity",
+      "field": "net_quantity",
+      "required": true,
+      "valid_units": ["g", "gm", "kg", "ml", "l", "litre", "liter", "pcs", "piece", "units", "unit"]
+    },
+    {
+      "code": "R6_MRP",
+      "name": "Maximum Retail Price (incl. of all taxes)",
+      "field": "mrp",
+      "required": true,
+      "require_incl_tax_wording": true
+    },
+    {
+      "code": "R6_MFG_DATE",
+      "name": "Month & Year of Manufacture/Packing/Import",
+      "field": "mfg_date",
+      "required": true
+    },
+    {
+      "code": "R6_CONSUMER_CARE",
+      "name": "Consumer Care Details",
+      "field": "consumer_care",
+      "required": true,
+      "min_length": 5
+    },
+    {
+      "code": "R6_COUNTRY_OF_ORIGIN",
+      "name": "Country of Origin",
+      "field": "country_of_origin",
+      "required": false,
+      "note": "Mandatory only for imported goods — flagged as INFO, not a hard FAIL, unless import context is detected."
+    }
+  ],
+  "font_size_slabs_mm": [
+    {"max_net_qty_g_or_ml": 200, "min_height_mm": 1},
+    {"max_net_qty_g_or_ml": 500, "min_height_mm": 2},
+    {"max_net_qty_g_or_ml": 1000, "min_height_mm": 4},
+    {"max_net_qty_g_or_ml": null, "min_height_mm": 6}
+  ]
+}
