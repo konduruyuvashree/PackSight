@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/reports:/app/reports
+    environment:
+      - DATABASE_URL=sqlite:///./compliance.db
+      - OCR_ENGINE=tesseract
+
+  frontend:
+    image: node:20-slim
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
