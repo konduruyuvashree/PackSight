@@ -8,7 +8,6 @@ from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from sqlalchemy.orm import Session
 
 import models
@@ -22,6 +21,7 @@ from ocr_rules import (
     evaluate_label_rules, run_tesseract_ocr, extract_text_with_boxes,
     annotate_image, extract_text, run_rule_engine, score_and_verdict,
 )
+from report_generator import generate_compliance_pdf_report
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -251,46 +251,18 @@ async def download_scan_pdf(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan record not found.")
 
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-
-    # Title & Metadata Header
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, 750, "PackSight Compliance Audit Report")
-    p.setFont("Helvetica", 11)
-    p.drawString(50, 730, f"Product Name: {scan.product_name}")
-    created_str = scan.created_at.strftime('%Y-%m-%d %H:%M:%S') if scan.created_at else "N/A"
-    p.drawString(50, 715, f"Date: {created_str}")
-    status_str = "NON-COMPLIANT" if scan.has_violation else "COMPLIANT"
-    p.drawString(50, 700, f"Overall Score: {scan.score}% | Status: {status_str}")
-    p.line(50, 690, 550, 690)
-
-    # Itemized Rules Table
-    y = 660
     raw = json.loads(scan.fields_json) if scan.fields_json else []
     fields = raw["fields"] if isinstance(raw, dict) and "fields" in raw else raw
 
-    for f in fields:
-        if y < 70:
-            p.showPage()
-            y = 750
-
-        p.setFont("Helvetica-Bold", 10)
-        verdict = f.get('verdict', '').upper()
-        rule_id = f.get('rule_id', '')
-        field_name = f.get('field', '')
-        p.drawString(50, y, f"[{verdict}] {rule_id} - {field_name}")
-
-        p.setFont("Helvetica", 9)
-        evidence = str(f.get('evidence', ''))
-        if len(evidence) > 90:
-            evidence = evidence[:87] + "..."
-        p.drawString(70, y - 12, f"Evidence: {evidence}")
-        y -= 32
-
-    p.showPage()
-    p.save()
-    buffer.seek(0)
+    buffer = generate_compliance_pdf_report(
+        scan_id=scan.id,
+        product_name=scan.product_name or "Packaged Commodity",
+        score=scan.score,
+        has_violation=scan.has_violation,
+        fields=fields,
+        created_at=scan.created_at,
+        user_name=current_user.full_name or current_user.user_id,
+    )
 
     return StreamingResponse(
         buffer,
