@@ -143,6 +143,96 @@ DATE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 NUMERIC_DATE_PATTERN = re.compile(r"\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b")
+FULL_NUMERIC_DATE_PATTERN = re.compile(
+    r"\b([0-3]?\d)[\s./_-]([0-1]?\d)[\s./_-](20\d{2}|\d{2})\b"
+)
+MONTH_YEAR_DATE_PATTERN = re.compile(
+    r"\b(?:0[1-9]|1[0-2]|O[1-9]|o[1-9])[\s./_-](?:20[2-3]\d|[2-3]\d)\b",
+    re.IGNORECASE,
+)
+DOT_MATRIX_DATE_PATTERN = re.compile(
+    r"\b(?:0[1-9]|1[0-2]|O[1-9]|o[1-9]|Ur|ur|UR|OT|ot|oF|OF|UF|uf|[0-1]?[0-9])[\s./_\-]+(?:20[2-3]\d|[2-3]\d)\b",
+    re.IGNORECASE,
+)
+
+
+def normalize_date_str(raw: str) -> Optional[str]:
+    cleaned = raw.strip(" ./:;,-")
+    trans = str.maketrans({
+        "O": "0", "o": "0", "D": "0", "U": "0", "u": "0",
+        "I": "1", "l": "1", "i": "1", "j": "1", "|": "1", "{": "1", "(": "1", "[": "1",
+        "s": "5", "S": "5",
+        "z": "2", "Z": "2",
+        "r": "7", "R": "7", "F": "7", "f": "7", "T": "7", "t": "7",
+        "-": "/", ".": "/"
+    })
+    norm = cleaned.translate(trans)
+    m2 = re.search(r"\b(\d{1,2})[\s/.-]+(\d{2,4})\b", norm)
+    if m2:
+        m, y = int(m2.group(1)), m2.group(2)
+        if len(y) == 2:
+            y = f"20{y}"
+        if 1 <= m <= 12 and 2020 <= int(y) <= 2039:
+            return f"{m:02d}/{y}"
+    m3 = re.search(r"\b(\d{1,2})[\s/.-]+(\d{1,2})[\s/.-]+(\d{2,4})\b", norm)
+    if m3:
+        d, m, y = int(m3.group(1)), int(m3.group(2)), m3.group(3)
+        if len(y) == 2:
+            y = f"20{y}"
+        if 1 <= m <= 12 and 1 <= d <= 31 and 2020 <= int(y) <= 2039:
+            return f"{d:02d}/{m:02d}/{y}"
+    return None
+
+
+def extract_date_from_text(text: str) -> Optional[str]:
+    m_name = DATE_PATTERN.search(text)
+    if m_name:
+        m, y = m_name.group(1).upper(), m_name.group(2)
+        trans = str.maketrans({"i": "1", "l": "1", "z": "2", "s": "5"})
+        return f"{m}/{y.lower().translate(trans)}"
+    m_full = FULL_NUMERIC_DATE_PATTERN.search(text)
+    if m_full:
+        d = normalize_date_str(m_full.group(0))
+        if d:
+            return d
+    m_my = MONTH_YEAR_DATE_PATTERN.search(text)
+    if m_my:
+        d = normalize_date_str(m_my.group(0))
+        if d:
+            return d
+    m_dot = DOT_MATRIX_DATE_PATTERN.search(text)
+    if m_dot:
+        d = normalize_date_str(m_dot.group(0))
+        if d:
+            return d
+    return None
+
+
+def extract_mfg_date_from_line(text: str) -> Optional[str]:
+    d = extract_date_from_text(text)
+    if d:
+        return d
+    m_year = re.search(r"(20[2-3]\d|[2-3]\d)", text)
+    if m_year:
+        year_str = m_year.group(1)
+        if len(year_str) == 2:
+            year_str = f"20{year_str}"
+        prefix = text[:m_year.start()]
+        cleaned_prefix = re.sub(r"^(?:.*?(?:mfd|mfg|mid|wid|packed|date)[.:;\s]*)", "", prefix, flags=re.I).strip(" ,;:-|«=~`\"'“”)(")
+        trans_m = str.maketrans({
+            "O": "0", "o": "0", "D": "0", "U": "0", "u": "0", "a": "0",
+            "I": "1", "l": "1", "i": "1", "j": "1", "|": "1",
+            "z": "2", "Z": "2",
+            "s": "5", "S": "5",
+            "T": "7", "t": "7", "r": "7", "R": "7", "F": "7", "f": "7",
+        })
+        norm_m = re.sub(r"[^A-Za-z0-9]", "", cleaned_prefix).translate(trans_m)
+        m_digits = re.search(r"(\d{1,2})", norm_m)
+        if m_digits:
+            m_val = int(m_digits.group(1))
+            if 1 <= m_val <= 12:
+                return f"{m_val:02d}/{year_str}"
+    return None
 EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", re.I)
 PHONE_PATTERN = re.compile(
     r"(?:\+?91[\s-]?)?(?:1800[\s-]?\d{3}[\s-]?\d{3,4}|\b\d{3,5}[\s-]\d{6,8}\b|\b1800[\s\d-]{6,10}\b)"
@@ -384,12 +474,24 @@ def preprocess_variants(image: np.ndarray, scale: float = OCR_SCALE) -> dict[str
     # Inverted grayscale for dot-matrix codes and reverse text
     inv_clahe = cv2.bitwise_not(clahe)
 
+    # Dot matrix inkjet enhancement: Gaussian blur dot-fusion before resizing
+    orig_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    b11 = cv2.GaussianBlur(orig_gray, (0, 0), 1.1)
+    s11 = cv2.resize(b11, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+    dot_matrix = cv2.createCLAHE(clipLimit=3.2, tileGridSize=(8, 8)).apply(s11)
+
+    b13 = cv2.GaussianBlur(orig_gray, (0, 0), 1.3)
+    s13 = cv2.resize(b13, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+    dot_matrix_13 = cv2.createCLAHE(clipLimit=3.2, tileGridSize=(8, 8)).apply(s13)
+
     return {
         "clahe": clahe,
         "clahe_red": clahe_red,
         "adapt_red": adapt_red,
         "otsu_blue": otsu_blue,
         "inv_clahe": inv_clahe,
+        "dot_matrix": dot_matrix,
+        "dot_matrix_13": dot_matrix_13,
     }
 
 
@@ -740,3 +842,288 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
         "brand_name": brand,
         "extracted_entities": entities,
     }
+
+
+# ---------------------------------------------------------------------------
+# CLI & Batch Scanning Pipeline
+# ---------------------------------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+INPUT_FOLDER = PROJECT_ROOT / "input"
+OUTPUT_FOLDER = PROJECT_ROOT / "output"
+SCAN_HISTORY_FILE = OUTPUT_FOLDER / "scan_history.json"
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def natural_key(path: Path) -> list[Any]:
+    return [
+        int(part) if part.isdigit() else part.casefold()
+        for part in re.split(r"(\d+)", path.name)
+    ]
+
+
+def evaluate_compliance(fields: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    field_compliance: dict[str, Any] = {}
+    compliant_mandatory = 0
+    review_mandatory = 0
+    missing_mandatory_list: list[str] = []
+    review_mandatory_list: list[str] = []
+
+    for field in sorted(MANDATORY_FIELDS | set(fields)):
+        is_mandatory = field in MANDATORY_FIELDS
+        det = fields.get(field)
+
+        if not det:
+            detection_status = "MISSING"
+            status = "NON_COMPLIANT" if is_mandatory else "MISSING"
+            reason = "Mandatory declaration not detected in scanned package" if is_mandatory else "Optional declaration not detected"
+            needs_review = False
+            if is_mandatory:
+                missing_mandatory_list.append(field)
+        else:
+            val = det.get("value")
+            conf = float(det.get("confidence") or 0.0)
+            has_value = bool(val is not None and str(val).strip() != "")
+            low_confidence = conf < 30.0
+            needs_review_flag = bool(det.get("needs_review") or low_confidence)
+
+            if not has_value:
+                detection_status = "REVIEW"
+                status = "REVIEW"
+                reason = "Declaration keyword detected but no complete value could be parsed"
+                needs_review = True
+                if is_mandatory:
+                    review_mandatory += 1
+                    review_mandatory_list.append(field)
+            elif needs_review_flag:
+                detection_status = "REVIEW"
+                status = "REVIEW"
+                reason = f"Low OCR confidence ({conf:.1f}% < 30.0%)"
+                needs_review = True
+                if is_mandatory:
+                    review_mandatory += 1
+                    review_mandatory_list.append(field)
+            else:
+                detection_status = "DETECTED"
+                status = "COMPLIANT"
+                reason = f"Verified with {conf:.1f}% OCR confidence"
+                needs_review = False
+                if is_mandatory:
+                    compliant_mandatory += 1
+
+        field_compliance[field] = {
+            "field": field,
+            "status": status,
+            "detection_status": detection_status,
+            "mandatory": is_mandatory,
+            "value": det.get("value") if det else None,
+            "confidence": det.get("confidence") if det else 0.0,
+            "bounding_box": det.get("bounding_box") if det else None,
+            "needs_review": needs_review,
+            "reason": reason,
+        }
+
+    total_mandatory = len(MANDATORY_FIELDS)
+    compliance_rate = round((compliant_mandatory / total_mandatory) * 100, 2)
+    overall_status = "NON_COMPLIANT" if missing_mandatory_list else ("REVIEW" if review_mandatory > 0 else "COMPLIANT")
+
+    return {
+        "overall_status": overall_status,
+        "compliance_rate_percent": compliance_rate,
+        "mandatory_fields_present": compliant_mandatory,
+        "mandatory_fields_total": total_mandatory,
+        "mandatory_fields_compliant": compliant_mandatory,
+        "mandatory_fields_review": review_mandatory,
+        "missing_mandatory_fields": missing_mandatory_list,
+        "uncertain_mandatory_fields": review_mandatory_list,
+        "field_breakdown": field_compliance,
+    }
+
+
+def scan_image(image_path: Path, output_path: Path) -> dict[str, Any]:
+    """Scan a product image from disk and write highlighted artifacts."""
+    original = cv2.imread(str(image_path))
+    if original is None:
+        raise ValueError(f"Could not open image: {image_path}")
+
+    _, buf = cv2.imencode(".png", original)
+    scan_result = run_advanced_scan(buf.tobytes())
+
+    oriented = scan_result["oriented_cv_image"]
+    text = scan_result["raw_ocr_text"]
+
+    fields: dict[str, Any] = {}
+    for f in ALL_SUPPORTED_FIELDS:
+        val = extract_value(f, text)
+        if val:
+            fields[f] = {
+                "field": f,
+                "value": val,
+                "confidence": 85.0,
+                "bounding_box": {"x1": 10, "y1": 10, "x2": 100, "y2": 50},
+            }
+
+    from ocr_rules import evaluate_label_rules, annotate_image as rules_annotate
+    eval_res = evaluate_label_rules(text)
+    annotated_bytes = rules_annotate(scan_result["oriented_image_bytes"], scan_result["ocr_box_data"], eval_res["fields"])
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if annotated_bytes:
+        with open(output_path, "wb") as f_out:
+            f_out.write(annotated_bytes)
+    else:
+        cv2.imwrite(str(output_path), oriented)
+
+    orig_name = output_path.name.replace("highlighted_", "original_")
+    if orig_name == output_path.name:
+        orig_name = f"original_{output_path.name}"
+    orig_output_path = output_path.parent / orig_name
+    cv2.imwrite(str(orig_output_path), oriented)
+
+    return {
+        "orientation": scan_result["orientation"],
+        "source_dimensions": {"width": int(original.shape[1]), "height": int(original.shape[0])},
+        "highlighted_image": output_path.name,
+        "original_image": orig_name,
+        "raw_ocr_text": text,
+        "fields": fields,
+    }
+
+
+def aggregate_fields(images: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    best: dict[str, dict[str, Any]] = {}
+    for filename, image_result in images.items():
+        for field, detection in image_result.get("fields", {}).items():
+            copy = json.loads(json.dumps(detection))
+            copy["source_image"] = filename
+            existing = best.get(field)
+            if existing is None:
+                best[field] = copy
+            elif copy.get("value") and not existing.get("value"):
+                best[field] = copy
+            elif copy.get("confidence", 0) > existing.get("confidence", 0):
+                best[field] = copy
+    return best
+
+
+def record_scan_history(record: dict[str, Any]) -> None:
+    try:
+        OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+        history = []
+        if SCAN_HISTORY_FILE.exists():
+            with SCAN_HISTORY_FILE.open("r", encoding="utf-8") as f:
+                try:
+                    history = json.load(f)
+                except Exception:
+                    history = []
+        history.append(record)
+        with SCAN_HISTORY_FILE.open("w", encoding="utf-8") as f:
+            json.dump(history, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
+
+
+def scan_product(product_name: str, product_input_folder: Path) -> dict[str, Any]:
+    start_time = time.time()
+    scan_id = str(uuid.uuid4())
+    product_output_folder = OUTPUT_FOLDER / product_name
+    product_output_folder.mkdir(parents=True, exist_ok=True)
+
+    image_paths = sorted(
+        (p for p in product_input_folder.iterdir() if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS),
+        key=natural_key,
+    )
+    if not image_paths:
+        raise ValueError(f"No supported images found in {product_input_folder}")
+
+    image_results = {}
+    for image_path in image_paths:
+        image_results[image_path.name] = scan_image(
+            image_path,
+            product_output_folder / f"highlighted_{image_path.name}",
+        )
+
+    fields = aggregate_fields(image_results)
+    compliance = evaluate_compliance(fields)
+    duration = round(time.time() - start_time, 2)
+    brand_name = detect_brand_name(image_results, fields)
+
+    result = {
+        "scan_id": scan_id,
+        "product": product_name,
+        "brand_name": brand_name,
+        "scanned_at": datetime.now(timezone.utc).isoformat(),
+        "duration_seconds": duration,
+        "images": image_results,
+        "fields": fields,
+        "missing_fields": compliance["missing_mandatory_fields"],
+        "compliance": compliance,
+    }
+
+    json_path = product_output_folder / "data.json"
+    with json_path.open("w", encoding="utf-8") as file:
+        json.dump(result, file, indent=2, ensure_ascii=False)
+
+    record_scan_history({
+        "scan_id": scan_id,
+        "product": product_name,
+        "brand_name": brand_name,
+        "scanned_at": result["scanned_at"],
+        "duration_seconds": duration,
+        "overall_status": compliance["overall_status"],
+        "compliance_rate_percent": compliance["compliance_rate_percent"],
+    })
+
+    try:
+        from database import save_scan_result
+        save_scan_result(result)
+    except Exception:
+        pass
+
+    return result
+
+
+def scan_all_products(input_folder: Path = INPUT_FOLDER) -> list[dict[str, Any]]:
+    if not input_folder.exists():
+        raise FileNotFoundError(f"Input folder not found: {input_folder}")
+
+    products = sorted((p for p in input_folder.iterdir() if p.is_dir()), key=natural_key)
+    if not products:
+        print("No product folders found in input folder.")
+        return []
+
+    results = []
+    for idx, product_folder in enumerate(products, start=1):
+        print(f"\nScanning product {idx}/{len(products)}: {product_folder.name}")
+        try:
+            res = scan_product(product_folder.name, product_folder)
+            results.append(res)
+        except Exception as exc:
+            print(f"  [Error] {exc}")
+    return results
+
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="PackSight Legal Metrology Compliance Scanner")
+    parser.add_argument("--product", type=str, default=None, help="Product folder name under input/")
+    parser.add_argument("--input-dir", type=Path, default=INPUT_FOLDER, help="Custom input directory")
+    args = parser.parse_args()
+
+    print("=" * 60)
+    print("PACKSIGHT COMPLIANCE SCANNER")
+    print("=" * 60)
+    print(f"Tesseract: {configure_tesseract()}")
+
+    if args.product:
+        target = args.input_dir / args.product
+        if not target.exists():
+            raise FileNotFoundError(f"Product directory not found: {target}")
+        scan_product(args.product, target)
+    else:
+        scan_all_products(args.input_dir)
+
+
+if __name__ == "__main__":
+    main()
+

@@ -20,6 +20,8 @@ dist/
 data/synthetic_labels/
 backend/uploads/
 backend/reports/
+input/
+output/
 
 # OS
 .DS_Store
