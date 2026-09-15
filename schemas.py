@@ -42,6 +42,11 @@ class ScanResponse(BaseModel):
     brand_name: Optional[str] = None
     image_quality: Optional[dict] = None
     extracted_entities: Optional[dict] = None
+    barcode_data: Optional[list] = None
+    veg_status: Optional[dict] = None
+    fssai_info: Optional[dict] = None
+    rule9_compliance: Optional[dict] = None
+    legal_liability: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
 

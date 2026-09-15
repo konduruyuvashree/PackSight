@@ -21,7 +21,7 @@ from ocr_rules import (
     evaluate_label_rules, run_tesseract_ocr, extract_text_with_boxes,
     annotate_image, extract_text, run_rule_engine, score_and_verdict,
 )
-from report_generator import generate_compliance_pdf_report
+from report_generator import generate_compliance_pdf_report, generate_legal_show_cause_notice_pdf
 from scanner import run_advanced_scan, assess_image_quality
 
 models.Base.metadata.create_all(bind=engine)
@@ -107,6 +107,7 @@ def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
     raw = json.loads(scan.fields_json) if scan.fields_json else []
     fields_list = raw["fields"] if isinstance(raw, dict) and "fields" in raw else raw
     quality = json.loads(scan.image_quality_json) if getattr(scan, "image_quality_json", None) else None
+    adv_data = json.loads(scan.advancements_json) if getattr(scan, "advancements_json", None) else {}
     return schemas.ScanResponse(
         id=scan.id,
         product_name=scan.product_name,
@@ -120,6 +121,11 @@ def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
         original_image=getattr(scan, "original_image", None),
         brand_name=getattr(scan, "brand_name", None),
         image_quality=quality,
+        barcode_data=adv_data.get("barcode_data"),
+        veg_status=adv_data.get("veg_status"),
+        fssai_info=adv_data.get("fssai_info"),
+        rule9_compliance=adv_data.get("rule9_compliance"),
+        legal_liability=adv_data.get("legal_liability"),
     )
 
 
@@ -133,6 +139,9 @@ async def create_scan(
     image_bytes = await image.read()
 
     # 1. Advanced CV pipeline: Quality assessment, auto-orientation, multi-channel OCR
+    barcode_data = []
+    veg_status = None
+    rule9_compliance = None
     try:
         scan_cv = run_advanced_scan(image_bytes)
         oriented_bytes = scan_cv["oriented_image_bytes"]
@@ -140,6 +149,9 @@ async def create_scan(
         box_data = scan_cv["ocr_box_data"]
         brand_name = scan_cv["brand_name"]
         quality_data = scan_cv["quality"]
+        barcode_data = scan_cv.get("barcode_data", [])
+        veg_status = scan_cv.get("veg_status")
+        rule9_compliance = scan_cv.get("rule9_compliance")
     except Exception as cv_err:
         print(f"Advanced scanner fallback: {cv_err}")
         try:
@@ -153,6 +165,8 @@ async def create_scan(
 
     # 2. Statutory Legal Metrology (LMPC 2011) compliance evaluation
     eval_result = evaluate_label_rules(ocr_text)
+    fssai_info = eval_result.get("fssai")
+    legal_liability = eval_result.get("statutory_liability")
 
     # 3. Generate annotated image with bounding boxes & rule tags
     annotated_base64 = None
@@ -175,6 +189,14 @@ async def create_scan(
         except Exception:
             pass
 
+    adv_json = json.dumps({
+        "barcode_data": barcode_data,
+        "veg_status": veg_status,
+        "fssai_info": fssai_info,
+        "rule9_compliance": rule9_compliance,
+        "legal_liability": legal_liability,
+    })
+
     scan = models.Scan(
         user_id=current_user.id,
         owner_id=current_user.id,
@@ -188,6 +210,7 @@ async def create_scan(
         original_image=original_base64,
         brand_name=brand_name,
         image_quality_json=json.dumps(quality_data),
+        advancements_json=adv_json,
     )
     db.add(scan)
     db.commit()
@@ -285,6 +308,14 @@ async def create_multi_scan(
         except Exception:
             pass
 
+    adv_json = json.dumps({
+        "barcode_data": [],
+        "veg_status": None,
+        "fssai_info": eval_result.get("fssai"),
+        "rule9_compliance": None,
+        "legal_liability": eval_result.get("statutory_liability"),
+    })
+
     db_scan = models.Scan(
         user_id=current_user.id,
         owner_id=current_user.id,
@@ -298,6 +329,7 @@ async def create_multi_scan(
         original_image=original_base64,
         brand_name=brand_name,
         image_quality_json=json.dumps(best_quality),
+        advancements_json=adv_json,
     )
     db.add(db_scan)
     db.commit()
@@ -339,4 +371,168 @@ async def download_scan_pdf(
         buffer,
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=packsight_report_{scan_id}.pdf"},
+    )
+
+
+@app.get("/scans/{scan_id}/legal-notice")
+def download_legal_notice(
+    scan_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Download formal Legal Metrology Show-Cause Notice / Inspection Memorandum (PDF)."""
+    scan = (
+        db.query(models.Scan)
+        .filter(models.Scan.id == scan_id)
+        .filter((models.Scan.user_id == current_user.id) | (models.Scan.owner_id == current_user.id))
+        .first()
+    )
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    adv_data = json.loads(scan.advancements_json) if getattr(scan, "advancements_json", None) else {}
+    liability = adv_data.get("legal_liability") or {}
+    violations = liability.get("violation_details", [])
+
+    pdf_buffer = generate_legal_show_cause_notice_pdf(
+        scan_id=scan.id,
+        product_name=scan.product_name,
+        brand_name=scan.brand_name,
+        violations=violations,
+        liability_info=liability,
+        inspecting_officer=f"Inspector {current_user.full_name or current_user.user_id}",
+        created_at=scan.created_at,
+    )
+
+    clean_filename = f"Legal_Notice_{scan.product_name.replace(' ', '_')}_{scan.id}.pdf"
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
+    )
+
+
+@app.post("/scans/batch", response_model=List[schemas.ScanResponse])
+async def create_batch_scans(
+    images: List[UploadFile] = File(...),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Enterprise SKU Batch Inspection: Audits multiple packaging photos concurrently."""
+    results = []
+    for file in images:
+        content = await file.read()
+        if not content:
+            continue
+        p_name = file.filename.rsplit(".", 1)[0].replace("_", " ").title()
+
+        barcode_data = []
+        veg_status = None
+        rule9_compliance = None
+        try:
+            scan_cv = run_advanced_scan(content)
+            oriented_bytes = scan_cv["oriented_image_bytes"]
+            ocr_text = scan_cv["raw_ocr_text"]
+            box_data = scan_cv["ocr_box_data"]
+            brand_name = scan_cv["brand_name"]
+            quality_data = scan_cv["quality"]
+            barcode_data = scan_cv.get("barcode_data", [])
+            veg_status = scan_cv.get("veg_status")
+            rule9_compliance = scan_cv.get("rule9_compliance")
+        except Exception:
+            ocr_text = run_tesseract_ocr(content)
+            box_data = {}
+            oriented_bytes = content
+            brand_name = "Packaged Commodity"
+            quality_data = {"acceptable": True, "status": "Standard", "recommendations": []}
+
+        eval_result = evaluate_label_rules(ocr_text)
+        fssai_info = eval_result.get("fssai")
+        legal_liability = eval_result.get("statutory_liability")
+
+        annotated_base64 = None
+        try:
+            annotated_bytes = annotate_image(oriented_bytes, box_data, eval_result["fields"])
+            if annotated_bytes:
+                annotated_base64 = base64.b64encode(annotated_bytes).decode("utf-8")
+        except Exception:
+            pass
+
+        original_base64 = None
+        try:
+            original_base64 = base64.b64encode(oriented_bytes).decode("utf-8")
+        except Exception:
+            pass
+
+        adv_json = json.dumps({
+            "barcode_data": barcode_data,
+            "veg_status": veg_status,
+            "fssai_info": fssai_info,
+            "rule9_compliance": rule9_compliance,
+            "legal_liability": legal_liability,
+        })
+
+        scan = models.Scan(
+            user_id=current_user.id,
+            owner_id=current_user.id,
+            product_name=p_name,
+            score=eval_result["score"],
+            has_violation=eval_result["has_violation"],
+            fail_count=eval_result["fail_count"],
+            raw_ocr_text=ocr_text,
+            fields_json=json.dumps(eval_result["fields"]),
+            annotated_image=annotated_base64,
+            original_image=original_base64,
+            brand_name=brand_name,
+            image_quality_json=json.dumps(quality_data),
+            advancements_json=adv_json,
+        )
+        db.add(scan)
+        db.commit()
+        db.refresh(scan)
+        results.append(_scan_to_response(scan))
+
+    return results
+
+
+@app.get("/scans/export-csv")
+def export_scans_csv(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Export comprehensive Legal Metrology compliance audit report as CSV."""
+    import csv
+    scans = (
+        db.query(models.Scan)
+        .filter((models.Scan.user_id == current_user.id) | (models.Scan.owner_id == current_user.id))
+        .order_by(models.Scan.created_at.desc())
+        .all()
+    )
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Scan ID", "Product Name", "Brand", "Score", "Status",
+        "Violations Count", "FSSAI License", "Barcode / GTIN", "Veg / Non-Veg",
+        "Rule 9 Font Height", "Statutory Penalty Liability", "Date"
+    ])
+    for s in scans:
+        adv = json.loads(s.advancements_json) if getattr(s, "advancements_json", None) else {}
+        fssai_no = adv.get("fssai_info", {}).get("license_number") or "N/A"
+        b_codes = ", ".join(b.get("code", "") for b in adv.get("barcode_data", [])) or "N/A"
+        veg_sym = adv.get("veg_status", {}).get("symbol") or "N/A"
+        rule9_h = f"{adv.get('rule9_compliance', {}).get('measured_numeral_height_mm', 'N/A')}mm"
+        penalty = adv.get("legal_liability", {}).get("penalty_display") or "₹0"
+        status_str = "COMPLIANT" if not s.has_violation else "NON-COMPLIANT"
+
+        writer.writerow([
+            s.id, s.product_name, s.brand_name or "N/A", f"{s.score}%",
+            status_str, s.fail_count, fssai_no, b_codes, veg_sym,
+            rule9_h, penalty, s.created_at.strftime("%Y-%m-%d %H:%M")
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode("utf-8")),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="PackSight_Audit_Report.csv"'}
     )

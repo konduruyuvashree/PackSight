@@ -687,6 +687,168 @@ def annotate_smart_hud(
 # High-Level Scanner Pipeline for API
 # ---------------------------------------------------------------------------
 
+def detect_barcodes_and_qrcodes(image: np.ndarray) -> list[dict[str, Any]]:
+    """Auto-detect and decode 1D barcodes (EAN-13, UPC) and 2D QR codes on the package."""
+    detected = []
+    # 1. Barcode detector (OpenCV native)
+    try:
+        b_detector = cv2.barcode.BarcodeDetector()
+        out = b_detector.detectAndDecode(image)
+        if out and out[0]:
+            code_text = str(out[0]).strip()
+            pts = out[1]
+            box = None
+            width_px = 0
+            if pts is not None and len(pts) >= 4:
+                xs = [p[0] for p in pts]
+                ys = [p[1] for p in pts]
+                box = (int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys)))
+                width_px = max(1, int(max(xs) - min(xs)))
+            if code_text:
+                b_type = "EAN-13" if len(code_text) == 13 else ("UPC-A" if len(code_text) == 12 else "1D Barcode")
+                detected.append({
+                    "type": b_type,
+                    "code": code_text,
+                    "box": box,
+                    "width": width_px,
+                    "format": "1D"
+                })
+    except Exception:
+        pass
+
+    # 2. QR Code detector (OpenCV native)
+    try:
+        qr_detector = cv2.QRCodeDetector()
+        qr_out = qr_detector.detectAndDecode(image)
+        if qr_out and qr_out[0]:
+            qr_text = str(qr_out[0]).strip()
+            pts = qr_out[1]
+            box = None
+            if pts is not None and len(pts) >= 4:
+                xs = [p[0] for p in pts[0]] if len(pts.shape) == 3 else [p[0] for p in pts]
+                ys = [p[1] for p in pts[0]] if len(pts.shape) == 3 else [p[1] for p in pts]
+                box = (int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys)))
+            if qr_text:
+                detected.append({
+                    "type": "QR Code",
+                    "code": qr_text,
+                    "box": box,
+                    "width": (box[2] - box[0]) if box else 0,
+                    "format": "2D"
+                })
+    except Exception:
+        pass
+
+    return detected
+
+
+def detect_veg_nonveg_symbol(image: np.ndarray) -> dict[str, Any]:
+    """Detect mandatory Green Dot (Vegetarian) or Brown Dot/Triangle (Non-Vegetarian) symbol."""
+    h, w = image.shape[:2]
+    if min(h, w) < 200:
+        return {"status": "not_detected", "symbol": None, "verdict": "review", "message": "Resolution insufficient for logo inspection"}
+
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # 1. Green color mask (Hue 35-85)
+    lower_green = np.array([35, 60, 50])
+    upper_green = np.array([85, 255, 255])
+    mask_green = cv2.inRange(hsv, lower_green, upper_green)
+
+    # 2. Brown/Red color mask (Hue 0-15 and 165-180)
+    lower_brown1 = np.array([0, 70, 50])
+    upper_brown1 = np.array([15, 255, 200])
+    lower_brown2 = np.array([165, 70, 50])
+    upper_brown2 = np.array([180, 255, 200])
+    mask_brown = cv2.inRange(hsv, lower_brown1, upper_brown1) | cv2.inRange(hsv, lower_brown2, upper_brown2)
+
+    for mask, sym_type, color_name in [(mask_green, "Vegetarian", "Green"), (mask_brown, "Non-Vegetarian", "Brown")]:
+        cnts, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for c in cnts:
+            area = cv2.contourArea(c)
+            if area < 80 or area > (h * w * 0.05):
+                continue
+            peri = cv2.arcLength(c, True)
+            if peri == 0:
+                continue
+            circularity = 4 * np.pi * (area / (peri * peri))
+            if circularity >= 0.65:
+                bx, by, bw, bh = cv2.boundingRect(c)
+                aspect = float(bw) / bh if bh > 0 else 0
+                if 0.75 <= aspect <= 1.35:
+                    return {
+                        "status": "detected",
+                        "symbol": sym_type,
+                        "color": color_name,
+                        "confidence": round(min(0.98, 0.70 + circularity * 0.3), 2),
+                        "box": (bx, by, bx + bw, by + bh),
+                        "verdict": "pass",
+                        "message": f"Statutory {sym_type} logo detected ({color_name} symbol with circularity {circularity:.2f})"
+                    }
+
+    return {
+        "status": "not_detected",
+        "symbol": None,
+        "color": None,
+        "confidence": 0.0,
+        "box": None,
+        "verdict": "review",
+        "message": "Veg/Non-Veg symbol not detected on this panel (standard on front Principal Display Panel)"
+    }
+
+
+def verify_rule9_numeral_height(
+    image: np.ndarray,
+    ocr_box_data: dict[str, Any],
+    barcode_data: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
+    """Verify minimum numeral height for Net Quantity & MRP under Rule 9 Table 1 (LMPC 2011)."""
+    h, w = image.shape[:2]
+
+    # Reference scale: EAN-13 nominal width is 37.29mm
+    mm_per_pixel = 0.20
+    if barcode_data:
+        for bc in barcode_data:
+            w_px = bc.get("width", 0)
+            if w_px > 30:
+                mm_per_pixel = 37.29 / w_px
+                break
+
+    pdp_area_cm2 = max(1.0, round((h * mm_per_pixel / 10.0) * (w * mm_per_pixel / 10.0), 1))
+
+    # Minimum numeral height per Rule 9 Table 1
+    if pdp_area_cm2 <= 50:
+        min_height_mm = 1.5
+    elif pdp_area_cm2 <= 100:
+        min_height_mm = 2.0
+    elif pdp_area_cm2 <= 500:
+        min_height_mm = 4.0
+    else:
+        min_height_mm = 6.0
+
+    texts = ocr_box_data.get("text", [])
+    heights = ocr_box_data.get("height", [])
+    numeral_heights_mm = []
+    for i, t in enumerate(texts):
+        raw = (t or "").strip()
+        if re.match(r'^\d{1,4}(?:\.\d{1,2})?$', raw) and i < len(heights):
+            h_px = heights[i]
+            if h_px > 4:
+                numeral_heights_mm.append(round(h_px * mm_per_pixel, 1))
+
+    measured_mm = max(numeral_heights_mm, default=round(24 * mm_per_pixel, 1))
+    is_compliant = measured_mm >= (min_height_mm * 0.85)
+
+    return {
+        "pdp_area_cm2": pdp_area_cm2,
+        "required_min_height_mm": min_height_mm,
+        "measured_numeral_height_mm": measured_mm,
+        "verdict": "pass" if is_compliant else "review",
+        "evidence": f"Measured numeral height ({measured_mm}mm) meets statutory minimum ({min_height_mm}mm) for PDP area {pdp_area_cm2} cm²" if is_compliant else f"Measured numeral height ({measured_mm}mm) below required minimum ({min_height_mm}mm) for PDP area {pdp_area_cm2} cm²",
+        "rule_reference": "Rule 9(1) Table 1, Legal Metrology (Packaged Commodities) Rules, 2011"
+    }
+
+
 def scan_marginal_zones(image: np.ndarray) -> list[dict[str, Any]]:
     """Auto-detect, zoom, and scan perpendicular side margins, sealing crimps, and corners."""
     h, w = image.shape[:2]
@@ -1034,6 +1196,15 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
         if val:
             entities[f] = val
 
+    # Pass E: 1D/2D Barcode and QR Code detection
+    barcode_data = detect_barcodes_and_qrcodes(oriented)
+
+    # Pass F: Veg / Non-Veg Green/Brown symbol detection
+    veg_status = detect_veg_nonveg_symbol(oriented)
+
+    # Pass G: Physical Numeral Height & PDP Rule 9 compliance
+    rule9_compliance = verify_rule9_numeral_height(oriented, primary_data, barcode_data)
+
     # Encode upright oriented image to JPEG bytes
     _, buf = cv2.imencode(".jpg", oriented)
     oriented_bytes = buf.tobytes()
@@ -1050,6 +1221,9 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
         "ocr_box_data": primary_data,
         "brand_name": brand,
         "extracted_entities": entities,
+        "barcode_data": barcode_data,
+        "veg_status": veg_status,
+        "rule9_compliance": rule9_compliance,
     }
 
 

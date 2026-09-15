@@ -694,11 +694,88 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
     score = int((pass_count / total_rules) * 100) if total_rules > 0 else 0
     has_violation = fail_count > 0
 
-    return {
+    fssai_info = extract_fssai_license(raw_ocr_text)
+    eval_dict = {
         "score": score,
         "has_violation": has_violation,
         "fail_count": fail_count,
-        "fields": fields
+        "fields": fields,
+        "fssai": fssai_info,
+    }
+    eval_dict["statutory_liability"] = calculate_statutory_penalty(eval_dict)
+    return eval_dict
+
+
+def extract_fssai_license(raw_text: str) -> Dict[str, Any]:
+    """Extract and validate 14-digit FSSAI License Number under Food Safety & Standards Act."""
+    text = raw_text.upper() if raw_text else ""
+    m = re.search(r'\b(?:FSSAI|LIC\.?\s*(?:NO\.?)?|LICENCE\s*(?:NO\.?)?)\s*[:.-]?[^\d\n]{0,10}([12]\d{13})\b', text)
+    if not m:
+        m = re.search(r'\b([12]\d{13})\b', text)
+    if m:
+        lic_no = m.group(1)
+        kind = "Central License" if lic_no.startswith("1") else "State / UT License"
+        return {
+            "found": True,
+            "license_number": lic_no,
+            "kind": kind,
+            "verdict": "pass",
+            "evidence": f"FSSAI {kind}: {lic_no}"
+        }
+    return {
+        "found": False,
+        "license_number": None,
+        "kind": None,
+        "verdict": "review",
+        "evidence": "No 14-digit FSSAI license detected (mandatory on food commodities)."
+    }
+
+
+def calculate_statutory_penalty(compliance_result: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate statutory legal liability under Section 36 of Legal Metrology Act, 2009."""
+    fail_fields = [f for f in compliance_result.get("fields", []) if f.get("verdict") == "fail"]
+    fail_count = len(fail_fields)
+
+    if fail_count == 0:
+        return {
+            "has_liability": False,
+            "fail_count": 0,
+            "penalty_first_offense": 0,
+            "penalty_second_offense": 0,
+            "penalty_display": "₹0 (Fully Compliant)",
+            "subsequent_action": "Statutory requirements satisfied. No penalty applicable.",
+            "applicable_sections": [],
+            "violation_details": [],
+            "compounding_eligible": True
+        }
+
+    sections = ["Section 36(1) Legal Metrology Act, 2009 (Penalty for non-standard packages)"]
+    has_mrp_violation = any(f.get("rule_id") == "LMPC_R6_1_E" for f in fail_fields)
+    has_usp_violation = any(f.get("rule_id") == "LMPC_USP" for f in fail_fields)
+    if has_mrp_violation or has_usp_violation:
+        sections.append("Section 36(2) Legal Metrology Act, 2009 (Sale of pre-packaged commodities exceeding MRP / price rules)")
+
+    first_offense_fine = 25000
+    second_offense_fine = 50000
+    subsequent_action = "Fine up to ₹1,00,000 and/or imprisonment for term up to 1 year under Section 36(1)"
+
+    violations = [{
+        "rule_id": f.get("rule_id", "LMPC_RULE"),
+        "field": f.get("field", "Declaration"),
+        "reason": f.get("evidence", "Mandatory statutory declaration missing or non-compliant.")
+    } for f in fail_fields]
+
+    return {
+        "has_liability": True,
+        "fail_count": fail_count,
+        "penalty_first_offense": first_offense_fine,
+        "penalty_second_offense": second_offense_fine,
+        "penalty_display": f"Up to ₹{first_offense_fine:,} (1st Offense) / ₹{second_offense_fine:,} (2nd Offense)",
+        "subsequent_action": subsequent_action,
+        "applicable_sections": sections,
+        "violation_details": violations,
+        "compounding_eligible": True,
+        "compounding_provision": "Section 48 Legal Metrology Act, 2009 (Compounding of Offences before filing in Court)"
     }
 
 

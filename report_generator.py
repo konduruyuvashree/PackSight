@@ -282,3 +282,190 @@ def generate_compliance_pdf_report(
     doc.build(elements)
     buffer.seek(0)
     return buffer
+
+
+def generate_legal_show_cause_notice_pdf(
+    scan_id: int,
+    product_name: str,
+    brand_name: Optional[str],
+    violations: List[Dict[str, Any]],
+    liability_info: Dict[str, Any],
+    inspecting_officer: str = "Authorized Legal Metrology Officer",
+    created_at: Optional[datetime] = None,
+) -> io.BytesIO:
+    """
+    Generates a formal, printable Legal Metrology Show-Cause Notice / Inspection Memorandum
+    under Section 36 of the Legal Metrology Act, 2009 and Rule 6 of the Legal Metrology
+    (Packaged Commodities) Rules, 2011.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=40,
+        rightMargin=40,
+        topMargin=40,
+        bottomMargin=40,
+    )
+
+    styles = getSampleStyleSheet()
+
+    header_style = ParagraphStyle(
+        "GovtHeader",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        leading=16,
+        alignment=1, # Centered
+        textColor=colors.HexColor("#1e293b"),
+    )
+    title_style = ParagraphStyle(
+        "NoticeTitle",
+        parent=styles["Heading1"],
+        fontName="Helvetica-Bold",
+        fontSize=15,
+        leading=18,
+        alignment=1,
+        textColor=colors.HexColor("#991b1b"), # Crimson Red
+        spaceAfter=12,
+    )
+    body_style = ParagraphStyle(
+        "NoticeBody",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=10,
+        leading=15,
+        textColor=colors.HexColor("#0f172a"),
+        spaceAfter=8,
+    )
+    bold_body = ParagraphStyle(
+        "NoticeBoldBody",
+        parent=body_style,
+        fontName="Helvetica-Bold",
+    )
+
+    elements = []
+
+    # 1. Government Emblem & Department Header
+    elements.append(Paragraph("GOVERNMENT OF INDIA<br/>MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION<br/>DEPARTMENT OF LEGAL METROLOGY", header_style))
+    elements.append(Spacer(1, 10))
+    elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#991b1b"), spaceAfter=12))
+
+    # 2. Formal Notice Title
+    elements.append(Paragraph("FORMAL SHOW-CAUSE NOTICE & INSPECTION MEMORANDUM", title_style))
+    elements.append(Spacer(1, 6))
+
+    # 3. Reference and Metadata Table
+    notice_date = (created_at or datetime.now()).strftime("%d/%m/%Y %H:%M")
+    ref_no = f"LM-IND/NOT-2026/SCN-{scan_id:05d}"
+    meta_data = [
+        [Paragraph("<b>Notice Ref No:</b>", body_style), Paragraph(ref_no, body_style),
+         Paragraph("<b>Date of Issue:</b>", body_style), Paragraph(notice_date, body_style)],
+        [Paragraph("<b>Commodity Name:</b>", body_style), Paragraph(product_name, body_style),
+         Paragraph("<b>Inspecting Authority:</b>", body_style), Paragraph(inspecting_officer, body_style)],
+        [Paragraph("<b>Brand / Trademark:</b>", body_style), Paragraph(brand_name or "Not Specified", body_style),
+         Paragraph("<b>Inspection Mode:</b>", body_style), Paragraph("PackSight Statutory AI Scan", body_style)],
+    ]
+    meta_table = Table(meta_data, colWidths=[110, 160, 120, 140])
+    meta_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+        ("PADDING", (0, 0), (-1, -1), 5),
+    ]))
+    elements.append(meta_table)
+    elements.append(Spacer(1, 14))
+
+    # 4. Legal Preamble
+    preamble = (
+        "<b>WHEREAS</b>, upon automated computer vision and optical statutory inspection of the packaged commodity "
+        f"<b>'{product_name}'</b> under the provisions of the <b>Legal Metrology Act, 2009</b> read with the "
+        "<b>Legal Metrology (Packaged Commodities) Rules, 2011 (as amended)</b>, the undersigned authorized officer has "
+        "detected prima facie non-compliance with the mandatory statutory labeling declarations."
+    )
+    elements.append(Paragraph(preamble, body_style))
+    elements.append(Spacer(1, 10))
+
+    # 5. Table of Violations
+    elements.append(Paragraph("<b>SCHEDULE OF STATUTORY INFRACTIONS DETECTED:</b>", bold_body))
+    elements.append(Spacer(1, 4))
+
+    viol_rows = [[
+        Paragraph("<b>Statutory Rule</b>", bold_body),
+        Paragraph("<b>Mandatory Declaration</b>", bold_body),
+        Paragraph("<b>Infraction Evidence / Finding</b>", bold_body)
+    ]]
+
+    if not violations:
+        viol_rows.append([
+            Paragraph("N/A", body_style),
+            Paragraph("All Mandatory Declarations Verified", body_style),
+            Paragraph("No statutory infractions found during inspection.", body_style)
+        ])
+    else:
+        for v in violations:
+            viol_rows.append([
+                Paragraph(f"<b>{v.get('rule_id', 'LMPC')}</b>", body_style),
+                Paragraph(v.get("field", "Declaration"), body_style),
+                Paragraph(v.get("reason", "Not declared as required"), body_style),
+            ])
+
+    viol_table = Table(viol_rows, colWidths=[90, 150, 290])
+    viol_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#fee2e2")),
+        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#dc2626")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#fecaca")),
+        ("PADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(viol_table)
+    elements.append(Spacer(1, 14))
+
+    # 6. Statutory Liability Assessment
+    elements.append(Paragraph("<b>STATUTORY PENALTY COMPUTATION (SECTION 36):</b>", bold_body))
+    elements.append(Spacer(1, 4))
+
+    penalty_1 = liability_info.get("penalty_first_offense", 25000)
+    penalty_2 = liability_info.get("penalty_second_offense", 50000)
+    sections_str = ", ".join(liability_info.get("applicable_sections", ["Section 36(1)"]))
+
+    liability_text = (
+        f"Under <b>{sections_str}</b> of the Legal Metrology Act, 2009:<br/>"
+        f"• <b>First Offence:</b> Penalty extending up to <b>₹{penalty_1:,}</b> per director / partner / company.<br/>"
+        f"• <b>Second Offence:</b> Penalty extending up to <b>₹{penalty_2:,}</b>.<br/>"
+        f"• <b>Subsequent Offences:</b> Fine up to <b>₹1,00,000</b> and/or imprisonment for term up to <b>one year</b>.<br/>"
+        f"• <b>Compounding of Offence:</b> Under Section 48, the company may apply for compounding before court proceedings."
+    )
+    elements.append(Paragraph(liability_text, body_style))
+    elements.append(Spacer(1, 14))
+
+    # 7. Directive & 15-Day Response Window
+    directive = (
+        "<b>NOW THEREFORE</b>, you are hereby called upon to <b>SHOW CAUSE within 15 (fifteen) calendar days</b> "
+        "from the receipt of this notice as to why statutory prosecution under Section 36 of the Legal Metrology Act, 2009 "
+        "should not be initiated against your enterprise and responsible directors. "
+        "Failure to submit written representation or rectifying evidence within the stipulated period shall result in immediate "
+        "statutory compounding summons or filing of a formal complaint in the Court of Judicial Magistrate."
+    )
+    elements.append(Paragraph(directive, body_style))
+    elements.append(Spacer(1, 28))
+
+    # 8. Signature & Seal Block
+    sig_data = [
+        ["", "For and on behalf of Controller of Legal Metrology:"],
+        ["", ""],
+        ["", "_____________________________________"],
+        ["", f"<b>{inspecting_officer}</b>"],
+        ["", "PackSight AI Enforcement Verification Cell"],
+    ]
+    sig_table = Table(sig_data, colWidths=[270, 260])
+    sig_table.setStyle(TableStyle([
+        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    elements.append(sig_table)
+
+    # Build document
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer

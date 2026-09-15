@@ -570,6 +570,86 @@
   }
   .btn-pdf:hover{background:var(--violet); color:white; border-color:var(--violet);}
 
+  /* ---------- Advancements & Statutory Intelligence Styles ---------- */
+  .btn-notice{
+    font-family:'IBM Plex Sans', sans-serif; font-size:12px; font-weight:600;
+    padding:6px 12px; border-radius:16px; border:1px solid #f5c2c7;
+    background:#f8d7da; color:#842029; cursor:pointer; transition:all .15s ease;
+  }
+  .btn-notice:hover{background:#dc3545; color:white; border-color:#dc3545;}
+  .btn-legal-notice{
+    background:linear-gradient(135deg, #d32f2f, #b71c1c);
+    color:white; border:none; border-radius:20px;
+    padding:8px 18px; font-family:'IBM Plex Sans', sans-serif;
+    font-size:12px; font-weight:700; cursor:pointer;
+    box-shadow:0 3px 10px rgba(211,47,47,0.25); transition:all .18s ease;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-legal-notice:hover{filter:brightness(1.15); transform:translateY(-1px);}
+
+  .intel-bar{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0 16px;
+  }
+  .intel-chip{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px;
+    font-size:11.5px; font-weight:600; border:1px solid var(--paper-line); background:var(--white);
+    color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,0.04);
+  }
+  .intel-chip.mono{font-family:'IBM Plex Mono', monospace;}
+  .intel-chip .chip-dot{width:7px; height:7px; border-radius:50%;}
+  .intel-chip .chip-dot.ok{background:var(--ok);}
+  .intel-chip .chip-dot.warn{background:var(--warn);}
+  .intel-chip .chip-dot.err{background:var(--stamp-red);}
+  .intel-chip.veg{border-color:#a3cfbb; background:#e8f5e9; color:#0f5132;}
+  .intel-chip.nonveg{border-color:#f1aeb5; background:#fbebe8; color:#842029;}
+  .intel-chip.fssai{border-color:#b6d4fe; background:#e8f0fe; color:#0d3d8c;}
+  .intel-chip.barcode{border-color:#c5b3f9; background:#f3effe; color:#4a2b99;}
+
+  .legal-liability-card{
+    background:linear-gradient(180deg, #fff5f5 0%, #ffeef0 100%);
+    border:1.5px solid #f5c2c7; border-radius:14px; padding:20px 22px;
+    margin-bottom:22px; box-shadow:0 4px 16px rgba(225,75,75,0.08);
+  }
+  .legal-clearance-card{
+    background:linear-gradient(180deg, #f0fdf4 0%, #e8f5e9 100%);
+    border:1.5px solid #a3cfbb; border-radius:14px; padding:18px 22px;
+    margin-bottom:22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  .legal-head{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:14px;
+  }
+  .penalty-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:14px;
+  }
+  .penalty-box{
+    background:var(--white); border:1px solid rgba(225,75,75,0.25); border-radius:10px;
+    padding:12px 14px; display:flex; flex-direction:column; gap:4px;
+  }
+  .penalty-box .p-label{font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#842029; font-weight:700;}
+  .penalty-box .p-val{font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:800; color:#b71c1c;}
+  .penalty-box .p-sub{font-size:10.5px; color:var(--ink-soft);}
+  .infraction-summary{
+    font-size:12px; line-height:1.5; color:#58151c; padding-top:10px; border-top:1px dashed #f5c2c7;
+  }
+
+  .rule9-card{
+    background:var(--white); border:1.5px solid var(--paper-line); border-radius:14px;
+    padding:18px 22px; margin-bottom:22px; box-shadow:var(--shadow-sm);
+  }
+  .rule9-head{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;
+  }
+  .rule9-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:10px;
+  }
+  .rule9-item{
+    background:var(--paper); border:1px solid var(--paper-line); border-radius:8px;
+    padding:10px 12px; display:flex; flex-direction:column; gap:3px;
+  }
+  .rule9-item .r9-label{font-size:11px; color:var(--ink-soft); font-weight:600;}
+  .rule9-item .r9-val{font-family:'IBM Plex Mono', monospace; font-size:15px; font-weight:700; color:var(--deep);}
+  .rule9-note{font-size:11.5px; color:var(--ink-soft); line-height:1.45;}
+
 </style>
 </head>
 <body>
@@ -849,7 +929,12 @@
 
   <!-- ============ DASHBOARD ============ -->
   <section id="dashboard" class="view">
-    <div class="section-head"><span class="section-num">03</span><h2>Inspection dashboard</h2></div>
+    <div class="section-head" style="justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <span class="section-num">03</span><h2>Inspection dashboard</h2>
+      </div>
+      <button type="button" class="btn-pdf" onclick="exportCsvReport()" style="padding:8px 18px; font-size:13px; font-weight:700; background:var(--ink); color:var(--paper); border-color:var(--ink); display:inline-flex; align-items:center; gap:8px;">📊 Export Audit CSV</button>
+    </div>
     <div class="section-sub">Aggregated from scans run in this session. In production this reads from the PostgreSQL scan repository across all inspectors.</div>
 
     <div class="stat-grid">
@@ -1263,7 +1348,7 @@ async function runScan(){
       return;
     }
 
-    renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image, data.brand_name, data.image_quality, data.original_image);
+    renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image, data.brand_name, data.image_quality, data.original_image, data.barcode_data, data.veg_status, data.fssai_info, data.rule9_compliance, data.legal_liability);
     progress.textContent = 'Done.';
     loadDashboard();
   }catch(networkErr){
@@ -1315,13 +1400,13 @@ function updateStudioTransform(){
   if(p) p.textContent = Math.round(window.currentZoom * 100) + '%';
 }
 
-function zoomStep(delta){
-  window.currentZoom = Math.max(1.0, Math.min(3.0, window.currentZoom + delta));
+function applyZoomSlider(val){
+  window.currentZoom = Math.min(3.0, Math.max(1.0, parseInt(val, 10) / 100));
   updateStudioTransform();
 }
 
-function applyZoomSlider(val){
-  window.currentZoom = parseFloat(val) / 100.0;
+function zoomStep(delta){
+  window.currentZoom = Math.min(3.0, Math.max(1.0, parseFloat((window.currentZoom + delta).toFixed(2))));
   updateStudioTransform();
 }
 
@@ -1332,41 +1417,49 @@ function resetStudioZoom(){
   updateStudioTransform();
 }
 
+let isDragging = false;
+let startX = 0, startY = 0;
+
+function startPan(e){
+  if(window.currentZoom <= 1.0) return;
+  isDragging = true;
+  startX = e.clientX - window.panX;
+  startY = e.clientY - window.panY;
+  const wrap = document.getElementById('singleViewport');
+  if(wrap) wrap.style.cursor = 'grabbing';
+  window.addEventListener('mousemove', onPan);
+  window.addEventListener('mouseup', stopPan);
+}
+
+function onPan(e){
+  if(!isDragging) return;
+  window.panX = e.clientX - startX;
+  window.panY = e.clientY - startY;
+  updateStudioTransform();
+}
+
+function stopPan(){
+  isDragging = false;
+  const wrap = document.getElementById('singleViewport');
+  if(wrap) wrap.style.cursor = 'grab';
+  window.removeEventListener('mousemove', onPan);
+  window.removeEventListener('mouseup', stopPan);
+}
+
 function handleWheelZoom(e){
   e.preventDefault();
-  const delta = e.deltaY < 0 ? 0.15 : -0.15;
+  const delta = e.deltaY < 0 ? 0.2 : -0.2;
   zoomStep(delta);
 }
 
-let isDraggingStudio = false, startPanX = 0, startPanY = 0;
-function startPan(e){
-  if(e.button !== 0) return;
-  isDraggingStudio = true;
-  startPanX = e.clientX - window.panX;
-  startPanY = e.clientY - window.panY;
-  const onMove = (ev) => {
-    if(!isDraggingStudio) return;
-    window.panX = ev.clientX - startPanX;
-    window.panY = ev.clientY - startPanY;
-    updateStudioTransform();
-  };
-  const onUp = () => {
-    isDraggingStudio = false;
-    window.removeEventListener('mousemove', onMove);
-    window.removeEventListener('mouseup', onUp);
-  };
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
-}
-
 function openLightbox(){
+  if(!window.currentScanData) return;
   const modal = document.getElementById('lightboxModal');
   const img = document.getElementById('lightboxImg');
-  if(!modal || !img || !window.currentScanData) return;
-  const src = (window.currentViewMode === 'original' && window.currentScanData.originalImage)
+  if(!modal || !img) return;
+  img.src = (window.currentViewMode === 'original' && window.currentScanData.originalImage)
     ? 'data:image/jpeg;base64,' + window.currentScanData.originalImage
     : 'data:image/png;base64,' + window.currentScanData.annotatedImage;
-  img.src = src;
   modal.classList.add('active');
 }
 
@@ -1379,20 +1472,20 @@ function focusTableRow(ruleId){
   const row = document.getElementById('row-' + ruleId);
   if(!row) return;
   row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  row.style.transition = 'background 0.3s';
-  const origBg = row.style.background;
-  row.style.background = 'rgba(155, 123, 247, 0.25)';
-  setTimeout(() => { row.style.background = origBg; }, 1200);
+  row.style.transition = 'background-color 0.4s ease';
+  const originalBg = row.style.backgroundColor;
+  row.style.backgroundColor = 'rgba(155,123,247,0.25)';
+  setTimeout(() => { row.style.backgroundColor = originalBg; }, 1800);
 }
 
-function filterReportTable(type, btnEl){
+function filterReportTable(mode, btn){
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if(btnEl) btnEl.classList.add('active');
+  if(btn) btn.classList.add('active');
   document.querySelectorAll('.rule-row').forEach(row => {
-    if(type === 'all'){
+    if(mode === 'all'){
       row.style.display = '';
     } else {
-      row.style.display = row.classList.contains('verdict-' + type) ? '' : 'none';
+      row.style.display = row.classList.contains('verdict-' + mode) ? '' : 'none';
     }
   });
 }
@@ -1420,13 +1513,18 @@ function viewHistoricalScan(scanId){
     scan.annotated_image,
     scan.brand_name,
     scan.image_quality,
-    scan.original_image
+    scan.original_image,
+    scan.barcode_data,
+    scan.veg_status,
+    scan.fssai_info,
+    scan.rule9_compliance,
+    scan.legal_liability
   );
 }
 
-function renderReport(scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage){
+function renderReport(scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage, barcodeData, vegStatus, fssaiInfo, rule9Compliance, legalLiability){
   window.currentScanData = {
-    scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage
+    scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage, barcodeData, vegStatus, fssaiInfo, rule9Compliance, legalLiability
   };
   window.currentZoom = 1.0;
   window.panX = 0;
@@ -1478,6 +1576,125 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   const brandBadgeHtml = (brandName && brandName !== 'Packaged Commodity')
     ? `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(63,232,208,0.18); color:var(--cyan); border:1px solid rgba(63,232,208,0.45); padding:2px 10px; border-radius:20px; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; letter-spacing:0.02em;">🏷️ ${escapeHtml(brandName)}</span>`
     : '';
+
+  // Advancements: Intelligence Chips Bar
+  const intelChips = [];
+  if(barcodeData && barcodeData.detected){
+    intelChips.push(`<span class="intel-chip barcode mono"><span class="chip-dot ok"></span> <strong>${escapeHtml(barcodeData.format)}:</strong> ${escapeHtml(barcodeData.data)}</span>`);
+  }
+  if(vegStatus && vegStatus.detected){
+    if(vegStatus.is_veg){
+      intelChips.push(`<span class="intel-chip veg"><span style="font-size:13px; color:#0f5132;">●</span> <strong>Veg Symbol:</strong> 100% Vegetarian (Verified)</span>`);
+    } else {
+      intelChips.push(`<span class="intel-chip nonveg"><span style="font-size:13px; color:#842029;">▲</span> <strong>Non-Veg Symbol:</strong> Non-Vegetarian</span>`);
+    }
+  } else if (vegStatus && !vegStatus.detected) {
+    intelChips.push(`<span class="intel-chip mono" style="color:var(--ink-soft);"><span class="chip-dot warn"></span> No Veg Symbol Detected</span>`);
+  }
+  if(fssaiInfo && fssaiInfo.detected){
+    intelChips.push(`<span class="intel-chip fssai mono"><span class="chip-dot ok"></span> <strong>FSSAI Lic:</strong> ${escapeHtml(fssaiInfo.license_number)} (${escapeHtml(fssaiInfo.type)})</span>`);
+  }
+  const intelBarHtml = intelChips.length ? `<div class="intel-bar">${intelChips.join('')}</div>` : '';
+
+  // Advancements: Statutory Legal Liability (Section 36) / Clearance Banner
+  let legalHtml = '';
+  if(hasViolation || (legalLiability && legalLiability.statutory_infractions && legalLiability.statutory_infractions.length > 0)){
+    const fine1 = (legalLiability && legalLiability.first_offense_fine) ? legalLiability.first_offense_fine : 25000;
+    const fine2 = (legalLiability && legalLiability.second_offense_fine) ? legalLiability.second_offense_fine : 50000;
+    const compoundingText = (legalLiability && legalLiability.compounding_applicable) ? 'Eligible for Compounding (Sec 48)' : 'Non-Compoundable';
+    const infractions = (legalLiability && legalLiability.statutory_infractions && legalLiability.statutory_infractions.length > 0)
+      ? legalLiability.statutory_infractions.join('; ')
+      : 'Non-compliance with mandatory packaged commodity declarations under Rule 6.';
+
+    legalHtml = `
+      <div class="legal-liability-card">
+        <div class="legal-head">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:24px;">⚖️</span>
+            <div>
+              <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">Statutory Legal Metrology Liability Assessment</div>
+              <div style="font-size:11.5px; color:#58151c;">Assessed under Section 36 of Legal Metrology Act, 2009 &amp; Rule 32 of LMPC Rules, 2011</div>
+            </div>
+          </div>
+          <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">📜 Download Show-Cause Notice (PDF)</button>
+        </div>
+        <div class="penalty-grid">
+          <div class="penalty-box">
+            <span class="p-label">First Offense fine (Sec 36(1))</span>
+            <span class="p-val">₹${fine1.toLocaleString('en-IN')}</span>
+            <span class="p-sub">${compoundingText}</span>
+          </div>
+          <div class="penalty-box">
+            <span class="p-label">Second Offense fine (Sec 36(2))</span>
+            <span class="p-val">₹${fine2.toLocaleString('en-IN')}</span>
+            <span class="p-sub">Escalated statutory liability</span>
+          </div>
+          <div class="penalty-box">
+            <span class="p-label">Subsequent Offenses</span>
+            <span class="p-val">₹1,00,000</span>
+            <span class="p-sub">+ Imprisonment up to 1 Year</span>
+          </div>
+        </div>
+        <div class="infraction-summary">
+          <strong>Schedule of Infractions:</strong> ${escapeHtml(infractions)}
+        </div>
+      </div>
+    `;
+  } else {
+    legalHtml = `
+      <div class="legal-clearance-card">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:24px;">🛡️</span>
+          <div>
+            <div style="font-family:'Fraunces', serif; font-size:15.5px; font-weight:700; color:#0f5132;">Full Statutory Compliance — Legal Metrology Act, 2009</div>
+            <div style="font-size:12px; color:#146c43;">All mandatory declarations verified in accordance with Rule 6 &amp; Rule 9. Zero statutory penalty liability assessed.</div>
+          </div>
+        </div>
+        <span class="verdict-pill pass" style="font-size:12px; padding:5px 14px;">Passed All LMPC Checks ✓</span>
+      </div>
+    `;
+  }
+
+  // Advancements: Rule 9 Numeral Height Card
+  let rule9Html = '';
+  if(rule9Compliance){
+    const r9PillClass = rule9Compliance.verdict === 'pass' ? 'pass' : (rule9Compliance.verdict === 'fail' ? 'fail' : 'review');
+    const r9Label = rule9Compliance.verdict === 'pass' ? 'Compliant ✓' : (rule9Compliance.verdict === 'fail' ? 'Height Violation ✕' : 'Review Required ?');
+
+    rule9Html = `
+      <div class="rule9-card">
+        <div class="rule9-head">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">📐</span>
+            <div>
+              <strong style="font-size:14px;">Rule 9 Numeral &amp; Letter Height Compliance (Table 1)</strong>
+              <div style="font-size:11px; color:var(--ink-soft);">Calibrated metric height verification for Net Quantity declaration</div>
+            </div>
+          </div>
+          <span class="verdict-pill ${r9PillClass}">${r9Label}</span>
+        </div>
+        <div class="rule9-grid">
+          <div class="rule9-item">
+            <span class="r9-label">Principal Display Panel (PDP)</span>
+            <span class="r9-val">${rule9Compliance.pdp_area_sq_cm} cm²</span>
+          </div>
+          <div class="rule9-item">
+            <span class="r9-label">Min. Prescribed Height</span>
+            <span class="r9-val">≥ ${rule9Compliance.min_required_numeral_height_mm} mm</span>
+          </div>
+          <div class="rule9-item">
+            <span class="r9-label">Measured Numeral Height</span>
+            <span class="r9-val">${rule9Compliance.measured_numeral_height_mm} mm</span>
+          </div>
+          <div class="rule9-item">
+            <span class="r9-label">Calibration Scale</span>
+            <span class="r9-val">${rule9Compliance.scale_mm_per_px} mm/px</span>
+          </div>
+        </div>
+        <div class="rule9-note">${escapeHtml(rule9Compliance.details || '')}</div>
+      </div>
+    `;
+  }
 
   let qualityHtml = '';
   if(imageQuality){
@@ -1596,7 +1813,8 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
           <div class="title" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">Compliance Report ${brandBadgeHtml}</div>
           <div class="meta">${escapeHtml(productName || 'Untitled scan')} · ${new Date(createdAt || Date.now()).toLocaleString()}</div>
         </div>
-        <div style="display:flex; align-items:center; gap:16px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          ${hasViolation ? `<button class="pill-btn" onclick="downloadNoticePdf(${scanId})" style="font-size:12px; padding:8px 14px; background:#f8d7da; color:#842029; border:1px solid #f5c2c7; font-weight:700;">⚖️ Legal Show-Cause Notice</button>` : ''}
           <button class="pill-btn solid" onclick="downloadPdf(${scanId})" style="font-size:12.5px; padding:8px 16px;">📥 Download Audit PDF</button>
           <div class="score-badge">${score}</div>
         </div>
@@ -1605,6 +1823,8 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
         <div class="stamp-wrap">
           <div class="stamp ${hasViolation?'violation':'compliant'}">${hasViolation?'Violation found':'Compliant'}</div>
         </div>
+        ${intelBarHtml}
+        ${legalHtml}
         ${qualityHtml}
 
         <!-- Key Statutory Declarations HUD -->
@@ -1617,6 +1837,9 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
             ${hudCardsHtml}
           </div>
         </div>
+
+        <!-- Rule 9 Physical Numeral Height & PDP -->
+        ${rule9Html}
 
         <!-- High-Res Visual Inspection Studio -->
         ${studioHtml}
@@ -1662,6 +1885,48 @@ async function downloadPdf(scanId){
   }
 }
 
+async function downloadNoticePdf(scanId){
+  if(!authToken){ alert("Please sign in to download inspection notice."); return; }
+  try{
+    const res = await fetch(`${API_BASE}/scans/${scanId}/legal-notice`, {
+      headers: { 'Authorization': 'Bearer ' + authToken }
+    });
+    if(!res.ok) throw new Error("Failed to generate Show-Cause Notice.");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Form_LMPC_INSP_Notice_${scanId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch(err){
+    alert("Error downloading notice: " + err.message);
+  }
+}
+
+async function exportCsvReport(){
+  if(!authToken){ alert("Please sign in to export audit CSV."); return; }
+  try{
+    const res = await fetch(`${API_BASE}/scans/export-csv`, {
+      headers: { 'Authorization': 'Bearer ' + authToken }
+    });
+    if(!res.ok) throw new Error("Failed to export CSV report.");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `packsight_sku_audit_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch(err){
+    alert("Error exporting CSV: " + err.message);
+  }
+}
+
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
@@ -1704,6 +1969,7 @@ async function loadDashboard(){
             <td>
               <strong>${escapeHtml(h.product_name || 'Untitled scan')}</strong>
               ${h.brand_name && h.brand_name !== 'Packaged Commodity' ? `<br><span class="mono" style="font-size:10.5px; color:var(--violet); background:rgba(155,123,247,0.08); padding:1px 6px; border-radius:10px; border:1px solid rgba(155,123,247,0.25);">🏷️ ${escapeHtml(h.brand_name)}</span>` : ''}
+              ${h.barcode_data && h.barcode_data.detected ? `<br><span class="mono" style="font-size:10.5px; color:var(--ink-soft);">📊 ${escapeHtml(h.barcode_data.format)} ${escapeHtml(h.barcode_data.data)}</span>` : ''}
             </td>
             <td class="mono">${new Date(h.created_at).toLocaleString()}</td>
             <td class="mono">${h.score}%</td>
@@ -1712,6 +1978,7 @@ async function loadDashboard(){
             <td>
               <button type="button" class="btn-inspect" onclick="viewHistoricalScan(${h.id})">👁️ Inspect</button>
               <button type="button" class="btn-pdf" onclick="downloadPdf(${h.id})">📥 PDF</button>
+              ${h.has_violation ? `<button type="button" class="btn-notice" onclick="downloadNoticePdf(${h.id})" title="Download Statutory Form LMPC-INSP Notice">⚖️ Notice</button>` : ''}
             </td>
           </tr>
         `).join('')}
