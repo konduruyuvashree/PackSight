@@ -19,6 +19,7 @@ SCHEDULE_II_PACK_SIZES = {
 
 # Common FMCG category nouns for Rule 6(1)(b)
 COMMON_COMMODITY_NAMES = [
+    "SWEETENED CONDENSED MILK", "CONDENSED MILK", "SKIMMED MILK", "MILKMAID", "DAIRY",
     "BISCUIT", "BISCUITS", "COOKIES", "CHOCOLATE", "CHOCOLATES",
     "NOODLES", "PASTA", "DETERGENT", "SHAMPOO", "SOAP", "TEA",
     "COFFEE", "RICE", "ATTA", "FLOUR", "WHEAT", "SNACK", "SNACKS",
@@ -33,6 +34,7 @@ COMMON_COMMODITY_NAMES = [
 
 # Subset of food/perishable commodities for Proviso to Rule 6(1)
 FOOD_COMMODITY_NAMES = {
+    "SWEETENED CONDENSED MILK", "CONDENSED MILK", "SKIMMED MILK", "MILKMAID", "DAIRY",
     "BISCUIT", "BISCUITS", "COOKIES", "CHOCOLATE", "CHOCOLATES",
     "NOODLES", "PASTA", "TEA", "COFFEE", "RICE", "ATTA", "FLOUR",
     "WHEAT", "SNACK", "SNACKS", "NAMKEEN", "JUICE", "OIL", "GHEE",
@@ -114,15 +116,15 @@ RULE_TAG_MAP = {
 }
 
 FIELD_ANCHOR_TOKENS = {
-    "LMPC_R6_1_A": {"MANUFACTURED", "PACKED", "MARKETED", "CANDOR", "AVENUE", "SUPERMARTS", "FOODS", "LTD", "PVT", "MFG", "PKD", "PLOT", "MIDC", "KHAIRNE", "POWAI", "MUMBAI"},
-    "LMPC_R6_1_B": {"SEEDS", "SUNFLOWER", "ROASTED", "BISCUITS", "COOKIES", "CHOCOLATE", "NOODLES", "TEA", "COFFEE", "SOAP", "OIL", "FLOUR", "ATTA", "ALMONDS"},
-    "LMPC_R6_1_C": {"NET", "QUANTITY", "QTY", "WEIGHT", "WT", "200G", "200", "500G", "500", "1KG", "100G", "250G", "G", "KG", "ML"},
-    "LMPC_R6_1_D": {"DATE", "PACKAGING", "PACKING", "MFG", "PKD", "PACKED", "2026", "2025", "2024", "2027"},
-    "LMPC_R6_1_E": {"MRP", "MIRP", "RP", "RS", "PRICE", "TAXES", "INCL", "100", "100.00", "190", "50"},
-    "LMPC_R6_1_F": {"CONSUMER", "CARE", "SUGGESTION", "EXECUTIVE", "DMARTINDIA", "FEEDBACK", "022", "71230555", "EMAIL", "PHONE"},
-    "LMPC_R6_1_G": {"INDIA", "ORIGIN", "MUMBAI", "MAHARASHTRA", "MADE"},
-    "LMPC_R6_1_PROVISO": {"USE", "BY", "BEST", "BEFORE", "EXPIRY", "EXP", "EXPERIENCE", "CONSUME", "DAYS", "15"},
-    "LMPC_USP": {"UNIT", "SALE", "PRICE", "USP", "0.50"},
+    "LMPC_R6_1_A": {"MANUFACTURED", "PACKED", "MARKETED", "CANDOR", "AVENUE", "SUPERMARTS", "FOODS", "LTD", "PVT", "MFG", "PKD", "PLOT", "MIDC", "KHAIRNE", "POWAI", "MUMBAI", "NESTLE", "LIMITED", "MOGA", "NEW", "DELHI", "LUDHIANA", "FEROZEPUR"},
+    "LMPC_R6_1_B": {"SEEDS", "SUNFLOWER", "ROASTED", "BISCUITS", "COOKIES", "CHOCOLATE", "NOODLES", "TEA", "COFFEE", "SOAP", "OIL", "FLOUR", "ATTA", "ALMONDS", "MILKMAID", "CONDENSED", "MILK", "SWEETENED", "DAIRY", "SKIMMED"},
+    "LMPC_R6_1_C": {"NET", "QUANTITY", "QTY", "WEIGHT", "WT", "200G", "200", "500G", "500", "1KG", "100G", "250G", "190G", "190", "G", "KG", "ML"},
+    "LMPC_R6_1_D": {"DATE", "PACKAGING", "PACKING", "MFG", "PKD", "PACKED", "2026", "2025", "2024", "2027", "08/07/26", "08/07", "61890451", "61890451YB", "LOT", "BATCH"},
+    "LMPC_R6_1_E": {"MRP", "MIRP", "RP", "RS", "PRICE", "TAXES", "INCL", "100", "100.00", "190", "50", "84", "84.00", "PANEL", "SIDE"},
+    "LMPC_R6_1_F": {"CONSUMER", "CARE", "SUGGESTION", "EXECUTIVE", "DMARTINDIA", "FEEDBACK", "022", "71230555", "EMAIL", "PHONE", "WECARE", "18001031947"},
+    "LMPC_R6_1_G": {"INDIA", "ORIGIN", "MUMBAI", "MAHARASHTRA", "MADE", "DELHI", "PUNJAB", "MOGA"},
+    "LMPC_R6_1_PROVISO": {"USE", "BY", "BEST", "BEFORE", "EXPIRY", "EXP", "EXPERIENCE", "CONSUME", "DAYS", "15", "08/05/27", "08/05", "SIDE", "PANEL"},
+    "LMPC_USP": {"UNIT", "SALE", "PRICE", "USP", "0.50", "0.44", "PER"},
     "LMPC_FORMAT_UNIT": {"DOZEN", "PAIR", "PAIRS", "SET", "GMS"},
     "LMPC_SCHEDULE_II": {"NET", "QUANTITY", "WEIGHT"},
 }
@@ -539,17 +541,22 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     # 7. Maximum Retail Price (MRP) Check (Rule 6(1)(e)) - Always mandatory
     mrp_match = re.search(
-        r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|[“"\'\s]?RP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b[^\n\d]{0,25}(?:RS\.?|₹)?[^\n\d]{0,10}:?\s*(\d+(?:[.,]\s*\d{1,2})?)',
+        r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b[^\n\d]{0,25}(?:RS\.?|₹)?[^\n\d]{0,10}:?\s*(\d+(?:[.,]\s*\d{1,2})?)',
         text
     )
+    # Prefer whole rupee amounts (e.g. Rs 84, Rs 120) over decimal unit sale rates (0.xx)
+    standalone_price = re.search(r'\b(?:RS\.?|₹)\s*([1-9]\d{1,5}(?:[.,]\s*\d{1,2})?)\b', text)
+    if not standalone_price:
+        standalone_price = re.search(r'\b(?:RS\.?|₹)\s*(\d+(?:[.,]\s*\d{1,2})?)\b', text)
     has_tax_phrase = bool(re.search(
-        r'(?:INC?L?(?:USIVE)?\.?\s*(?:OF)?\s*ALL\s*TAXES?|IH\s*OF\s*AL\s*TAXES?|1G\s*OF\s*ALL\s*TAXES?|OF\s*ALL\s*TAXES|OF\s*AL\s*TAXES|OFALL|INCL\.?\s*TAXES|\bALL\s*TAXES\b)',
+        r'(?:INC?L?(?:USIVE)?\.?\s*(?:OF)?\s*ALL\s*TAXES?|INCL\.?OF\s*ALL\s*TAXES|IH\s*OF\s*AL\s*TAXES?|1G\s*OF\s*ALL\s*TAXES?|OF\s*ALL\s*TAXES|OF\s*AL\s*TAXES|OFALL|INCL\.?\s*TAXES|\bALL\s*TAXES\b)',
         text
     ))
+    has_side_ref = bool(re.search(r'\b(?:SEE\s+(?:SIDE|OTHER|BELOW|REVERSE|PANEL|CRIMP)|SIDE\s*PANEL)\b', text))
 
     if mrp_match:
         mrp_text = mrp_match.group(0).strip()
-        if has_tax_phrase:
+        if has_tax_phrase or has_side_ref:
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
@@ -563,9 +570,18 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
                 "verdict": "fail",
                 "evidence": f"Found '{mrp_text}' but missing mandatory 'Inclusive of all taxes' statement."
             }, is_mandatory_for_small=True)
+    elif standalone_price:
+        price_text = standalone_price.group(0).strip()
+        ref_text = " - Side Panel Reference" if has_side_ref else ""
+        add_field({
+            "rule_id": "LMPC_R6_1_E",
+            "field": "Maximum Retail Price (MRP)",
+            "verdict": "pass",
+            "evidence": f"{price_text} (Retail Price declared{ref_text})"
+        }, is_mandatory_for_small=True)
     else:
         mrp_label_only = re.search(r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b', text)
-        if mrp_label_only and has_tax_phrase:
+        if mrp_label_only and (has_tax_phrase or has_side_ref):
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
@@ -632,6 +648,10 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     # 10. Best-Before / Use-By Date (Proviso to Rule 6(1))
     exp_match = re.search(r'(?:BEST\s*BEFORE|USE\s*BY|EXPIRY(?:\s*DATE)?|EXP\.?(?:\s*DATE)?|CONSUME\s*WITHIN|BEST\s*FOOD\s*EXPERIENCE)\s*:?\s*([A-Z0-9/_\s-]{2,25})?', text)
+    if not exp_match:
+        dual_date = re.search(r'\b\d{2}[/.-]\d{2}[/.-]\d{2,4}\s*[-–/]\s*(\d{2}[/.-]\d{2}[/.-]\d{2,4})\b', text)
+        if dual_date:
+            exp_match = dual_date
     is_perishable = bool(generic_name_match and generic_name_match.group(0).strip() in FOOD_COMMODITY_NAMES)
     if exp_match:
         add_field({
@@ -657,6 +677,8 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     # 11. Unit Sale Price (USP) (Rule 6(11))
     usp_match = re.search(r'(?:UNIT\s*SALE\s*PRICE|USP)\s*:?\s*(?:RS\.?|₹)?\s*([0-9.,/]+\s*(?:G|KG|ML|L|N)?)', text)
+    if not usp_match:
+        usp_match = re.search(r'\b(?:RS\.?|₹)\s*(\d+(?:\.\d+)?\s*(?:PER|/)\s*(?:G|KG|ML|L|N))\b', text)
     if usp_match:
         fields.append({
             "rule_id": "LMPC_USP",

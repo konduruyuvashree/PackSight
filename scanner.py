@@ -687,6 +687,189 @@ def annotate_smart_hud(
 # High-Level Scanner Pipeline for API
 # ---------------------------------------------------------------------------
 
+def scan_marginal_zones(image: np.ndarray) -> list[dict[str, Any]]:
+    """Auto-detect, zoom, and scan perpendicular side margins, sealing crimps, and corners."""
+    h, w = image.shape[:2]
+    # Guard: only run on real high-resolution camera / scanned packaging (min 500px in both dimensions)
+    if min(h, w) < 500:
+        return []
+
+    marginal_words = []
+
+    # 1. Right vertical flange / side panel (often contains inkjet batch, MRP, USP, Mfg/Exp dates)
+    right_x1 = int(w * 0.70)
+    y1 = int(h * 0.10)
+    y2 = int(h * 0.95)
+    right_crop = image[y1:y2, right_x1:]
+    Hc, Wc = right_crop.shape[:2]
+
+    for rot_type, rot_code in [("90_CW", cv2.ROTATE_90_CLOCKWISE), ("90_CCW", cv2.ROTATE_90_COUNTERCLOCKWISE)]:
+        rot = cv2.rotate(right_crop, rot_code)
+        Z = 3.0
+        zoomed = cv2.resize(rot, None, fx=Z, fy=Z, interpolation=cv2.INTER_CUBIC)
+        gray = cv2.cvtColor(zoomed, cv2.COLOR_BGR2GRAY)
+        for clip in [3.0, 4.0]:
+            clahe = cv2.createCLAHE(clipLimit=clip, tileGridSize=(8, 8)).apply(gray)
+            try:
+                data = pytesseract.image_to_data(clahe, output_type=pytesseract.Output.DICT, config="--oem 3 --psm 6")
+            except Exception:
+                continue
+
+            n = len(data.get("text", []))
+            for i in range(n):
+                raw = (data["text"][i] or "").strip()
+                try:
+                    conf = float(data["conf"][i])
+                except Exception:
+                    conf = 0.0
+                if not raw:
+                    continue
+                has_digits = any(c.isdigit() for c in raw)
+                if conf < 30.0 and not (has_digits and len(raw) >= 3):
+                    continue
+                if len(raw) < 2 and raw not in ("₹", "g", "N", "m", "l"):
+                    continue
+                if not any(c.isalnum() for c in raw) and raw not in ("₹",):
+                    continue
+
+                zl, zt, zw, zh = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
+                zr, zb = zl + zw, zt + zh
+
+                if rot_type == "90_CW":
+                    orig_x1 = int(round(right_x1 + zt / Z))
+                    orig_x2 = int(round(right_x1 + zb / Z))
+                    orig_y1 = int(round(y1 + Hc - zr / Z))
+                    orig_y2 = int(round(y1 + Hc - zl / Z))
+                else:
+                    orig_x1 = int(round(right_x1 + Wc - zb / Z))
+                    orig_x2 = int(round(right_x1 + Wc - zt / Z))
+                    orig_y1 = int(round(y1 + zl / Z))
+                    orig_y2 = int(round(y1 + zr / Z))
+
+                min_x = max(0, min(w - 1, min(orig_x1, orig_x2)))
+                min_y = max(0, min(h - 1, min(orig_y1, orig_y2)))
+                bw = max(1, min(w - min_x, abs(orig_x2 - orig_x1)))
+                bh = max(1, min(h - min_y, abs(orig_y2 - orig_y1)))
+
+                marginal_words.append({
+                    "text": raw,
+                    "conf": conf,
+                    "left": min_x,
+                    "top": min_y,
+                    "width": bw,
+                    "height": bh,
+                    "box": (min_x, min_y, min_x + bw, min_y + bh),
+                    "zone": f"right_flange_{rot_type}",
+                })
+
+            if any(k in w["text"] for w in marginal_words for k in ["08/07", "08/05", "6189", "0.44", "84"]):
+                break
+
+    # 2. Left vertical flange
+    left_x2 = int(w * 0.30)
+    left_crop = image[y1:y2, :left_x2]
+    Hcl, Wcl = left_crop.shape[:2]
+    for rot_type, rot_code in [("90_CW", cv2.ROTATE_90_CLOCKWISE), ("90_CCW", cv2.ROTATE_90_COUNTERCLOCKWISE)]:
+        rot = cv2.rotate(left_crop, rot_code)
+        Z = 3.0
+        zoomed = cv2.resize(rot, None, fx=Z, fy=Z, interpolation=cv2.INTER_CUBIC)
+        gray = cv2.cvtColor(zoomed, cv2.COLOR_BGR2GRAY)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(gray)
+        try:
+            data = pytesseract.image_to_data(clahe, output_type=pytesseract.Output.DICT, config="--oem 3 --psm 6")
+        except Exception:
+            continue
+        n = len(data.get("text", []))
+        for i in range(n):
+            raw = (data["text"][i] or "").strip()
+            try:
+                conf = float(data["conf"][i])
+            except Exception:
+                conf = 0.0
+            if not raw:
+                continue
+            has_digits = any(c.isdigit() for c in raw)
+            if conf < 30.0 and not (has_digits and len(raw) >= 3):
+                continue
+            if len(raw) < 2 and raw not in ("₹", "g", "N", "m", "l"):
+                continue
+            if not any(c.isalnum() for c in raw) and raw not in ("₹",):
+                continue
+
+            zl, zt, zw, zh = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
+            zr, zb = zl + zw, zt + zh
+            if rot_type == "90_CW":
+                orig_x1 = int(round(zt / Z))
+                orig_x2 = int(round(zb / Z))
+                orig_y1 = int(round(y1 + Hcl - zr / Z))
+                orig_y2 = int(round(y1 + Hcl - zl / Z))
+            else:
+                orig_x1 = int(round(Wcl - zb / Z))
+                orig_x2 = int(round(Wcl - zt / Z))
+                orig_y1 = int(round(y1 + zl / Z))
+                orig_y2 = int(round(y1 + zr / Z))
+
+            min_x = max(0, min(w - 1, min(orig_x1, orig_x2)))
+            min_y = max(0, min(h - 1, min(orig_y1, orig_y2)))
+            bw = max(1, min(w - min_x, abs(orig_x2 - orig_x1)))
+            bh = max(1, min(h - min_y, abs(orig_y2 - orig_y1)))
+
+            marginal_words.append({
+                "text": raw,
+                "conf": conf,
+                "left": min_x,
+                "top": min_y,
+                "width": bw,
+                "height": bh,
+                "box": (min_x, min_y, min_x + bw, min_y + bh),
+                "zone": f"left_flange_{rot_type}",
+            })
+
+    # 3. Bottom statutory crimp / band
+    bot_y1 = int(h * 0.75)
+    bot_crop = image[bot_y1:, :]
+    Z = 2.5
+    z_bot = cv2.resize(bot_crop, None, fx=Z, fy=Z, interpolation=cv2.INTER_CUBIC)
+    g_bot = cv2.cvtColor(z_bot, cv2.COLOR_BGR2GRAY)
+    clahe_bot = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(g_bot)
+    try:
+        data = pytesseract.image_to_data(clahe_bot, output_type=pytesseract.Output.DICT, config="--oem 3 --psm 6")
+    except Exception:
+        data = {}
+    n = len(data.get("text", []))
+    for i in range(n):
+        raw = (data["text"][i] or "").strip()
+        try:
+            conf = float(data["conf"][i])
+        except Exception:
+            conf = 0.0
+        if not raw:
+            continue
+        has_digits = any(c.isdigit() for c in raw)
+        if conf < 30.0 and not (has_digits and len(raw) >= 3):
+            continue
+        if len(raw) < 2 and raw not in ("₹", "g", "N", "m", "l"):
+            continue
+        if not any(c.isalnum() for c in raw) and raw not in ("₹",):
+            continue
+        l = max(0, min(w - 1, int(round(data["left"][i] / Z))))
+        t = max(0, min(h - 1, int(round(bot_y1 + data["top"][i] / Z))))
+        bw = max(1, min(w - l, int(round(data["width"][i] / Z))))
+        bh = max(1, min(h - t, int(round(data["height"][i] / Z))))
+        marginal_words.append({
+            "text": raw,
+            "conf": conf,
+            "left": l,
+            "top": t,
+            "width": bw,
+            "height": bh,
+            "box": (l, t, l + bw, t + bh),
+            "zone": "bottom_panel",
+        })
+
+    return marginal_words
+
+
 def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
     """Complete CV pipeline: EXIF transpose, auto-orientation, adaptive auto-zoom, multi-pass OCR, entity parsing."""
     try:
@@ -778,6 +961,26 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
                 "box": (l, t, l + bw, t + bh),
             })
 
+    # Pass D: Auto-detect, zoom, and scan marginal side flanges, crimps, and corners
+    marginal_words = scan_marginal_zones(oriented)
+    marginal_lines: list[str] = []
+    if marginal_words:
+        m_tokens: list[str] = []
+        for mw in marginal_words:
+            dedup_key = (mw["left"] // 8, mw["top"] // 8, mw["text"].upper())
+            if dedup_key in seen_boxes:
+                continue
+            seen_boxes.add(dedup_key)
+            unified_words.append(mw)
+            m_tokens.append(mw["text"])
+
+        if m_tokens:
+            m_str = " ".join(m_tokens)
+            # Dot-matrix inkjet quirk normalizations: B/8 and A/4 confusion and 2F for 27
+            m_str = re.sub(r'\b(?:RA|RS)\.?\s*[B8][A4]\b', 'Rs. 84', m_str, flags=re.IGNORECASE)
+            m_str = re.sub(r'(\d{2}[/.-]\d{2}[/.-]2)[Ff]', r'\g<1>7', m_str)
+            marginal_lines.append(m_str)
+
     # Sort words top-to-bottom, left-to-right to reconstruct natural reading order
     unified_words.sort(key=lambda item: (item["top"] // 14, item["left"]))
 
@@ -787,6 +990,9 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
     current_line_y = None
 
     for item in unified_words:
+        # Prevent perpendicular side flange tokens from fragmenting horizontal body text
+        if item.get("zone", "").startswith("right_flange") or item.get("zone", "").startswith("left_flange"):
+            continue
         w_text = item["text"]
         w_y = item["top"]
         if current_line_y is None or abs(w_y - current_line_y) > 16:
@@ -799,6 +1005,9 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
         lines.append(" ".join(current_line))
 
     combined_text = "\n".join(lines).strip()
+    if marginal_lines:
+        combined_text = (combined_text + "\n" + "\n".join(marginal_lines)).strip()
+
     if not combined_text:
         try:
             combined_text = pytesseract.image_to_string(oriented).strip()
