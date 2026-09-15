@@ -29,6 +29,9 @@ class Scan(Base):
     raw_ocr_text = Column(Text, default="")
     fields_json = Column(Text, default="[]")
     annotated_image = Column(Text, nullable=True, default=None)
+    original_image = Column(Text, nullable=True, default=None)
+    brand_name = Column(String, nullable=True, default=None)
+    image_quality_json = Column(Text, nullable=True, default=None)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="scans", foreign_keys=[user_id])

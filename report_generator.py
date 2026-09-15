@@ -1,4 +1,5 @@
-﻿import io
+import io
+import base64
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
@@ -6,8 +7,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage, KeepTogether
 )
+from PIL import Image as PILImage
 
 
 def generate_compliance_pdf_report(
@@ -18,6 +20,8 @@ def generate_compliance_pdf_report(
     fields: List[Dict[str, Any]],
     created_at: Optional[datetime] = None,
     user_name: Optional[str] = None,
+    annotated_image_b64: Optional[str] = None,
+    brand_name: Optional[str] = None,
 ) -> io.BytesIO:
     """
     Generates a professional Legal Metrology Compliance Audit PDF report
@@ -131,24 +135,25 @@ def generate_compliance_pdf_report(
 
     # Status determination
     status_label = "NON-COMPLIANT" if has_violation else "COMPLIANT"
-    status_text_color = colors.HexColor("#b91c1c") if has_violation else colors.HexColor("#15803d")
+    status_hex = "#b91c1c" if has_violation else "#15803d"
 
-    date_str = created_at.strftime("%Y-%m-%d %H:%M:%S UTC") if created_at else datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    date_str = created_at.strftime("%Y-%m-%d %H:%M:%S UTC") if created_at else datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
 
     # Summary Metadata Box
+    brand_display = brand_name if (brand_name and brand_name != "Packaged Commodity") else "N/A"
     summary_data = [
         [
             Paragraph(f"<b>Product Name:</b> {product_name or 'N/A'}", body_style),
-            Paragraph(f"<b>Scan ID:</b> #{scan_id}", body_style),
+            Paragraph(f"<b>Identified Brand:</b> {brand_display}", body_style),
         ],
         [
-            Paragraph(f"<b>Auditor / User:</b> {user_name or 'System Auditor'}", body_style),
+            Paragraph(f"<b>Scan ID:</b> #{scan_id}", body_style),
             Paragraph(f"<b>Audit Date:</b> {date_str}", body_style),
         ],
         [
-            Paragraph(f"<b>Overall Score:</b> <b>{score}%</b>", body_style),
+            Paragraph(f"<b>Auditor / User:</b> {user_name or 'System Auditor'}", body_style),
             Paragraph(
-                f"<b>Status:</b> <font color='{status_text_color.hexval()}'><b>{status_label}</b></font>",
+                f"<b>Score & Verdict:</b> <b>{score}%</b> — <font color='{status_hex}'><b>{status_label}</b></font>",
                 body_style,
             ),
         ],
@@ -226,8 +231,41 @@ def generate_compliance_pdf_report(
         bg = colors.HexColor("#ffffff") if i % 2 != 0 else colors.HexColor("#f8fafc")
         table_style_commands.append(("BACKGROUND", (0, i), (-1, i), bg))
 
+        verdict_val = str(fields[i - 1].get("verdict", "review")).upper() if i - 1 < len(fields) else "REVIEW"
+        if verdict_val == "PASS":
+            status_cell_bg = colors.HexColor("#dcfce7")
+        elif verdict_val == "FAIL":
+            status_cell_bg = colors.HexColor("#fee2e2")
+        else:
+            status_cell_bg = colors.HexColor("#fef3c7")
+        table_style_commands.append(("BACKGROUND", (2, i), (2, i), status_cell_bg))
+        table_style_commands.append(("ALIGN", (2, i), (2, i), "CENTER"))
+
     rules_table.setStyle(TableStyle(table_style_commands))
     elements.append(rules_table)
+
+    # Annotated Image Section
+    if annotated_image_b64:
+        try:
+            img_bytes = base64.b64decode(annotated_image_b64)
+            pil_img = PILImage.open(io.BytesIO(img_bytes))
+            orig_w, orig_h = pil_img.size
+
+            max_w = 520
+            max_h = 360
+            scale_f = min(max_w / orig_w, max_h / orig_h, 1.0)
+            disp_w = orig_w * scale_f
+            disp_h = orig_h * scale_f
+
+            img_block = [
+                Spacer(1, 14),
+                Paragraph("Annotated Packaging Inspection Visualizer", section_head_style),
+                Spacer(1, 6),
+                RLImage(io.BytesIO(img_bytes), width=disp_w, height=disp_h),
+            ]
+            elements.append(KeepTogether(img_block))
+        except Exception as img_err:
+            print(f"Failed to embed annotated image in PDF: {img_err}")
 
     elements.append(Spacer(1, 16))
 

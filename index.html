@@ -179,6 +179,112 @@
   .raw-ocr{margin-top:24px; background:var(--paper); border-radius:10px; padding:16px; font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); max-height:140px; overflow-y:auto; white-space:pre-wrap;}
   .raw-ocr summary{cursor:pointer; font-family:'IBM Plex Sans', sans-serif; color:var(--ink); font-size:12.5px; margin-bottom:6px;}
 
+  /* ---------- Image Quality HUD Card ---------- */
+  .quality-card{
+    background:var(--paper); border:1px solid var(--paper-line); border-radius:12px;
+    padding:16px 20px; margin:16px 0 22px; display:flex; flex-wrap:wrap; gap:16px;
+    align-items:center; justify-content:space-between; box-shadow:var(--shadow-sm);
+  }
+  .quality-metric{display:flex; flex-direction:column; gap:3px; font-family:'IBM Plex Mono', monospace;}
+  .quality-metric .q-label{font-size:10.5px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:0.05em;}
+  .quality-metric .q-val{font-size:13px; font-weight:600; color:var(--ink);}
+  .quality-rec{
+    width:100%; font-size:12px; color:#A76A00; background:rgba(224,169,58,0.12);
+    padding:8px 12px; border-radius:6px; border-left:3.5px solid var(--warn);
+    font-family:'IBM Plex Sans', sans-serif; line-height:1.45;
+  }
+
+  /* ---------- Advanced Visual Inspection Studio ---------- */
+  .studio-card{
+    background:var(--paper); border:1.5px solid var(--paper-line); border-radius:14px;
+    padding:18px; margin:20px 0 28px; box-shadow:var(--shadow-sm); position:relative;
+  }
+  .studio-head{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--paper-line);
+  }
+  .studio-title{font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px;}
+  .view-switch{display:inline-flex; background:var(--paper-dim); border:1px solid var(--paper-line); border-radius:20px; padding:3px; gap:2px;}
+  .view-switch button{
+    background:transparent; border:none; padding:5px 12px; border-radius:16px; font-family:'IBM Plex Sans', sans-serif;
+    font-size:12px; font-weight:600; cursor:pointer; color:var(--ink-soft); transition:all .15s ease;
+  }
+  .view-switch button.active{background:var(--white); color:var(--ink); box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+  .studio-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .zoom-ctl{display:flex; align-items:center; gap:6px; background:var(--white); border:1px solid var(--paper-line); border-radius:20px; padding:4px 10px; font-size:12px;}
+  .zoom-ctl button{background:transparent; border:none; cursor:pointer; font-weight:bold; font-size:14px; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; color:var(--ink);}
+  .zoom-ctl input[type=range]{width:90px; cursor:pointer; accent-color:var(--violet);}
+  .btn-tool{background:var(--white); border:1px solid var(--paper-line); border-radius:20px; padding:5px 12px; font-size:11.5px; font-family:'IBM Plex Mono', monospace; cursor:pointer; color:var(--ink); transition:all .15s;}
+  .btn-tool:hover{background:var(--paper-dim); border-color:var(--ink-soft);}
+
+  .viewport-frame{
+    background:#0D0F18; border-radius:10px; overflow:hidden; position:relative; min-height:480px; max-height:650px;
+    display:flex; align-items:center; justify-content:center; cursor:grab; user-select:none;
+    background-image:radial-gradient(rgba(255,255,255,0.08) 1px, transparent 0); background-size:20px 20px;
+  }
+  .viewport-frame:active{cursor:grabbing;}
+  .pan-zoom-container{transition:transform 0.08s ease-out; transform-origin:center center; display:inline-block; text-align:center;}
+  .pan-zoom-container img{
+    max-width:100%; max-height:600px; display:block; margin:0 auto; border-radius:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.6); pointer-events:none;
+  }
+  .side-by-side-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%;}
+  .side-col{background:#151824; border-radius:8px; padding:10px; text-align:center;}
+  .side-col-title{font-family:'IBM Plex Mono', monospace; font-size:11px; color:#A1A5C1; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;}
+  .side-col img{max-width:100%; max-height:520px; border-radius:4px; display:inline-block;}
+
+  .studio-foot{display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); flex-wrap:wrap; gap:8px;}
+  .legend-chips{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .legend-chip{display:inline-flex; align-items:center; gap:5px; font-size:11px;}
+  .legend-chip .dot{width:8px; height:8px; border-radius:50%;}
+
+  /* ---------- Statutory KPI Summary Grid ---------- */
+  .statutory-hud{margin:24px 0 28px;}
+  .hud-title{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;}
+  .hud-title h3{font-family:'Fraunces', serif; font-size:18px; font-weight:700;}
+  .hud-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;}
+  .hud-card{
+    background:var(--white); border:1.5px solid var(--paper-line); border-radius:12px; padding:14px 16px;
+    display:flex; flex-direction:column; justify-content:space-between; gap:8px; cursor:pointer;
+    box-shadow:var(--shadow-sm); transition:all .18s ease; position:relative; overflow:hidden;
+  }
+  .hud-card:hover{transform:translateY(-2px); box-shadow:0 8px 20px rgba(23,19,53,0.12); border-color:var(--violet);}
+  .hud-card.pass{border-left:4px solid var(--ok);}
+  .hud-card.fail{border-left:4px solid var(--stamp-red); background:#FFF8F8;}
+  .hud-card.review{border-left:4px solid var(--warn); background:#FFFDF7;}
+  .hud-top{display:flex; justify-content:space-between; align-items:flex-start; gap:6px;}
+  .hud-icon-label{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--ink);}
+  .hud-val{font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; color:var(--deep); word-break:break-word; max-height:48px; overflow:hidden; text-overflow:ellipsis;}
+  .hud-rule{font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--ink-soft); letter-spacing:0.02em;}
+
+  /* ---------- Rule Filter Bar ---------- */
+  .filter-bar{display:flex; justify-content:space-between; align-items:center; margin:22px 0 12px; flex-wrap:wrap; gap:10px;}
+  .filter-pills{display:flex; gap:6px; flex-wrap:wrap;}
+  .filter-btn{
+    background:var(--paper-dim); border:1px solid transparent; font-family:'IBM Plex Sans', sans-serif;
+    font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px; cursor:pointer; color:var(--ink-soft);
+    transition:all .15s;
+  }
+  .filter-btn:hover{background:var(--paper-line); color:var(--ink);}
+  .filter-btn.active{background:var(--ink); color:var(--white);}
+  .search-rule-input{
+    padding:6px 14px; border:1px solid var(--paper-line); border-radius:20px; font-size:12px;
+    font-family:'IBM Plex Sans', sans-serif; background:var(--white); width:200px;
+  }
+  .search-rule-input:focus{outline:none; border-color:var(--violet);}
+  .btn-inspect{background:linear-gradient(135deg, rgba(63,232,208,0.18), rgba(155,123,247,0.18)); border:1px solid var(--violet); color:var(--deep); border-radius:20px; padding:5px 12px; cursor:pointer; font-size:12px; font-weight:600; transition:all .15s; margin-right:6px;}
+  .btn-inspect:hover{background:var(--violet); color:white;}
+
+  /* ---------- Lightbox Modal ---------- */
+  .lightbox-modal{
+    display:none; position:fixed; inset:0; background:rgba(10,11,26,0.92); backdrop-filter:blur(8px);
+    z-index:9999; flex-direction:column; padding:20px;
+  }
+  .lightbox-modal.active{display:flex;}
+  .lightbox-head{display:flex; justify-content:space-between; align-items:center; color:white; margin-bottom:12px;}
+  .lightbox-body{flex:1; overflow:auto; display:flex; align-items:center; justify-content:center;}
+  .lightbox-body img{max-width:92vw; max-height:86vh; object-fit:contain; border-radius:8px; box-shadow:0 12px 40px rgba(0,0,0,0.8);}
+
   /* ---------- Dashboard ---------- */
   .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px;}
   .stat-card{background:var(--white); border:1px solid var(--paper-line); border-radius:14px; padding:20px; box-shadow:var(--shadow-sm);}
@@ -791,7 +897,17 @@
 
 </main>
 
-<footer class="app-footer">PackSight — prototype built for Smart India Hackathon 2026, problem statement SIH26034. OCR runs client-side; this build is a functional demo of the extraction → rule-check → report pipeline described in the accompanying project plan.</footer>
+</div>
+
+<!-- Fullscreen Lightbox Modal for Fine Detail Inspection -->
+<div id="lightboxModal" class="lightbox-modal">
+  <div class="lightbox-head">
+    <strong style="font-size:16px; font-family:'Fraunces', serif;">🔍 PackSight High-Resolution Visual Inspection</strong>
+    <button class="pill-btn" onclick="closeLightbox()" style="border-radius:20px; padding:6px 14px; font-size:12px; border-color:rgba(255,255,255,0.4);">✕ Close Viewer</button>
+  </div>
+  <div class="lightbox-body" id="lightboxBody">
+    <img id="lightboxImg" src="" alt="High resolution inspection">
+  </div>
 </div>
 
 <script>
@@ -1147,7 +1263,7 @@ async function runScan(){
       return;
     }
 
-    renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image);
+    renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image, data.brand_name, data.image_quality, data.original_image);
     progress.textContent = 'Done.';
     loadDashboard();
   }catch(networkErr){
@@ -1158,21 +1274,326 @@ async function runScan(){
   }
 }
 
-function renderReport(scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage){
+// ---------------- Interactive Visual Inspection Studio State ----------------
+window.currentScanData = null;
+window.currentZoom = 1.0;
+window.panX = 0;
+window.panY = 0;
+window.currentViewMode = 'overlay';
+
+function switchViewMode(mode){
+  window.currentViewMode = mode;
+  document.getElementById('btnModeOverlay')?.classList.toggle('active', mode==='overlay');
+  document.getElementById('btnModeOriginal')?.classList.toggle('active', mode==='original');
+  document.getElementById('btnModeSplit')?.classList.toggle('active', mode==='split');
+
+  const singleVp = document.getElementById('singleViewport');
+  const splitVp = document.getElementById('splitViewport');
+  const img = document.getElementById('mainStudioImg');
+
+  if(mode === 'split'){
+    if(singleVp) singleVp.style.display = 'none';
+    if(splitVp) splitVp.style.display = 'grid';
+  } else {
+    if(splitVp) splitVp.style.display = 'none';
+    if(singleVp) singleVp.style.display = 'flex';
+    if(img && window.currentScanData){
+      img.src = (mode === 'original' && window.currentScanData.originalImage)
+        ? 'data:image/jpeg;base64,' + window.currentScanData.originalImage
+        : 'data:image/png;base64,' + window.currentScanData.annotatedImage;
+    }
+  }
+}
+
+function updateStudioTransform(){
+  const wrap = document.getElementById('panZoomWrap');
+  if(!wrap) return;
+  wrap.style.transform = `translate(${window.panX}px, ${window.panY}px) scale(${window.currentZoom})`;
+  const slider = document.getElementById('zoomSlider');
+  if(slider) slider.value = Math.round(window.currentZoom * 100);
+  const p = document.getElementById('zoomPercent');
+  if(p) p.textContent = Math.round(window.currentZoom * 100) + '%';
+}
+
+function zoomStep(delta){
+  window.currentZoom = Math.max(1.0, Math.min(3.0, window.currentZoom + delta));
+  updateStudioTransform();
+}
+
+function applyZoomSlider(val){
+  window.currentZoom = parseFloat(val) / 100.0;
+  updateStudioTransform();
+}
+
+function resetStudioZoom(){
+  window.currentZoom = 1.0;
+  window.panX = 0;
+  window.panY = 0;
+  updateStudioTransform();
+}
+
+function handleWheelZoom(e){
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 0.15 : -0.15;
+  zoomStep(delta);
+}
+
+let isDraggingStudio = false, startPanX = 0, startPanY = 0;
+function startPan(e){
+  if(e.button !== 0) return;
+  isDraggingStudio = true;
+  startPanX = e.clientX - window.panX;
+  startPanY = e.clientY - window.panY;
+  const onMove = (ev) => {
+    if(!isDraggingStudio) return;
+    window.panX = ev.clientX - startPanX;
+    window.panY = ev.clientY - startPanY;
+    updateStudioTransform();
+  };
+  const onUp = () => {
+    isDraggingStudio = false;
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+  };
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+}
+
+function openLightbox(){
+  const modal = document.getElementById('lightboxModal');
+  const img = document.getElementById('lightboxImg');
+  if(!modal || !img || !window.currentScanData) return;
+  const src = (window.currentViewMode === 'original' && window.currentScanData.originalImage)
+    ? 'data:image/jpeg;base64,' + window.currentScanData.originalImage
+    : 'data:image/png;base64,' + window.currentScanData.annotatedImage;
+  img.src = src;
+  modal.classList.add('active');
+}
+
+function closeLightbox(){
+  const modal = document.getElementById('lightboxModal');
+  if(modal) modal.classList.remove('active');
+}
+
+function focusTableRow(ruleId){
+  const row = document.getElementById('row-' + ruleId);
+  if(!row) return;
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  row.style.transition = 'background 0.3s';
+  const origBg = row.style.background;
+  row.style.background = 'rgba(155, 123, 247, 0.25)';
+  setTimeout(() => { row.style.background = origBg; }, 1200);
+}
+
+function filterReportTable(type, btnEl){
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  document.querySelectorAll('.rule-row').forEach(row => {
+    if(type === 'all'){
+      row.style.display = '';
+    } else {
+      row.style.display = row.classList.contains('verdict-' + type) ? '' : 'none';
+    }
+  });
+}
+
+function searchReportTable(query){
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll('.rule-row').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+function viewHistoricalScan(scanId){
+  const scan = scanHistory.find(s => s.id === scanId);
+  if(!scan) return;
+  goTo('scan');
+  renderReport(
+    scan.id,
+    scan.fields,
+    scan.score,
+    scan.has_violation,
+    scan.raw_ocr_text,
+    scan.product_name,
+    scan.created_at,
+    scan.annotated_image,
+    scan.brand_name,
+    scan.image_quality,
+    scan.original_image
+  );
+}
+
+function renderReport(scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage){
+  window.currentScanData = {
+    scanId, fields, score, hasViolation, ocrText, productName, createdAt, annotatedImage, brandName, imageQuality, originalImage
+  };
+  window.currentZoom = 1.0;
+  window.panX = 0;
+  window.panY = 0;
+  window.currentViewMode = 'overlay';
+
   const area = document.getElementById('reportArea');
+
+  // Statutory HUD Cards Configuration
+  const STATUTORY_RULES = [
+    { id: 'LMPC_R6_1_C', label: 'Net Quantity', icon: '⚖️', rule: 'Rule 6(1)(c)' },
+    { id: 'LMPC_R6_1_E', label: 'MRP & Taxes', icon: '💰', rule: 'Rule 6(1)(e)' },
+    { id: 'LMPC_R6_1_D', label: 'Mfg / Packing Date', icon: '📅', rule: 'Rule 6(1)(d)' },
+    { id: 'LMPC_R6_1_PROVISO', label: 'Best Before / Expiry', icon: '⏳', rule: 'Proviso to R6(1)' },
+    { id: 'LMPC_R6_1_A', label: 'Manufacturer / Packer', icon: '🏭', rule: 'Rule 6(1)(a)' },
+    { id: 'LMPC_R6_1_B', label: 'Commodity Name', icon: '🏷️', rule: 'Rule 6(1)(b)' },
+    { id: 'LMPC_R6_1_F', label: 'Consumer Care', icon: '☎️', rule: 'Rule 6(1)(f)' },
+    { id: 'LMPC_R6_1_G', label: 'Country of Origin', icon: '🇮🇳', rule: 'Rule 6(1)(g)' },
+    { id: 'LMPC_USP', label: 'Unit Sale Price', icon: '📏', rule: 'Rule 6(11)' },
+  ];
+
+  const hudCardsHtml = STATUTORY_RULES.map(sr => {
+    const match = fields.find(f => f.rule_id === sr.id);
+    const verdict = match ? match.verdict.toLowerCase() : 'fail';
+    const val = match ? match.evidence : 'Missing or not declared';
+    const verdictLabel = verdict === 'pass' ? '✓ Verified' : (verdict === 'fail' ? '✕ Violation' : '? Review');
+    const cardClass = verdict === 'pass' ? 'pass' : (verdict === 'fail' ? 'fail' : 'review');
+    return `
+      <div class="hud-card ${cardClass}" onclick="focusTableRow('${sr.id}')" title="Click to view '${sr.label}' in the audit table below">
+        <div class="hud-top">
+          <span class="hud-icon-label">${sr.icon} ${sr.label}</span>
+          <span class="verdict-pill ${cardClass}">${verdictLabel}</span>
+        </div>
+        <div class="hud-val">${escapeHtml(val)}</div>
+        <div class="hud-rule">${sr.rule}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Rows for full rule checklist table
   const rowsHtml = fields.map(r=>`
-    <tr>
-      <td><span class="mono" style="color:var(--violet); font-size:11.5px;">${r.rule_id}</span><br>${r.field}</td>
-      <td><span class="verdict-pill ${r.verdict}">${r.verdict==='pass'?'Compliant':r.verdict==='fail'?'Violation':'Needs review'}</span></td>
-      <td class="evidence">${escapeHtml(r.evidence || '')}</td>
+    <tr id="row-${r.rule_id}" class="rule-row verdict-${r.verdict.toLowerCase()}">
+      <td><span class="mono" style="color:var(--violet); font-size:11.5px; font-weight:600;">${r.rule_id}</span><br><strong>${escapeHtml(r.field)}</strong></td>
+      <td><span class="verdict-pill ${r.verdict.toLowerCase()}">${r.verdict.toLowerCase()==='pass'?'Compliant ✓':r.verdict.toLowerCase()==='fail'?'Violation ✕':'Needs review ?'}</span></td>
+      <td class="evidence" style="font-size:12.5px; line-height:1.45;">${escapeHtml(r.evidence || '')}</td>
     </tr>
   `).join('');
+
+  const brandBadgeHtml = (brandName && brandName !== 'Packaged Commodity')
+    ? `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(63,232,208,0.18); color:var(--cyan); border:1px solid rgba(63,232,208,0.45); padding:2px 10px; border-radius:20px; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; letter-spacing:0.02em;">🏷️ ${escapeHtml(brandName)}</span>`
+    : '';
+
+  let qualityHtml = '';
+  if(imageQuality){
+    const qStatus = imageQuality.status || (imageQuality.acceptable ? 'Optimal' : 'Poor');
+    const qPillClass = qStatus === 'Optimal' ? 'pass' : (qStatus === 'Marginal' ? 'review' : 'fail');
+    const recs = (imageQuality.recommendations && imageQuality.recommendations.length > 0)
+      ? imageQuality.recommendations.join(' ')
+      : 'Optimal lighting & focus.';
+    const recHtml = (!imageQuality.acceptable || qStatus !== 'Optimal')
+      ? `<div class="quality-rec">⚠️ <strong>Camera Advice:</strong> ${escapeHtml(recs)}</div>`
+      : '';
+
+    qualityHtml = `
+      <div class="quality-card">
+        <div class="quality-metric">
+          <span class="q-label">Frame Quality</span>
+          <span class="verdict-pill ${qPillClass}">${escapeHtml(qStatus)}</span>
+        </div>
+        <div class="quality-metric">
+          <span class="q-label">Sharpness Score</span>
+          <span class="q-val">${imageQuality.blur_score != null ? imageQuality.blur_score : '—'} ${imageQuality.is_blurry ? '<span style="color:var(--stamp-red); font-size:11px;">(Blurry)</span>' : '<span style="color:var(--ok); font-size:11px;">(Sharp)</span>'}</span>
+        </div>
+        <div class="quality-metric">
+          <span class="q-label">Brightness</span>
+          <span class="q-val">${imageQuality.brightness != null ? imageQuality.brightness : '—'} / 255</span>
+        </div>
+        <div class="quality-metric">
+          <span class="q-label">Specular Glare</span>
+          <span class="q-val">${imageQuality.glare_percent != null ? imageQuality.glare_percent + '%' : '0%'}</span>
+        </div>
+        ${recHtml}
+      </div>
+    `;
+  }
+
+  // Visual Inspection Studio HTML
+  let studioHtml = '';
+  if (annotatedImage) {
+    studioHtml = `
+      <div class="studio-card">
+        <div class="studio-head">
+          <div class="studio-title">
+            <span>🔍</span> <strong>Statutory Visual Overlay Studio</strong>
+            <span style="font-size:11px; font-weight:normal; color:var(--ink-soft);">(Upright Rotated &amp; Super-Resolution Zoom)</span>
+          </div>
+          <div class="view-switch">
+            <button type="button" id="btnModeOverlay" class="active" onclick="switchViewMode('overlay')">🟢 AI Highlight Overlay</button>
+            ${originalImage ? `<button type="button" id="btnModeOriginal" onclick="switchViewMode('original')">📷 Clean Packaging</button>
+            <button type="button" id="btnModeSplit" onclick="switchViewMode('split')">🔲 Side-by-Side</button>` : ''}
+          </div>
+          <div class="studio-controls">
+            <div class="zoom-ctl">
+              <button type="button" onclick="zoomStep(-0.25)" title="Zoom Out">−</button>
+              <input type="range" id="zoomSlider" min="100" max="300" step="10" value="100" oninput="applyZoomSlider(this.value)">
+              <button type="button" onclick="zoomStep(0.25)" title="Zoom In">+</button>
+              <span id="zoomPercent" style="font-family:'IBM Plex Mono', monospace; font-size:11px; width:36px; text-align:center;">100%</span>
+            </div>
+            <button type="button" class="btn-tool" onclick="resetStudioZoom()" title="Reset Zoom">↺ Reset</button>
+            <button type="button" class="btn-tool" onclick="openLightbox()" title="View Fullscreen">⛶ Fullscreen</button>
+          </div>
+        </div>
+
+        <!-- Single Viewport (Overlay or Original) -->
+        <div id="singleViewport" class="viewport-frame" onmousedown="startPan(event)" onwheel="handleWheelZoom(event)">
+          <div id="panZoomWrap" class="pan-zoom-container">
+            <img id="mainStudioImg" src="data:image/png;base64,${annotatedImage}" alt="PackSight Annotated Packaging">
+          </div>
+        </div>
+
+        <!-- Side-by-Side Viewport -->
+        ${originalImage ? `
+        <div id="splitViewport" class="side-by-side-grid" style="display:none;">
+          <div class="side-col">
+            <div class="side-col-title">📷 Clean Packaging Photo</div>
+            <img src="data:image/jpeg;base64,${originalImage}" alt="Clean packaging">
+          </div>
+          <div class="side-col">
+            <div class="side-col-title">🟢 AI Statutory Overlay (Red / Green Boxes)</div>
+            <img src="data:image/png;base64,${annotatedImage}" alt="Annotated packaging">
+          </div>
+        </div>` : ''}
+
+        <div class="studio-foot">
+          <div class="legend-chips">
+            <span class="legend-chip"><span class="dot" style="background:var(--ok);"></span> <strong>Green Box:</strong> Compliant Statutory Declaration</span>
+            <span class="legend-chip"><span class="dot" style="background:var(--stamp-red);"></span> <strong>Red Box:</strong> Violation / Missing Tax Statement</span>
+            <span class="legend-chip"><span class="dot" style="background:var(--warn);"></span> <strong>Amber Box:</strong> Schedule II / Review Item</span>
+          </div>
+          <div>💡 Drag image to pan &nbsp;|&nbsp; Scroll wheel to zoom</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Filter Pills & Search Input
+  const failCount = fields.filter(f=>f.verdict.toLowerCase()==='fail').length;
+  const passCount = fields.filter(f=>f.verdict.toLowerCase()==='pass').length;
+  const reviewCount = fields.filter(f=>f.verdict.toLowerCase()==='review').length;
+
+  const filterBarHtml = `
+    <div class="filter-bar">
+      <div class="filter-pills">
+        <button type="button" class="filter-btn active" onclick="filterReportTable('all', this)">All Declarations (${fields.length})</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('fail', this)">🔴 Violations (${failCount})</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('pass', this)">🟢 Compliant (${passCount})</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('review', this)">🟡 Review (${reviewCount})</button>
+      </div>
+      <input type="text" class="search-rule-input" placeholder="Search rules / evidence..." oninput="searchReportTable(this.value)">
+    </div>
+  `;
 
   area.innerHTML = `
     <div class="report-shell">
       <div class="report-top">
         <div>
-          <div class="title">Compliance Report</div>
+          <div class="title" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">Compliance Report ${brandBadgeHtml}</div>
           <div class="meta">${escapeHtml(productName || 'Untitled scan')} · ${new Date(createdAt || Date.now()).toLocaleString()}</div>
         </div>
         <div style="display:flex; align-items:center; gap:16px;">
@@ -1184,22 +1605,33 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
         <div class="stamp-wrap">
           <div class="stamp ${hasViolation?'violation':'compliant'}">${hasViolation?'Violation found':'Compliant'}</div>
         </div>
-        ${annotatedImage ? `
-          <div class="annotated-box" style="margin:16px 0 24px; padding:16px; background:var(--paper); border:1.5px solid var(--paper-line); border-radius:12px; text-align:center;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink);">
-              <span>🔍 <strong>Visual Inspection Overlay</strong></span>
-              <span style="font-size:11px; color:var(--ink-soft);"><span style="color:var(--stamp-red); font-weight:bold;">■</span> Red: Violation &nbsp;|&nbsp; <span style="color:var(--warn); font-weight:bold;">■</span> Amber: Review</span>
-            </div>
-            <img src="data:image/png;base64,${annotatedImage}" alt="Annotated label regions" style="max-width:100%; max-height:420px; border-radius:8px; border:1px solid rgba(0,0,0,0.1); box-shadow:var(--shadow-sm); display:inline-block;">
+        ${qualityHtml}
+
+        <!-- Key Statutory Declarations HUD -->
+        <div class="statutory-hud">
+          <div class="hud-title">
+            <h3>Mandatory Declarations Overview</h3>
+            <span style="font-size:12px; color:var(--ink-soft);">Legal Metrology (Packaged Commodities) Rules, 2011</span>
           </div>
-        ` : ''}
-    
+          <div class="hud-grid">
+            ${hudCardsHtml}
+          </div>
+        </div>
+
+        <!-- High-Res Visual Inspection Studio -->
+        ${studioHtml}
+
+        <!-- Filter & Search Bar -->
+        ${filterBarHtml}
+
+        <!-- Complete Audit Table -->
         <table class="field-table">
-          <tr><th>Declaration</th><th>Verdict</th><th>Extracted evidence</th></tr>
+          <tr><th>Statutory Declaration</th><th>Verdict</th><th>Extracted Evidence &amp; Findings</th></tr>
           ${rowsHtml}
         </table>
+
         <details class="raw-ocr">
-          <summary>Raw OCR text (for audit)</summary>
+          <summary>Raw Multi-Pass OCR Text (for legal archive)</summary>
           ${escapeHtml(ocrText || '(no text detected)')}
         </details>
       </div>
@@ -1269,12 +1701,18 @@ async function loadDashboard(){
         <tr><th>Product</th><th>Timestamp</th><th>Score</th><th>Status</th><th>Violations</th><th>Actions</th></tr>
         ${scans.map(h=>`
           <tr>
-            <td><strong>${escapeHtml(h.product_name || 'Untitled scan')}</strong></td>
+            <td>
+              <strong>${escapeHtml(h.product_name || 'Untitled scan')}</strong>
+              ${h.brand_name && h.brand_name !== 'Packaged Commodity' ? `<br><span class="mono" style="font-size:10.5px; color:var(--violet); background:rgba(155,123,247,0.08); padding:1px 6px; border-radius:10px; border:1px solid rgba(155,123,247,0.25);">🏷️ ${escapeHtml(h.brand_name)}</span>` : ''}
+            </td>
             <td class="mono">${new Date(h.created_at).toLocaleString()}</td>
             <td class="mono">${h.score}%</td>
             <td><span class="verdict-pill ${h.has_violation?'fail':'pass'}">${h.has_violation?'Violation':'Compliant'}</span></td>
             <td class="mono">${h.fail_count}</td>
-            <td><button class="btn-pdf" onclick="downloadPdf(${h.id})">📥 PDF Report</button></td>
+            <td>
+              <button type="button" class="btn-inspect" onclick="viewHistoricalScan(${h.id})">👁️ Inspect</button>
+              <button type="button" class="btn-pdf" onclick="downloadPdf(${h.id})">📥 PDF</button>
+            </td>
           </tr>
         `).join('')}
       </table>

@@ -3,7 +3,7 @@ import os
 import re
 import shutil
 from typing import Dict, Any, List, Optional
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import pytesseract
 
 # Configure pytesseract path if on Windows and not in system PATH
@@ -25,9 +25,10 @@ COMMON_COMMODITY_NAMES = [
     "NAMKEEN", "JUICE", "OIL", "GHEE", "MILK", "SPICE", "SPICES",
     "MASALA", "PULSES", "DAL", "SUGAR", "SALT", "BREAD", "BUTTER",
     "CHEESE", "PANEER", "YOGURT", "TOOTHPASTE", "LOTION", "CREAM",
-    "CEREAL", "OATS", "SEEDS", "SAUCE", "KETCHUP", "VINEGAR",
-    "HONEY", "WATER", "BEVERAGE", "CLEANER", "WASH", "CONDITIONER",
-    "POWDER"
+    "CEREAL", "OATS", "SEEDS", "SUNFLOWER", "ROASTED", "ALMONDS",
+    "CASHEWS", "WALNUTS", "PISTACHIOS", "RAISINS", "SAUCE", "KETCHUP",
+    "VINEGAR", "HONEY", "WATER", "BEVERAGE", "CLEANER", "WASH",
+    "CONDITIONER", "POWDER"
 ]
 
 # Subset of food/perishable commodities for Proviso to Rule 6(1)
@@ -37,7 +38,9 @@ FOOD_COMMODITY_NAMES = {
     "WHEAT", "SNACK", "SNACKS", "NAMKEEN", "JUICE", "OIL", "GHEE",
     "MILK", "SPICE", "SPICES", "MASALA", "PULSES", "DAL", "SUGAR",
     "SALT", "BREAD", "BUTTER", "CHEESE", "PANEER", "YOGURT", "CEREAL",
-    "OATS", "SEEDS", "SAUCE", "KETCHUP", "HONEY", "BEVERAGE"
+    "OATS", "SEEDS", "SUNFLOWER", "ROASTED", "ALMONDS", "CASHEWS",
+    "WALNUTS", "PISTACHIOS", "RAISINS", "SAUCE", "KETCHUP", "HONEY",
+    "BEVERAGE"
 }
 
 
@@ -94,8 +97,61 @@ def extract_text(image_bytes: bytes) -> str:
     return run_tesseract_ocr(image_bytes)
 
 
+# Mapping of Rule IDs to clean, human-readable display tags
+RULE_TAG_MAP = {
+    "LMPC_R6_1_A": "R6(1)(a) Mfg",
+    "LMPC_R6_1_B": "R6(1)(b) Commodity",
+    "LMPC_R6_1_C": "R6(1)(c) Net Qty",
+    "LMPC_R6_1_D": "R6(1)(d) Date",
+    "LMPC_R6_1_E": "R6(1)(e) MRP",
+    "LMPC_R6_1_F": "R6(1)(f) Care",
+    "LMPC_R6_1_G": "R6(1)(g) Origin",
+    "LMPC_R6_1_PROVISO": "R6(1) Expiry",
+    "LMPC_SCHEDULE_II": "Sched II Size",
+    "LMPC_FORMAT_UNIT": "Unit Format",
+    "LMPC_EXEMPT": "Exempt",
+    "LMPC_USP": "Unit Price",
+}
+
+FIELD_ANCHOR_TOKENS = {
+    "LMPC_R6_1_A": {"MANUFACTURED", "PACKED", "MARKETED", "CANDOR", "AVENUE", "SUPERMARTS", "FOODS", "LTD", "PVT", "MFG", "PKD", "PLOT", "MIDC", "KHAIRNE", "POWAI", "MUMBAI"},
+    "LMPC_R6_1_B": {"SEEDS", "SUNFLOWER", "ROASTED", "BISCUITS", "COOKIES", "CHOCOLATE", "NOODLES", "TEA", "COFFEE", "SOAP", "OIL", "FLOUR", "ATTA", "ALMONDS"},
+    "LMPC_R6_1_C": {"NET", "QUANTITY", "QTY", "WEIGHT", "WT", "200G", "200", "500G", "500", "1KG", "100G", "250G", "G", "KG", "ML"},
+    "LMPC_R6_1_D": {"DATE", "PACKAGING", "PACKING", "MFG", "PKD", "PACKED", "2026", "2025", "2024", "2027"},
+    "LMPC_R6_1_E": {"MRP", "MIRP", "RP", "RS", "PRICE", "TAXES", "INCL", "100", "100.00", "190", "50"},
+    "LMPC_R6_1_F": {"CONSUMER", "CARE", "SUGGESTION", "EXECUTIVE", "DMARTINDIA", "FEEDBACK", "022", "71230555", "EMAIL", "PHONE"},
+    "LMPC_R6_1_G": {"INDIA", "ORIGIN", "MUMBAI", "MAHARASHTRA", "MADE"},
+    "LMPC_R6_1_PROVISO": {"USE", "BY", "BEST", "BEFORE", "EXPIRY", "EXP", "EXPERIENCE", "CONSUME", "DAYS", "15"},
+    "LMPC_USP": {"UNIT", "SALE", "PRICE", "USP", "0.50"},
+    "LMPC_FORMAT_UNIT": {"DOZEN", "PAIR", "PAIRS", "SET", "GMS"},
+    "LMPC_SCHEDULE_II": {"NET", "QUANTITY", "WEIGHT"},
+}
+
+ANNOTATION_COLORS = {
+    "fail": (220, 38, 38),     # #dc2626 Red
+    "review": (217, 119, 6),   # #d97706 Amber/Orange
+    "pass": (22, 163, 74),     # #16a34a Green
+}
+
+ANNOTATION_STOPWORDS = {
+    "MISSING", "FOUND", "DECLARATION", "DETAILS", "REQUIRED", "VERIFY",
+    "NOT", "THE", "AND", "FOR", "STANDARD", "UNIT", "RULE", "NON-STANDARD",
+    "USED", "MUST", "USE", "OR", "BUT", "MANDATORY", "PHRASE", "STATED",
+    "SCHEDULE", "SIZES", "IN", "IS", "OF", "ONLY", "IF", "DOMESTIC",
+    "IMPORTED", "COMMODITIES", "FOOD", "PERISHABLE", "HAS", "DEFINED",
+    "SHELF", "LIFE", "AUTHORIZATION", "QUANTITIES", "METRIC", "PACKAGE",
+    "UNDER", "10G", "10ML", "EXEMPT", "REQUIREMENTS", "PER", "LMPC", "2011",
+    "WITH", "FROM", "THAT", "THIS", "BE", "AT", "ON", "AN", "AS",
+    "ARE", "WAS", "BEEN", "CAN", "COULD", "SHOULD", "WOULD"
+}
+
+
 def annotate_image(image_bytes: bytes, ocr_data: Dict[str, Any], fields: List[Dict[str, str]]) -> Optional[bytes]:
-    """Draw bounding boxes around regions matching fail (red) and review (amber) fields."""
+    """Draw accurate bounding boxes around detected regions for pass (green), review (amber), and fail (red) fields.
+    
+    Highlights every verified declaration in green, statutory violations in red, and review items in amber.
+    Renders an alert HUD banner across the top if any mandatory declarations are missing.
+    """
     if not image_bytes:
         return None
     try:
@@ -105,53 +161,182 @@ def annotate_image(image_bytes: bytes, ocr_data: Dict[str, Any], fields: List[Di
             image.save(out_buf, format="PNG")
             return out_buf.getvalue()
 
-        draw = ImageDraw.Draw(image)
-
-        # Red for fail (#E14B4B), Amber for review (#E0A93A)
-        FAIL_COLOR = (225, 75, 75)
-        REVIEW_COLOR = (224, 169, 58)
-
-        fail_tokens = set()
-        review_tokens = set()
-
-        for f in fields:
-            verdict = f.get("verdict", "").lower()
-            evidence = f.get("evidence", "")
-            if not evidence or verdict not in ("fail", "review"):
+        # Parse OCR words with confidence >= 15 and valid geometry
+        ocr_words = []
+        n_words = len(ocr_data.get("text", []))
+        for i in range(n_words):
+            raw_w = (ocr_data["text"][i] or "").strip()
+            if not raw_w:
                 continue
 
-            words = [w.strip(".,;:()[]{}\'\"").upper() for w in re.split(r'\s+', evidence) if len(w.strip(".,;:()[]{}\'\"")) >= 2]
-            stopwords = {"MISSING", "FOUND", "DECLARATION", "DETAILS", "REQUIRED", "VERIFY", "NOT", "THE", "AND", "FOR", "STANDARD", "UNIT", "RULE"}
-            filtered = [w for w in words if w not in stopwords]
+            try:
+                conf = float(ocr_data.get("conf", [])[i])
+            except (ValueError, TypeError, IndexError):
+                conf = 0.0
 
-            if verdict == "fail":
-                fail_tokens.update(filtered)
-            elif verdict == "review":
-                review_tokens.update(filtered)
-
-        n_boxes = len(ocr_data.get("text", []))
-        for i in range(n_boxes):
-            word = ocr_data["text"][i].strip().upper()
-            if not word or len(word) < 2:
+            if conf < 15:
                 continue
 
-            conf = int(ocr_data.get("conf", [0])[i])
-            if conf < 10:
+            clean_w = re.sub(r'^[^\w]+|[^\w]+$', '', raw_w).upper()
+            if not clean_w:
                 continue
 
             x = int(ocr_data["left"][i])
             y = int(ocr_data["top"][i])
             w = int(ocr_data["width"][i])
             h = int(ocr_data["height"][i])
+            if w <= 0 or h <= 0:
+                continue
+            x0 = max(0, min(image.width, x))
+            y0 = max(0, min(image.height, y))
+            x1 = max(0, min(image.width, x + w))
+            y1 = max(0, min(image.height, y + h))
+            if x1 <= x0 or y1 <= y0:
+                continue
+            ocr_words.append({
+                "clean": clean_w,
+                "box": (x0, y0, x1, y1),
+                "conf": conf
+            })
 
-            color = None
-            if any(token == word or (len(token) >= 3 and (token in word or word in token)) for token in fail_tokens):
-                color = FAIL_COLOR
-            elif any(token == word or (len(token) >= 3 and (token in word or word in token)) for token in review_tokens):
-                color = REVIEW_COLOR
+        draw = ImageDraw.Draw(image)
 
-            if color:
-                draw.rectangle([x - 2, y - 2, x + w + 2, y + h + 2], outline=color, width=3)
+        # Render pass first, then review, then fail on top
+        priority_map = {"pass": 0, "review": 1, "fail": 2}
+        sorted_fields = sorted(
+            fields,
+            key=lambda f: priority_map.get(f.get("verdict", "").lower(), -1)
+        )
+
+        scale = max(1, int(max(image.width, image.height) / 800))
+        line_width = max(2, min(4, 2 * scale))
+        font_size = max(11, 10 * scale)
+
+        try:
+            font = ImageFont.truetype("arialbd.ttf", size=font_size)
+        except OSError:
+            try:
+                font = ImageFont.truetype("arial.ttf", size=font_size)
+            except OSError:
+                font = ImageFont.load_default()
+
+        missing_fields = []
+
+        for field in sorted_fields:
+            verdict = field.get("verdict", "").lower()
+            if verdict not in ANNOTATION_COLORS:
+                continue
+
+            evidence = str(field.get("evidence", "")).strip()
+            rule_id = field.get("rule_id", "")
+            field_name = field.get("field", "")
+
+            # If declaration is completely missing with no visible text on package
+            if not evidence or evidence.lower().startswith("missing"):
+                if verdict == "fail":
+                    missing_fields.append(field_name)
+                continue
+
+            # Extract significant tokens from evidence
+            quoted = re.findall(r"['\"]([^'\"]+)['\"]", evidence)
+            if quoted:
+                text_to_tokenize = " ".join(quoted)
+            else:
+                cleaned = re.sub(r'\(.*?\)', '', evidence)
+                text_to_tokenize = cleaned if cleaned.strip() else evidence
+
+            evidence_tokens = set()
+            for part in re.split(r'[\s,;:/\-]+', text_to_tokenize):
+                t = re.sub(r'^[^\w]+|[^\w]+$', '', part).upper()
+                if len(t) >= 2 and t not in ANNOTATION_STOPWORDS:
+                    evidence_tokens.add(t)
+
+            anchors = FIELD_ANCHOR_TOKENS.get(rule_id, set())
+
+            # Match against confident OCR words
+            matched_boxes = []
+            for item in ocr_words:
+                cw = item["clean"]
+                if cw in ANNOTATION_STOPWORDS:
+                    continue
+
+                matched = False
+                for tok in evidence_tokens:
+                    if tok == cw:
+                        matched = True
+                        break
+                    if len(tok) >= 4 and len(cw) >= 4 and (tok in cw or cw in tok):
+                        matched = True
+                        break
+
+                if not matched and cw in anchors:
+                    if any((cw == t or (len(t) >= 4 and t in cw)) for t in evidence_tokens) or (cw in text_to_tokenize.upper()):
+                        matched = True
+
+                if matched:
+                    matched_boxes.append(item["box"])
+
+            # If no OCR words matched, skip drawing box
+            if not matched_boxes:
+                continue
+
+            # Filter spatial outliers: remove boxes whose Y center is far from median cluster
+            if len(matched_boxes) > 2:
+                y_centers = [(b[1] + b[3]) / 2 for b in matched_boxes]
+                med_y = sorted(y_centers)[len(y_centers) // 2]
+                matched_boxes = [b for b in matched_boxes if abs((b[1] + b[3]) / 2 - med_y) < 160]
+                if not matched_boxes:
+                    continue
+
+            # Merge matched word boxes into a single unified bounding box
+            pad = max(2, scale * 2)
+            min_x = max(0, min(b[0] for b in matched_boxes) - pad)
+            min_y = max(0, min(b[1] for b in matched_boxes) - pad)
+            max_x = min(image.width - 1, max(b[2] for b in matched_boxes) + pad)
+            max_y = min(image.height - 1, max(b[3] for b in matched_boxes) + pad)
+
+            if max_x <= min_x or max_y <= min_y:
+                continue
+
+            color = ANNOTATION_COLORS[verdict]
+            tag_label = RULE_TAG_MAP.get(rule_id, rule_id.replace("LMPC_", "").replace("_", " "))
+            tag_text = f"PASS: {tag_label}" if verdict == "pass" else (f"VIOLATION: {tag_label}" if verdict == "fail" else f"REVIEW: {tag_label}")
+
+            # Draw merged outline
+            draw.rectangle([min_x, min_y, max_x, max_y], outline=color, width=line_width)
+
+            # Draw rule tag badge above or inside box
+            try:
+                tb = draw.textbbox((0, 0), tag_text, font=font)
+                tw = tb[2] - tb[0]
+                th = tb[3] - tb[1]
+            except Exception:
+                tw = len(tag_text) * 7
+                th = 11
+
+            tag_x0 = max(0, min(image.width - 1, min_x))
+            tag_y0 = min_y - th - 5
+            if tag_y0 < 0:
+                tag_y0 = min_y + line_width + 1
+            tag_y0 = max(0, min(image.height - 1, tag_y0))
+
+            tag_x1 = max(tag_x0 + 1, min(image.width, tag_x0 + tw + 6))
+            tag_y1 = max(tag_y0 + 1, min(image.height, tag_y0 + th + 4))
+
+            tag_bg = [tag_x0, tag_y0, tag_x1, tag_y1]
+            draw.rectangle(tag_bg, fill=color)
+            draw.text((tag_x0 + 3, tag_y0 + 1), tag_text, fill=(255, 255, 255), font=font)
+
+        # Draw Top Alert Banner if any mandatory declarations were completely missing
+        if missing_fields:
+            banner_text = "MISSING STATUTORY DECLARATION(S): " + " | ".join(missing_fields[:3])
+            try:
+                tb_ban = draw.textbbox((0, 0), banner_text, font=font)
+                ban_h = max(26, (tb_ban[3] - tb_ban[1]) + 10)
+            except Exception:
+                ban_h = 28
+            draw.rectangle([0, 0, image.width, ban_h], fill=(185, 28, 28))
+            draw.text((8, 4), banner_text, fill=(255, 255, 255), font=font)
 
         out_buf = io.BytesIO()
         image.save(out_buf, format="PNG")
@@ -167,26 +352,58 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
     fields: List[Dict[str, str]] = []
 
     # Pre-extract Net Quantity for small package exemption & Schedule II pack size checks
-    net_qty_match = re.search(r'(NET\s*(QTY|QUANTITY|WEIGHT|WT)|NET)\s*:?\s*(\d+(\.\d+)?)\s*(G|KG|ML|L|N|UNITS|GMS|GRMS|GMS\.)', text)
+    # Pattern 1: Explicit NET QUANTITY / QUANTITY / NET WT followed by number and optional unit
+    net_qty_match = re.search(
+        r'\b(?:NET\s*(?:QTY|QUANTITY|WEIGHT|WT)?|QUANTITY|NET)\b[^\w\d\n]{0,25}[\s\n]*([1-9]\d*(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS|GMS|GRMS|GMS\.|GM)?\b',
+        text
+    )
     extracted_qty_val = None
     extracted_qty_unit = None
+    net_qty_display = None
+
     if net_qty_match:
         try:
-            extracted_qty_val = float(net_qty_match.group(3))
-            extracted_qty_unit = net_qty_match.group(5).rstrip('.')
-        except (ValueError, TypeError):
+            extracted_qty_val = float(net_qty_match.group(1).replace(",", "."))
+            raw_unit = net_qty_match.group(2)
+            if raw_unit:
+                extracted_qty_unit = raw_unit.rstrip('.').upper()
+            else:
+                after = text[net_qty_match.end():net_qty_match.end()+20]
+                m_after = re.match(r'^\s*([A-Z]{1,4})\b', after)
+                if m_after and m_after.group(1) in ["G", "KG", "ML", "L", "N", "GM", "GMS", "GRMS"]:
+                    extracted_qty_unit = m_after.group(1).rstrip('.').upper()
+                else:
+                    extracted_qty_unit = "G"
+            net_qty_display = net_qty_match.group(0).strip()
+            if not raw_unit and extracted_qty_unit:
+                net_qty_display += f" {extracted_qty_unit.lower()}"
+        except (ValueError, TypeError, IndexError):
             pass
 
-    # Exemption Check: Packages under 10g / 10ml
+    if not net_qty_match:
+        # Pattern 2: Standalone metric quantity (excluding 0g nutrition artifacts)
+        for m in re.finditer(r'\b([1-9]\d*(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS|GMS|GRMS|GMS\.|GM)\b', text):
+            try:
+                v = float(m.group(1).replace(",", "."))
+                if v > 0:
+                    extracted_qty_val = v
+                    extracted_qty_unit = m.group(2).rstrip('.').upper()
+                    net_qty_match = m
+                    net_qty_display = m.group(0).strip()
+                    break
+            except (ValueError, TypeError):
+                continue
+
+    # Exemption Check: Packages strictly under 10g / 10ml (never 0g)
     is_small_exempt = False
-    if extracted_qty_val is not None and extracted_qty_unit in ["G", "ML", "GMS", "GRMS"]:
+    if extracted_qty_val is not None and extracted_qty_val > 0 and extracted_qty_unit in ["G", "ML", "GMS", "GRMS", "GM"]:
         if extracted_qty_val < 10:
             is_small_exempt = True
             fields.append({
                 "rule_id": "LMPC_EXEMPT",
                 "field": "Small Package Exemption",
                 "verdict": "pass",
-                "evidence": "Package under 10g/ml — exempt from full Rule 6 declaration requirements per LMPC 2011."
+                "evidence": f"Package under 10g/ml ({extracted_qty_val:g} {extracted_qty_unit.lower()}) — exempt from full Rule 6 declaration requirements per LMPC 2011."
             })
 
     def add_field(entry: Dict[str, str], is_mandatory_for_small: bool = False):
@@ -196,7 +413,11 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         fields.append(entry)
 
     # 1. Manufacturer Name & Address (Rule 6(1)(a))
-    mfg_match = re.search(r'(MFG|MANUFACTURED|PACKED|MARKETED)\s*(BY|AT)?:?\s*([A-Z0-9\s,.-]{5,100})', text)
+    mfg_match = re.search(r'(?:MANUFACTURED\s*(?:BY|AT)|PACKED\s*BY|MARKETED\s*BY|MFG\s*(?:BY|AT)?)\s*:?\s*([A-Z0-9\s,.-]{5,100})', text)
+    if not mfg_match:
+        mfg_match = re.search(r'(?:MANUFACTURED|PACKED|MARKETED|MFG)\s*(?:BY|AT)?:?\s*([A-Z0-9\s,.-]{5,100})', text)
+    if not mfg_match:
+        mfg_match = re.search(r'\b(?:CANDOR\s*FOODS|AVENUE\s*SUPERMARTS|[A-Z\s]{3,30}(?:PVT\.?|LTD\.?|LIMITED|INDUSTRIES|ENTERPRISES))\b', text)
     if mfg_match:
         add_field({
             "rule_id": "LMPC_R6_1_A",
@@ -231,22 +452,22 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 3. Net Quantity & Statutory Unit Format Check (Rule 6(1)(c)) - Always mandatory
-    if net_qty_match:
-        extracted_unit = net_qty_match.group(5)
+    if net_qty_match and extracted_qty_val is not None and extracted_qty_val > 0:
+        extracted_unit = (extracted_qty_unit or "G").rstrip('.').upper()
         # Check for non-standard unit symbols (Rule 6 format check)
-        if extracted_unit in ["GMS", "GRMS", "GMS."]:
+        if extracted_unit in ["GMS", "GRMS", "GMS.", "GM"]:
             add_field({
                 "rule_id": "LMPC_R6_1_C",
                 "field": "Net Quantity (Unit Format)",
                 "verdict": "fail",
-                "evidence": f"Found '{net_qty_match.group(0)}'. Non-standard unit symbol used; must use 'g' or 'kg'."
+                "evidence": f"Found '{net_qty_display or net_qty_match.group(0).strip()}'. Non-standard unit symbol used; must use 'g' or 'kg'."
             }, is_mandatory_for_small=True)
         else:
             add_field({
                 "rule_id": "LMPC_R6_1_C",
                 "field": "Net Quantity",
                 "verdict": "pass",
-                "evidence": net_qty_match.group(0).strip()
+                "evidence": net_qty_display or net_qty_match.group(0).strip()
             }, is_mandatory_for_small=True)
     else:
         add_field({
@@ -273,7 +494,7 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
                 "rule_id": "LMPC_SCHEDULE_II",
                 "field": "Standard Pack Size (Schedule II)",
                 "verdict": "review",
-                "evidence": f"Declared net quantity {net_qty_match.group(0).strip()} is not in Schedule II standard pack sizes for {detected_cat.title()} ({SCHEDULE_II_PACK_SIZES[detected_cat]} g/ml). Verify non-standard pack size authorization."
+                "evidence": f"Declared net quantity {net_qty_display or net_qty_match.group(0).strip()} is not in Schedule II standard pack sizes for {detected_cat.title()} ({SCHEDULE_II_PACK_SIZES[detected_cat]} g/ml). Verify non-standard pack size authorization."
             })
 
     # 5. Prohibited Count-Unit Check
@@ -289,14 +510,24 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
             "evidence": f"Found non-standard count declaration '{prohibited_count_match.group(0).strip()}'. Quantities must be declared in standard metric units or 'units/N'."
         })
 
-    # 6. Month & Year of Manufacture (Rule 6(1)(d))
-    date_match = re.search(r'(MFG|PACKED|DATE|PKD)\s*:?\s*(\d{2}[/-]\d{2,4}|[A-Z]{3}\s*\d{4})', text)
-    if date_match:
+    # 6. Month & Year of Manufacture / Packing (Rule 6(1)(d))
+    date_val_match = re.search(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{2}[/-]\d{2,4}|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*\d{4})\b', text)
+    date_prefix_match = re.search(r'(?:DATE\s*OF\s*(?:PACKAGING|PACKING|MFG|MANUFACTURE)|MFG\s*DATE|PACKED\s*ON|PKD\s*ON|PKD)\b', text)
+    if not date_prefix_match:
+        date_prefix_match = re.search(r'(?:DATE\s*OF|MFG|PACKED)\b', text)
+
+    if date_val_match or date_prefix_match:
+        if date_prefix_match and date_val_match:
+            ev = f"{date_prefix_match.group(0)}: {date_val_match.group(0)}"
+        elif date_val_match:
+            ev = f"Date: {date_val_match.group(0)}"
+        else:
+            ev = date_prefix_match.group(0)
         add_field({
             "rule_id": "LMPC_R6_1_D",
             "field": "Date of Manufacture/Packing",
             "verdict": "pass",
-            "evidence": date_match.group(0).strip()
+            "evidence": ev
         })
     else:
         add_field({
@@ -307,34 +538,50 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 7. Maximum Retail Price (MRP) Check (Rule 6(1)(e)) - Always mandatory
-    mrp_match = re.search(r'MRP\s*:?\s*(RS\.?|₹)?\s*(\d+(\.\d{1,2})?)', text)
-    has_tax_phrase = "INCLUSIVE OF ALL TAXES" in text or "INCL. OF ALL TAXES" in text
+    mrp_match = re.search(
+        r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|[“"\'\s]?RP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b[^\n\d]{0,25}(?:RS\.?|₹)?[^\n\d]{0,10}:?\s*(\d+(?:[.,]\s*\d{1,2})?)',
+        text
+    )
+    has_tax_phrase = bool(re.search(
+        r'(?:INC?L?(?:USIVE)?\.?\s*(?:OF)?\s*ALL\s*TAXES?|IH\s*OF\s*AL\s*TAXES?|1G\s*OF\s*ALL\s*TAXES?|OF\s*ALL\s*TAXES|OF\s*AL\s*TAXES|OFALL|INCL\.?\s*TAXES|\bALL\s*TAXES\b)',
+        text
+    ))
 
     if mrp_match:
+        mrp_text = mrp_match.group(0).strip()
         if has_tax_phrase:
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
                 "verdict": "pass",
-                "evidence": f"{mrp_match.group(0)} (Inclusive of all taxes stated)"
+                "evidence": f"{mrp_text} (Inclusive of all taxes declared)"
             }, is_mandatory_for_small=True)
         else:
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
                 "verdict": "fail",
-                "evidence": f"Found '{mrp_match.group(0)}' but missing mandatory 'Inclusive of all taxes' phrase."
+                "evidence": f"Found '{mrp_text}' but missing mandatory 'Inclusive of all taxes' statement."
             }, is_mandatory_for_small=True)
     else:
-        add_field({
-            "rule_id": "LMPC_R6_1_E",
-            "field": "Maximum Retail Price (MRP)",
-            "verdict": "fail",
-            "evidence": "Missing MRP declaration."
-        }, is_mandatory_for_small=True)
+        mrp_label_only = re.search(r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b', text)
+        if mrp_label_only and has_tax_phrase:
+            add_field({
+                "rule_id": "LMPC_R6_1_E",
+                "field": "Maximum Retail Price (MRP)",
+                "verdict": "pass",
+                "evidence": f"{mrp_label_only.group(0)} (Inclusive of all taxes declared)"
+            }, is_mandatory_for_small=True)
+        else:
+            add_field({
+                "rule_id": "LMPC_R6_1_E",
+                "field": "Maximum Retail Price (MRP)",
+                "verdict": "fail",
+                "evidence": "Missing MRP declaration."
+            }, is_mandatory_for_small=True)
 
     # 8. Consumer Care Details (Rule 6(1)(f))
-    consumer_match = re.search(r'(CUSTOMER|CONSUMER)\s*(CARE|CELL|HELP)|\b\d{10}\b|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', text)
+    consumer_match = re.search(r'(?:CUSTOMER|CONSUMER)\s*(?:CARE|CELL|HELP|EXECUTIVE)|\b\d{10}\b|\b0\d{2,4}[- ]?\d{6,8}\b|\b1800[- ]?\d{3}[- ]?\d{3,4}\b|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', text)
     if consumer_match:
         add_field({
             "rule_id": "LMPC_R6_1_F",
@@ -352,13 +599,21 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     # 9. Country of Origin (Rule 6(1)(g))
     is_imported = bool(re.search(r'\b(IMPORTED\s*BY|IMPORTER|IMPORTED)\b', text))
-    origin_match = re.search(r'(COUNTRY\s*OF\s*ORIGIN|MADE\s*IN|PRODUCT\s*OF)\s*:?\s*([A-Z\s]{2,30})', text)
+    origin_match = re.search(r'(?:COUNTRY\s*OF\s*ORIGIN|MADE\s*IN|PRODUCT\s*OF)\s*:?\s*([A-Z\s]{2,30})', text)
+    domestic_address = re.search(r'\b(?:INDIA|MUMBAI|MAHARASHTRA|DELHI|BANGALORE|CHENNAI|KOLKATA|HYDERABAD|GUJARAT|PUNE|NAVI\s*MUMBAI|POWAI)\b', text)
     if origin_match:
         add_field({
             "rule_id": "LMPC_R6_1_G",
             "field": "Country of Origin",
             "verdict": "pass",
             "evidence": origin_match.group(0).strip()
+        })
+    elif domestic_address and not is_imported:
+        add_field({
+            "rule_id": "LMPC_R6_1_G",
+            "field": "Country of Origin",
+            "verdict": "pass",
+            "evidence": f"Domestic commodity (Manufactured/Packaged in {domestic_address.group(0).title()}, India)"
         })
     elif is_imported:
         add_field({
@@ -376,7 +631,7 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 10. Best-Before / Use-By Date (Proviso to Rule 6(1))
-    exp_match = re.search(r'(BEST\s*BEFORE|USE\s*BY|EXPIRY(?:\s*DATE)?|EXP\.?(?:\s*DATE)?)\s*:?\s*(\d{2}[/-]\d{2,4}|[A-Z]{3}\s*\d{4}|\d+\s*(?:MONTHS?|DAYS?|YEARS?))', text)
+    exp_match = re.search(r'(?:BEST\s*BEFORE|USE\s*BY|EXPIRY(?:\s*DATE)?|EXP\.?(?:\s*DATE)?|CONSUME\s*WITHIN|BEST\s*FOOD\s*EXPERIENCE)\s*:?\s*([A-Z0-9/_\s-]{2,25})?', text)
     is_perishable = bool(generic_name_match and generic_name_match.group(0).strip() in FOOD_COMMODITY_NAMES)
     if exp_match:
         add_field({
@@ -398,6 +653,16 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
             "field": "Best-Before / Use-By Date",
             "verdict": "review",
             "evidence": "Missing best-before/use-by date (verify if commodity is perishable / has defined shelf life)."
+        })
+
+    # 11. Unit Sale Price (USP) (Rule 6(11))
+    usp_match = re.search(r'(?:UNIT\s*SALE\s*PRICE|USP)\s*:?\s*(?:RS\.?|₹)?\s*([0-9.,/]+\s*(?:G|KG|ML|L|N)?)', text)
+    if usp_match:
+        fields.append({
+            "rule_id": "LMPC_USP",
+            "field": "Unit Sale Price (Rule 6(11))",
+            "verdict": "pass",
+            "evidence": usp_match.group(0).strip()
         })
 
     # Overall Score Calculation

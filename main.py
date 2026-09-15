@@ -6,7 +6,7 @@ from typing import List
 
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from reportlab.lib.pagesizes import letter
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,7 @@ from ocr_rules import (
     annotate_image, extract_text, run_rule_engine, score_and_verdict,
 )
 from report_generator import generate_compliance_pdf_report
+from scanner import run_advanced_scan, assess_image_quality
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -39,6 +40,11 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"status": "ok", "service": "PackSight API"}
+
+
+@app.get("/app", response_class=FileResponse)
+def serve_webapp():
+    return FileResponse("index.html")
 
 
 # ---------------------------------------------------------------- auth ----
@@ -100,6 +106,7 @@ def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
 def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
     raw = json.loads(scan.fields_json) if scan.fields_json else []
     fields_list = raw["fields"] if isinstance(raw, dict) and "fields" in raw else raw
+    quality = json.loads(scan.image_quality_json) if getattr(scan, "image_quality_json", None) else None
     return schemas.ScanResponse(
         id=scan.id,
         product_name=scan.product_name,
@@ -110,6 +117,9 @@ def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
         raw_ocr_text=scan.raw_ocr_text or "",
         fields=[schemas.FieldResult(**f) for f in fields_list],
         annotated_image=getattr(scan, "annotated_image", None),
+        original_image=getattr(scan, "original_image", None),
+        brand_name=getattr(scan, "brand_name", None),
+        image_quality=quality,
     )
 
 
@@ -121,33 +131,63 @@ async def create_scan(
     db: Session = Depends(get_db),
 ):
     image_bytes = await image.read()
-    try:
-        ocr_text, box_data = extract_text_with_boxes(image_bytes)
-    except Exception as e:
-        ocr_text = run_tesseract_ocr(image_bytes)
-        box_data = {}
 
+    # 1. Advanced CV pipeline: Quality assessment, auto-orientation, multi-channel OCR
+    try:
+        scan_cv = run_advanced_scan(image_bytes)
+        oriented_bytes = scan_cv["oriented_image_bytes"]
+        ocr_text = scan_cv["raw_ocr_text"]
+        box_data = scan_cv["ocr_box_data"]
+        brand_name = scan_cv["brand_name"]
+        quality_data = scan_cv["quality"]
+    except Exception as cv_err:
+        print(f"Advanced scanner fallback: {cv_err}")
+        try:
+            ocr_text, box_data = extract_text_with_boxes(image_bytes)
+        except Exception:
+            ocr_text = run_tesseract_ocr(image_bytes)
+            box_data = {}
+        oriented_bytes = image_bytes
+        brand_name = "Packaged Commodity"
+        quality_data = {"acceptable": True, "status": "Standard", "recommendations": []}
+
+    # 2. Statutory Legal Metrology (LMPC 2011) compliance evaluation
     eval_result = evaluate_label_rules(ocr_text)
 
-    # Generate annotated image with bounding boxes around fail/review regions
+    # 3. Generate annotated image with bounding boxes & rule tags
     annotated_base64 = None
     try:
-        annotated_bytes = annotate_image(image_bytes, box_data, eval_result["fields"])
+        annotated_bytes = annotate_image(oriented_bytes, box_data, eval_result["fields"])
         if annotated_bytes:
             annotated_base64 = base64.b64encode(annotated_bytes).decode("utf-8")
     except Exception as e:
         print(f"Annotation failed: {e}")
 
+    # Refine product name if default and brand detected
+    final_product_name = product_name
+    if (not product_name or product_name == "Untitled scan") and brand_name and brand_name != "Packaged Commodity":
+        final_product_name = f"{brand_name} Package"
+
+    original_base64 = None
+    if oriented_bytes:
+        try:
+            original_base64 = base64.b64encode(oriented_bytes).decode("utf-8")
+        except Exception:
+            pass
+
     scan = models.Scan(
         user_id=current_user.id,
         owner_id=current_user.id,
-        product_name=product_name or "Untitled scan",
+        product_name=final_product_name or "Untitled scan",
         score=eval_result["score"],
         has_violation=eval_result["has_violation"],
         fail_count=eval_result["fail_count"],
         raw_ocr_text=ocr_text,
         fields_json=json.dumps(eval_result["fields"]),
         annotated_image=annotated_base64,
+        original_image=original_base64,
+        brand_name=brand_name,
+        image_quality_json=json.dumps(quality_data),
     )
     db.add(scan)
     db.commit()
@@ -196,16 +236,31 @@ async def create_multi_scan(
     first_image_bytes = None
     first_box_data = {}
 
+    brand_name = "Packaged Commodity"
+    best_quality = {"acceptable": True, "status": "Standard", "recommendations": []}
     for i, img in enumerate(images):
         contents = await img.read()
-        if i == 0:
-            first_image_bytes = contents
-            try:
-                panel_text, first_box_data = extract_text_with_boxes(contents)
-            except Exception:
+        try:
+            panel_cv = run_advanced_scan(contents)
+            panel_text = panel_cv["raw_ocr_text"]
+            if i == 0:
+                first_image_bytes = panel_cv["oriented_image_bytes"]
+                first_box_data = panel_cv["ocr_box_data"]
+                best_quality = panel_cv["quality"]
+                if panel_cv["brand_name"] != "Packaged Commodity":
+                    brand_name = panel_cv["brand_name"]
+            elif brand_name == "Packaged Commodity" and panel_cv["brand_name"] != "Packaged Commodity":
+                brand_name = panel_cv["brand_name"]
+        except Exception:
+            if i == 0:
+                first_image_bytes = contents
+                try:
+                    panel_text, first_box_data = extract_text_with_boxes(contents)
+                except Exception:
+                    panel_text = run_tesseract_ocr(contents)
+            else:
                 panel_text = run_tesseract_ocr(contents)
-        else:
-            panel_text = run_tesseract_ocr(contents)
+
         combined_ocr_text += f"\n--- Panel ({img.filename}) ---\n" + panel_text
 
     eval_result = evaluate_label_rules(combined_ocr_text)
@@ -219,16 +274,30 @@ async def create_multi_scan(
         except Exception as e:
             print(f"Multi annotation failed: {e}")
 
+    final_product_name = product_name
+    if (not product_name or product_name == "Untitled Product") and brand_name != "Packaged Commodity":
+        final_product_name = f"{brand_name} Multi-Panel Package"
+
+    original_base64 = None
+    if first_image_bytes:
+        try:
+            original_base64 = base64.b64encode(first_image_bytes).decode("utf-8")
+        except Exception:
+            pass
+
     db_scan = models.Scan(
         user_id=current_user.id,
         owner_id=current_user.id,
-        product_name=product_name,
+        product_name=final_product_name,
         score=eval_result["score"],
         has_violation=eval_result["has_violation"],
         fail_count=eval_result["fail_count"],
         raw_ocr_text=combined_ocr_text,
         fields_json=json.dumps(eval_result["fields"]),
         annotated_image=annotated_base64,
+        original_image=original_base64,
+        brand_name=brand_name,
+        image_quality_json=json.dumps(best_quality),
     )
     db.add(db_scan)
     db.commit()
@@ -262,6 +331,8 @@ async def download_scan_pdf(
         fields=fields,
         created_at=scan.created_at,
         user_name=current_user.full_name or current_user.user_id,
+        annotated_image_b64=getattr(scan, "annotated_image", None),
+        brand_name=getattr(scan, "brand_name", None),
     )
 
     return StreamingResponse(

@@ -38,6 +38,10 @@ class ScanResponse(BaseModel):
     created_at: datetime
     fields: List[ScanField]
     annotated_image: Optional[str] = None
+    original_image: Optional[str] = None
+    brand_name: Optional[str] = None
+    image_quality: Optional[dict] = None
+    extracted_entities: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
 
