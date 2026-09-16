@@ -7,6 +7,9 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
+from PIL import Image
+import cv2
+import numpy as np
 from reportlab.lib.pagesizes import letter
 from sqlalchemy.orm import Session
 
@@ -130,6 +133,53 @@ def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
     )
 
 
+ALLOWED_IMAGE_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+}
+
+
+def validate_image_upload(upload_file: UploadFile, image_bytes: bytes) -> None:
+    """Validate that the uploaded file has an allowed image content-type and is decodable."""
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
+
+    # Reject non-image content-types early
+    if upload_file.content_type:
+        raw_ct = upload_file.content_type.split(";")[0].strip().lower()
+        if raw_ct and raw_ct not in ALLOWED_IMAGE_CONTENT_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded file is not a valid image.",
+            )
+
+    # Validate image decodability using PIL and OpenCV
+    is_valid = False
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as pil_img:
+            pil_img.verify()
+        is_valid = True
+    except Exception:
+        pass
+
+    if not is_valid:
+        try:
+            np_arr = np.frombuffer(image_bytes, np.uint8)
+            cv_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            if cv_img is not None and cv_img.size > 0:
+                is_valid = True
+        except Exception:
+            pass
+
+    if not is_valid:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is not a valid image.",
+        )
+
+
 @app.post("/scans", response_model=schemas.ScanResponse)
 async def create_scan(
     image: UploadFile = File(...),
@@ -138,6 +188,7 @@ async def create_scan(
     db: Session = Depends(get_db),
 ):
     image_bytes = await image.read()
+    validate_image_upload(image, image_bytes)
 
     # 1. Advanced CV pipeline: Quality assessment, auto-orientation, multi-channel OCR
     barcode_data = []
@@ -154,6 +205,8 @@ async def create_scan(
         veg_status = scan_cv.get("veg_status")
         rule9_compliance = scan_cv.get("rule9_compliance")
     except Exception as cv_err:
+        if isinstance(cv_err, (ValueError, HTTPException)):
+            raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
         print(f"Advanced scanner fallback: {cv_err}")
         try:
             ocr_text, box_data = extract_text_with_boxes(image_bytes)
@@ -264,6 +317,7 @@ async def create_multi_scan(
     best_quality = {"acceptable": True, "status": "Standard", "recommendations": []}
     for i, img in enumerate(images):
         contents = await img.read()
+        validate_image_upload(img, contents)
         try:
             panel_cv = run_advanced_scan(contents)
             panel_text = panel_cv["raw_ocr_text"]
@@ -275,7 +329,9 @@ async def create_multi_scan(
                     brand_name = panel_cv["brand_name"]
             elif brand_name == "Packaged Commodity" and panel_cv["brand_name"] != "Packaged Commodity":
                 brand_name = panel_cv["brand_name"]
-        except Exception:
+        except Exception as panel_err:
+            if isinstance(panel_err, (ValueError, HTTPException)):
+                raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
             if i == 0:
                 first_image_bytes = contents
                 try:
@@ -529,6 +585,7 @@ async def create_batch_scans(
         content = await file.read()
         if not content:
             continue
+        validate_image_upload(file, content)
         p_name = file.filename.rsplit(".", 1)[0].replace("_", " ").title()
 
         barcode_data = []
@@ -544,7 +601,9 @@ async def create_batch_scans(
             barcode_data = scan_cv.get("barcode_data", [])
             veg_status = scan_cv.get("veg_status")
             rule9_compliance = scan_cv.get("rule9_compliance")
-        except Exception:
+        except Exception as batch_err:
+            if isinstance(batch_err, (ValueError, HTTPException)):
+                raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
             ocr_text = run_tesseract_ocr(content)
             box_data = {}
             oriented_bytes = content
