@@ -29,7 +29,12 @@ COMMON_COMMODITY_NAMES = [
     "CEREAL", "OATS", "SEEDS", "SUNFLOWER", "ROASTED", "ALMONDS",
     "CASHEWS", "WALNUTS", "PISTACHIOS", "RAISINS", "SAUCE", "KETCHUP",
     "VINEGAR", "HONEY", "WATER", "BEVERAGE", "CLEANER", "WASH",
-    "CONDITIONER", "POWDER"
+    "CONDITIONER", "POWDER", "CORN FLAKES", "MAKHANA", "POHA", "CHIPS",
+    "WAFERS", "BESAN", "SUJI", "RAVA", "SOJI", "MUSTARD OIL", "SOYBEAN OIL",
+    "SUNFLOWER OIL", "COCONUT OIL", "OLIVE OIL", "GROUNDNUT OIL", "SESAME OIL",
+    "JEERA", "TURMERIC", "HALDI", "PEPPER", "CARDAMOM", "CLOVE", "CINNAMON",
+    "CORIANDER", "CUMIN", "RAJMA", "CHANA", "MOONG", "TOOR", "URAD", "MASOOR",
+    "MAYONNAISE", "JAM", "PICKLE", "PAPAD", "GINGER GARLIC PASTE"
 ]
 
 # Subset of food/perishable commodities for Proviso to Rule 6(1)
@@ -42,7 +47,12 @@ FOOD_COMMODITY_NAMES = {
     "SALT", "BREAD", "BUTTER", "CHEESE", "PANEER", "YOGURT", "CEREAL",
     "OATS", "SEEDS", "SUNFLOWER", "ROASTED", "ALMONDS", "CASHEWS",
     "WALNUTS", "PISTACHIOS", "RAISINS", "SAUCE", "KETCHUP", "HONEY",
-    "BEVERAGE"
+    "BEVERAGE", "CORN FLAKES", "MAKHANA", "POHA", "CHIPS", "WAFERS",
+    "BESAN", "SUJI", "RAVA", "SOJI", "MUSTARD OIL", "SOYBEAN OIL",
+    "SUNFLOWER OIL", "COCONUT OIL", "OLIVE OIL", "GROUNDNUT OIL", "SESAME OIL",
+    "JEERA", "TURMERIC", "HALDI", "PEPPER", "CARDAMOM", "CLOVE", "CINNAMON",
+    "CORIANDER", "CUMIN", "RAJMA", "CHANA", "MOONG", "TOOR", "URAD", "MASOOR",
+    "MAYONNAISE", "JAM", "PICKLE", "PAPAD", "GINGER GARLIC PASTE"
 }
 
 
@@ -116,14 +126,14 @@ RULE_TAG_MAP = {
 }
 
 FIELD_ANCHOR_TOKENS = {
-    "LMPC_R6_1_A": {"MANUFACTURED", "PACKED", "MARKETED", "CANDOR", "AVENUE", "SUPERMARTS", "FOODS", "LTD", "PVT", "MFG", "PKD", "PLOT", "MIDC", "KHAIRNE", "POWAI", "MUMBAI", "NESTLE", "LIMITED", "MOGA", "NEW", "DELHI", "LUDHIANA", "FEROZEPUR"},
-    "LMPC_R6_1_B": {"SEEDS", "SUNFLOWER", "ROASTED", "BISCUITS", "COOKIES", "CHOCOLATE", "NOODLES", "TEA", "COFFEE", "SOAP", "OIL", "FLOUR", "ATTA", "ALMONDS", "MILKMAID", "CONDENSED", "MILK", "SWEETENED", "DAIRY", "SKIMMED"},
-    "LMPC_R6_1_C": {"NET", "QUANTITY", "QTY", "WEIGHT", "WT", "200G", "200", "500G", "500", "1KG", "100G", "250G", "190G", "190", "G", "KG", "ML"},
-    "LMPC_R6_1_D": {"DATE", "PACKAGING", "PACKING", "MFG", "PKD", "PACKED", "2026", "2025", "2024", "2027", "08/07/26", "08/07", "61890451", "61890451YB", "LOT", "BATCH"},
-    "LMPC_R6_1_E": {"MRP", "MIRP", "RP", "RS", "PRICE", "TAXES", "INCL", "100", "100.00", "190", "50", "84", "84.00", "PANEL", "SIDE"},
-    "LMPC_R6_1_F": {"CONSUMER", "CARE", "SUGGESTION", "EXECUTIVE", "DMARTINDIA", "FEEDBACK", "022", "71230555", "EMAIL", "PHONE", "WECARE", "18001031947"},
-    "LMPC_R6_1_G": {"INDIA", "ORIGIN", "MUMBAI", "MAHARASHTRA", "MADE", "DELHI", "PUNJAB", "MOGA"},
-    "LMPC_R6_1_PROVISO": {"USE", "BY", "BEST", "BEFORE", "EXPIRY", "EXP", "EXPERIENCE", "CONSUME", "DAYS", "15", "08/05/27", "08/05", "SIDE", "PANEL"},
+    "LMPC_R6_1_A": {"MANUFACTURED", "PACKED", "MARKETED", "CANDOR", "AVENUE", "SUPERMARTS", "FOODS", "LTD", "PVT", "MFG", "MFD", "MFR", "PKD", "MKTD", "PRODUCED", "PACKAGED", "LLP", "CORP", "PLOT", "MIDC", "KHAIRNE", "POWAI", "MUMBAI", "NESTLE", "LIMITED", "MOGA", "NEW", "DELHI", "LUDHIANA", "FEROZEPUR"},
+    "LMPC_R6_1_B": {"SEEDS", "SUNFLOWER", "ROASTED", "BISCUITS", "COOKIES", "CHOCOLATE", "NOODLES", "TEA", "COFFEE", "SOAP", "OIL", "FLOUR", "ATTA", "ALMONDS", "MILKMAID", "CONDENSED", "MILK", "SWEETENED", "DAIRY", "SKIMMED", "MAKHANA", "CORN", "FLAKES", "CHIPS", "COMMODITY", "PRODUCT"},
+    "LMPC_R6_1_C": {"NET", "QUANTITY", "QTY", "WEIGHT", "WT", "CONTENTS", "200G", "200", "500G", "500", "1KG", "100G", "250G", "190G", "190", "G", "KG", "ML", "L", "N"},
+    "LMPC_R6_1_D": {"DATE", "PACKAGING", "PACKING", "MFG", "MFD", "PKD", "PACKED", "2026", "2025", "2024", "2027", "08/07/26", "08/07", "61890451", "61890451YB", "LOT", "BATCH"},
+    "LMPC_R6_1_E": {"MRP", "MIRP", "RP", "RS", "PRICE", "TAXES", "INCL", "100", "100.00", "190", "50", "84", "84.00", "PANEL", "SIDE", "MAXIMUM"},
+    "LMPC_R6_1_F": {"CONSUMER", "CARE", "SUGGESTION", "EXECUTIVE", "DMARTINDIA", "FEEDBACK", "022", "71230555", "EMAIL", "PHONE", "WECARE", "HELPLINE", "TOLL", "FREE", "18001031947", "1800"},
+    "LMPC_R6_1_G": {"INDIA", "ORIGIN", "MUMBAI", "MAHARASHTRA", "MADE", "DELHI", "PUNJAB", "MOGA", "PRODUCED"},
+    "LMPC_R6_1_PROVISO": {"USE", "BY", "BEST", "BEFORE", "EXPIRY", "EXP", "EXPERIENCE", "CONSUME", "DAYS", "MONTHS", "15", "08/05/27", "08/05", "SIDE", "PANEL"},
     "LMPC_USP": {"UNIT", "SALE", "PRICE", "USP", "0.50", "0.44", "PER"},
     "LMPC_FORMAT_UNIT": {"DOZEN", "PAIR", "PAIRS", "SET", "GMS"},
     "LMPC_SCHEDULE_II": {"NET", "QUANTITY", "WEIGHT"},
@@ -354,9 +364,9 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
     fields: List[Dict[str, str]] = []
 
     # Pre-extract Net Quantity for small package exemption & Schedule II pack size checks
-    # Pattern 1: Explicit NET QUANTITY / QUANTITY / NET WT followed by number and optional unit
+    # Pattern 1: Explicit NET QUANTITY / QUANTITY / NET WT / NET CONTENTS followed by number and optional unit
     net_qty_match = re.search(
-        r'\b(?:NET\s*(?:QTY|QUANTITY|WEIGHT|WT)?|QUANTITY|NET)\b[^\w\d\n]{0,25}[\s\n]*([1-9]\d*(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS|GMS|GRMS|GMS\.|GM)?\b',
+        r'\b(?:NET\s*(?:QTY|QUANTITY|WEIGHT|WT|CONTENTS?|MASS|VOL|VOLUME)?|QUANTITY|NET\b(?!\s*PRICE))\b[^\w\d\n]{0,25}[\s\n]*([0-9]+(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS?|GMS|GRMS|GMS\.|GM)?\b',
         text
     )
     extracted_qty_val = None
@@ -371,12 +381,13 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
                 extracted_qty_unit = raw_unit.rstrip('.').upper()
             else:
                 after = text[net_qty_match.end():net_qty_match.end()+20]
-                m_after = re.match(r'^\s*([A-Z]{1,4})\b', after)
-                if m_after and m_after.group(1) in ["G", "KG", "ML", "L", "N", "GM", "GMS", "GRMS"]:
+                m_after = re.match(r'^\s*([A-Z]{1,5})\b', after)
+                if m_after and m_after.group(1) in ["G", "KG", "ML", "L", "N", "GM", "GMS", "GRMS", "UNITS"]:
                     extracted_qty_unit = m_after.group(1).rstrip('.').upper()
                 else:
                     extracted_qty_unit = "G"
-            net_qty_display = net_qty_match.group(0).strip()
+            clean_match_str = re.sub(r'\s+', ' ', net_qty_match.group(0)).strip()
+            net_qty_display = clean_match_str
             if not raw_unit and extracted_qty_unit:
                 net_qty_display += f" {extracted_qty_unit.lower()}"
         except (ValueError, TypeError, IndexError):
@@ -384,14 +395,17 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     if not net_qty_match:
         # Pattern 2: Standalone metric quantity (excluding 0g nutrition artifacts)
-        for m in re.finditer(r'\b([1-9]\d*(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS|GMS|GRMS|GMS\.|GM)\b', text):
+        for m in re.finditer(r'\b([0-9]+(?:[.,]\d+)?)\s*(G|KG|ML|L|N|UNITS?|GMS|GRMS|GMS\.|GM)\b', text):
             try:
                 v = float(m.group(1).replace(",", "."))
                 if v > 0:
+                    prefix = text[max(0, m.start()-25):m.start()]
+                    if any(n in prefix for n in ["FAT", "PROTEIN", "CARB", "SUGAR", "SODIUM", "CHOLESTEROL", "ENERGY", "CALORIES", "SATURATED"]):
+                        continue
                     extracted_qty_val = v
                     extracted_qty_unit = m.group(2).rstrip('.').upper()
                     net_qty_match = m
-                    net_qty_display = m.group(0).strip()
+                    net_qty_display = re.sub(r'\s+', ' ', m.group(0)).strip()
                     break
             except (ValueError, TypeError):
                 continue
@@ -415,17 +429,33 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         fields.append(entry)
 
     # 1. Manufacturer Name & Address (Rule 6(1)(a))
-    mfg_match = re.search(r'(?:MANUFACTURED\s*(?:BY|AT)|PACKED\s*BY|MARKETED\s*BY|MFG\s*(?:BY|AT)?)\s*:?\s*([A-Z0-9\s,.-]{5,100})', text)
+    mfg_match = re.search(
+        r'\b(?:MANUFACTURED|PACKED|PACKAGED|MARKETED|PRODUCED|PROCESSED)\s*(?:AND\s+PACKED\s+)?(?:BY|AT|FOR)\s*[:\-]?\s*([^\n]{3,100})',
+        text
+    )
     if not mfg_match:
-        mfg_match = re.search(r'(?:MANUFACTURED|PACKED|MARKETED|MFG)\s*(?:BY|AT)?:?\s*([A-Z0-9\s,.-]{5,100})', text)
+        mfg_match = re.search(
+            r'\b(?:MFD|MFG|MFR|PKD|MKTD)\.?\s*(?:AND\s+PKD\.?\s+)?(?:BY|AT|FOR)\s*[:\-]?\s*([^\n]{3,100})',
+            text
+        )
     if not mfg_match:
-        mfg_match = re.search(r'\b(?:CANDOR\s*FOODS|AVENUE\s*SUPERMARTS|[A-Z\s]{3,30}(?:PVT\.?|LTD\.?|LIMITED|INDUSTRIES|ENTERPRISES))\b', text)
+        mfg_match = re.search(
+            r'\b(?:MANUFACTURED|PACKED|PACKAGED|MARKETED|PRODUCED|PROCESSED)(?!\s*(?:DATE|DT\b|ON\b|IN\s*INDIA))\s*[:\-]?\s*([^\n]{3,100})',
+            text
+        )
+    if not mfg_match:
+        mfg_match = re.search(
+            r'\b(?:CANDOR\s*FOODS|AVENUE\s*SUPERMARTS|[A-Z\s]{3,35}(?:PVT\.?|LTD\.?|LIMITED|CORP(?:ORATION)?|LLP|INDUSTRIES|ENTERPRISES))\b',
+            text
+        )
+
     if mfg_match:
+        ev_mfg = re.sub(r'\s+', ' ', mfg_match.group(0)).strip()
         add_field({
             "rule_id": "LMPC_R6_1_A",
             "field": "Manufacturer / Packer Details",
             "verdict": "pass",
-            "evidence": mfg_match.group(0).strip()
+            "evidence": ev_mfg
         })
     else:
         add_field({
@@ -436,8 +466,21 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 2. Common / Generic Name of Commodity (Rule 6(1)(b))
+    commodity_header_match = re.search(
+        r'\b(?:NAME\s*OF\s*(?:THE\s*)?COMMODITY|COMMODITY|PRODUCT\s*NAME|PRODUCT|GENERIC\s*NAME|ITEM\s*NAME|ITEM)\s*[:\-]\s*([^\n,;]{2,60})',
+        text
+    )
     generic_name_match = re.search(r'\b(?:' + '|'.join(re.escape(w) for w in COMMON_COMMODITY_NAMES) + r')\b', text)
-    if generic_name_match:
+    
+    if commodity_header_match:
+        matched_term = commodity_header_match.group(1).strip()
+        add_field({
+            "rule_id": "LMPC_R6_1_B",
+            "field": "Common / Generic Name of Commodity",
+            "verdict": "pass",
+            "evidence": matched_term
+        })
+    elif generic_name_match:
         matched_term = generic_name_match.group(0).strip()
         add_field({
             "rule_id": "LMPC_R6_1_B",
@@ -513,18 +556,14 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 6. Month & Year of Manufacture / Packing (Rule 6(1)(d))
-    date_val_match = re.search(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{2}[/-]\d{2,4}|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*\d{4})\b', text)
-    date_prefix_match = re.search(r'(?:DATE\s*OF\s*(?:PACKAGING|PACKING|MFG|MANUFACTURE)|MFG\s*DATE|PACKED\s*ON|PKD\s*ON|PKD)\b', text)
-    if not date_prefix_match:
-        date_prefix_match = re.search(r'(?:DATE\s*OF|MFG|PACKED)\b', text)
-
-    if date_val_match or date_prefix_match:
-        if date_prefix_match and date_val_match:
-            ev = f"{date_prefix_match.group(0)}: {date_val_match.group(0)}"
-        elif date_val_match:
-            ev = f"Date: {date_val_match.group(0)}"
-        else:
-            ev = date_prefix_match.group(0)
+    mfg_date_direct = re.search(
+        r'\b(?:DATE\s*OF\s*(?:PACKAGING|PACKING|MFG|MANUFACTURE)|MFG\.?\s*DATE|MFD\.?\s*DATE|MFD\.?\s*ON|MFG\.?\s*ON|PACKED\s*ON|PKD\.?\s*ON|PACKED|MFD|MFG|PKD)\b'
+        r'[:\s\-\.]*(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}|\d{1,2}[/.-]\d{2,4}|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s*[\d]{2,4}|\d{1,2}\s+(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s+\d{2,4})\b',
+        text
+    )
+    
+    if mfg_date_direct:
+        ev = re.sub(r'\s+', ' ', mfg_date_direct.group(0)).strip()
         add_field({
             "rule_id": "LMPC_R6_1_D",
             "field": "Date of Manufacture/Packing",
@@ -532,46 +571,76 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
             "evidence": ev
         })
     else:
-        add_field({
-            "rule_id": "LMPC_R6_1_D",
-            "field": "Date of Manufacture/Packing",
-            "verdict": "fail",
-            "evidence": "Missing manufacturing or packing date."
-        })
+        date_prefix_match = re.search(
+            r'\b(?:DATE\s*OF\s*(?:PACKAGING|PACKING|MFG|MANUFACTURE)|MFG\.?\s*DATE|MFD\.?\s*DATE|MFD\.?\s*ON|MFG\.?\s*ON|PACKED\s*ON|PKD\.?\s*ON|PACKED|MFD|PKD)\b',
+            text
+        )
+        candidates = []
+        for m in re.finditer(r'\b(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}|\d{1,2}[/.-]\d{2,4}|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s*\d{2,4})\b', text):
+            pre = text[max(0, m.start()-30):m.start()]
+            if not re.search(r'(?:EXP|EXPIRY|BEST\s*BEFORE|USE\s*BY|CONSUME)', pre):
+                candidates.append(m.group(0))
+        
+        if candidates and date_prefix_match:
+            ev = f"{date_prefix_match.group(0)}: {candidates[0]}"
+        elif candidates:
+            ev = f"Date: {candidates[0]}"
+        elif date_prefix_match:
+            ev = date_prefix_match.group(0)
+        else:
+            ev = None
+
+        if ev:
+            add_field({
+                "rule_id": "LMPC_R6_1_D",
+                "field": "Date of Manufacture/Packing",
+                "verdict": "pass",
+                "evidence": ev
+            })
+        else:
+            add_field({
+                "rule_id": "LMPC_R6_1_D",
+                "field": "Date of Manufacture/Packing",
+                "verdict": "fail",
+                "evidence": "Missing manufacturing or packing date."
+            })
 
     # 7. Maximum Retail Price (MRP) Check (Rule 6(1)(e)) - Always mandatory
     mrp_match = re.search(
-        r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b[^\n\d]{0,25}(?:RS\.?|₹)?[^\n\d]{0,10}:?\s*(\d+(?:[.,]\s*\d{1,2})?)',
+        r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\.?\s*RETAIL\s*PRICE|RETAIL\s*PRICE)\b'
+        r'(?:\s*\([^\)\n]{1,40}\))?[\s\n:\-\.]*(?:RS\.?|₹|INR)?[\s\n:\-\.]*'
+        r'(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)'
+        r'(?:\s*(?:/\-|\-|RS\.?|₹|INR))?',
         text
     )
-    # Prefer whole rupee amounts (e.g. Rs 84, Rs 120) over decimal unit sale rates (0.xx)
-    standalone_price = re.search(r'\b(?:RS\.?|₹)\s*([1-9]\d{1,5}(?:[.,]\s*\d{1,2})?)\b', text)
+    standalone_price = re.search(r'\b(?:RS\.?|₹|INR)\s*([1-9]\d{0,4}(?:,\d{3})*(?:\.\d{1,2})?)\b', text)
     if not standalone_price:
-        standalone_price = re.search(r'\b(?:RS\.?|₹)\s*(\d+(?:[.,]\s*\d{1,2})?)\b', text)
+        standalone_price = re.search(r'\b([1-9]\d{0,4}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:RS\.?|₹|INR|/\-)\b', text)
+    
     has_tax_phrase = bool(re.search(
-        r'(?:INC?L?(?:USIVE)?\.?\s*(?:OF)?\s*ALL\s*TAXES?|INCL\.?OF\s*ALL\s*TAXES|IH\s*OF\s*AL\s*TAXES?|1G\s*OF\s*ALL\s*TAXES?|OF\s*ALL\s*TAXES|OF\s*AL\s*TAXES|OFALL|INCL\.?\s*TAXES|\bALL\s*TAXES\b)',
+        r'(?:INC?L?(?:USIVE)?\.?\s*(?:OF\s*)?(?:ALL\s*)?(?:TAXES?|TAX|GST)|INCL\.?OF\s*ALL\s*TAXES|IH\s*OF\s*AL\s*TAXES?|1G\s*OF\s*ALL\s*TAXES?|OF\s*ALL\s*TAXES|OF\s*AL\s*TAXES|OFALL|\bALL\s*TAXES\b|\bINCL\.?\s*TAXES\b|\bTAXES\s*INCL(?:UDED)?\b)',
         text
     ))
     has_side_ref = bool(re.search(r'\b(?:SEE\s+(?:SIDE|OTHER|BELOW|REVERSE|PANEL|CRIMP)|SIDE\s*PANEL)\b', text))
 
     if mrp_match:
-        mrp_text = mrp_match.group(0).strip()
+        clean_mrp = re.sub(r'\s+', ' ', mrp_match.group(0)).strip()
         if has_tax_phrase or has_side_ref:
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
                 "verdict": "pass",
-                "evidence": f"{mrp_text} (Inclusive of all taxes declared)"
+                "evidence": f"{clean_mrp} (Inclusive of all taxes declared)"
             }, is_mandatory_for_small=True)
         else:
             add_field({
                 "rule_id": "LMPC_R6_1_E",
                 "field": "Maximum Retail Price (MRP)",
                 "verdict": "fail",
-                "evidence": f"Found '{mrp_text}' but missing mandatory 'Inclusive of all taxes' statement."
+                "evidence": f"Found '{clean_mrp}' but missing mandatory 'Inclusive of all taxes' statement."
             }, is_mandatory_for_small=True)
     elif standalone_price:
-        price_text = standalone_price.group(0).strip()
+        price_text = re.sub(r'\s+', ' ', standalone_price.group(0)).strip()
         ref_text = " - Side Panel Reference" if has_side_ref else ""
         add_field({
             "rule_id": "LMPC_R6_1_E",
@@ -580,7 +649,7 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
             "evidence": f"{price_text} (Retail Price declared{ref_text})"
         }, is_mandatory_for_small=True)
     else:
-        mrp_label_only = re.search(r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\s*RETAIL\s*PRICE)\b', text)
+        mrp_label_only = re.search(r'\b(?:M\.?\s*R\.?\s*P\.?|MIRP|MAX(?:IMUM)?\.?\s*RETAIL\s*PRICE)\b', text)
         if mrp_label_only and (has_tax_phrase or has_side_ref):
             add_field({
                 "rule_id": "LMPC_R6_1_E",
@@ -597,13 +666,26 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
             }, is_mandatory_for_small=True)
 
     # 8. Consumer Care Details (Rule 6(1)(f))
-    consumer_match = re.search(r'(?:CUSTOMER|CONSUMER)\s*(?:CARE|CELL|HELP|EXECUTIVE)|\b\d{10}\b|\b0\d{2,4}[- ]?\d{6,8}\b|\b1800[- ]?\d{3}[- ]?\d{3,4}\b|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', text)
+    consumer_match = re.search(
+        r'\b(?:CUSTOMER|CONSUMER)\s*(?:CARE|CELL|HELP|HELPLINE|SERVICE|SUPPORT|EXECUTIVE|FEEDBACK)\b[^\n]{0,50}'
+        r'|\bTOLL\s*FREE(?:\s*HELPLINE|\s*NUMBER)?\s*[:\-]?\s*[\d\- ]{6,15}'
+        r'|\bHELPLINE\s*[:\-]?\s*[\d\- ]{6,15}'
+        r'|\bWECARE\b'
+        r'|\b1800[- ]?\d{3}[- ]?\d{3,4}\b'
+        r'|\b1800\d{6,8}\b'
+        r'|\b0\d{2,4}[- ]?\d{6,8}\b'
+        r'|\b\+?91[- ]?[6-9]\d{9}\b'
+        r'|\b[6-9]\d{9}\b'
+        r'|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}',
+        text
+    )
     if consumer_match:
+        ev_care = re.sub(r'\s+', ' ', consumer_match.group(0)).strip()
         add_field({
             "rule_id": "LMPC_R6_1_F",
             "field": "Consumer Care Contact",
             "verdict": "pass",
-            "evidence": consumer_match.group(0).strip()
+            "evidence": ev_care
         })
     else:
         add_field({
@@ -615,14 +697,21 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
 
     # 9. Country of Origin (Rule 6(1)(g))
     is_imported = bool(re.search(r'\b(IMPORTED\s*BY|IMPORTER|IMPORTED)\b', text))
-    origin_match = re.search(r'(?:COUNTRY\s*OF\s*ORIGIN|MADE\s*IN|PRODUCT\s*OF)\s*:?\s*([A-Z\s]{2,30})', text)
-    domestic_address = re.search(r'\b(?:INDIA|MUMBAI|MAHARASHTRA|DELHI|BANGALORE|CHENNAI|KOLKATA|HYDERABAD|GUJARAT|PUNE|NAVI\s*MUMBAI|POWAI)\b', text)
+    origin_match = re.search(
+        r'\b(?:COUNTRY\s*OF\s*ORIGIN|MADE\s*IN|PRODUCT\s*OF|PRODUCED\s*IN|MANUFACTURED\s*IN|ORIGIN|COO)\s*[:\-]?\s*([^\n,;]{2,30})',
+        text
+    )
+    domestic_address = re.search(
+        r'\b(?:INDIA|MUMBAI|MAHARASHTRA|DELHI|NEW\s*DELHI|BANGALORE|BENGALURU|CHENNAI|KOLKATA|HYDERABAD|GUJARAT|PUNE|NAVI\s*MUMBAI|POWAI|PUNJAB|MOGA|HARYANA|GURGAON|GURUGRAM|NOIDA|UTTAR\s*PRADESH|UP|TAMIL\s*NADU|KARNATAKA|RAJASTHAN|KERALA|AHMEDABAD|SURAT|VADODARA|INDORE|MADHYA\s*PRADESH|MP|ANDHRA\s*PRADESH|AP|TELANGANA|GOA|HIMACHAL|BADDI|SOLAN|UTTARAKHAND|HARIDWAR|PANTNAGAR|ASSAM|KOLHAPUR|NAGPUR|THANE)\b',
+        text
+    )
     if origin_match:
+        ev_origin = re.sub(r'\s+', ' ', origin_match.group(0)).strip()
         add_field({
             "rule_id": "LMPC_R6_1_G",
             "field": "Country of Origin",
             "verdict": "pass",
-            "evidence": origin_match.group(0).strip()
+            "evidence": ev_origin
         })
     elif domestic_address and not is_imported:
         add_field({
@@ -647,18 +736,23 @@ def evaluate_label_rules(raw_ocr_text: str) -> Dict[str, Any]:
         })
 
     # 10. Best-Before / Use-By Date (Proviso to Rule 6(1))
-    exp_match = re.search(r'(?:BEST\s*BEFORE|USE\s*BY|EXPIRY(?:\s*DATE)?|EXP\.?(?:\s*DATE)?|CONSUME\s*WITHIN|BEST\s*FOOD\s*EXPERIENCE)\s*:?\s*([A-Z0-9/_\s-]{2,25})?', text)
+    exp_match = re.search(
+        r'\b(?:BEST\s*BEFORE|USE\s*BY|USE\s*WITHIN|EXPIRY(?:\s*DATE)?|EXP\.?(?:\s*DATE)?|CONSUME\s*WITHIN|SHELF\s*LIFE|BEST\s*FOOD\s*EXPERIENCE)\b'
+        r'[:\s\-\.]*([^\n,;]{2,40})',
+        text
+    )
     if not exp_match:
         dual_date = re.search(r'\b\d{2}[/.-]\d{2}[/.-]\d{2,4}\s*[-–/]\s*(\d{2}[/.-]\d{2}[/.-]\d{2,4})\b', text)
         if dual_date:
             exp_match = dual_date
-    is_perishable = bool(generic_name_match and generic_name_match.group(0).strip() in FOOD_COMMODITY_NAMES)
+    is_perishable = bool((commodity_header_match and commodity_header_match.group(1).strip() in FOOD_COMMODITY_NAMES) or (generic_name_match and generic_name_match.group(0).strip() in FOOD_COMMODITY_NAMES))
     if exp_match:
+        ev_exp = re.sub(r'\s+', ' ', exp_match.group(0)).strip()
         add_field({
             "rule_id": "LMPC_R6_1_PROVISO",
             "field": "Best-Before / Use-By Date",
             "verdict": "pass",
-            "evidence": exp_match.group(0).strip()
+            "evidence": ev_exp
         })
     elif is_perishable:
         add_field({
@@ -712,6 +806,20 @@ def extract_fssai_license(raw_text: str) -> Dict[str, Any]:
     m = re.search(r'\b(?:FSSAI|LIC\.?\s*(?:NO\.?)?|LICENCE\s*(?:NO\.?)?)\s*[:.-]?[^\d\n]{0,10}([12]\d{13})\b', text)
     if not m:
         m = re.search(r'\b([12]\d{13})\b', text)
+    if not m:
+        m_spaced = re.search(r'\b(?:FSSAI|LIC\.?\s*(?:NO\.?)?|LICENCE\s*(?:NO\.?)?)\s*[:.-]?[^\d\n]{0,10}([12](?:[\s-]?\d){13})\b', text)
+        if m_spaced:
+            digits_only = re.sub(r'[\s-]', '', m_spaced.group(1))
+            if len(digits_only) == 14:
+                lic_no = digits_only
+                kind = "Central License" if lic_no.startswith("1") else "State / UT License"
+                return {
+                    "found": True,
+                    "license_number": lic_no,
+                    "kind": kind,
+                    "verdict": "pass",
+                    "evidence": f"FSSAI {kind}: {lic_no}"
+                }
     if m:
         lic_no = m.group(1)
         kind = "Central License" if lic_no.startswith("1") else "State / UT License"
