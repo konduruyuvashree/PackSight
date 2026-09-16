@@ -1111,8 +1111,10 @@
 
 <script>
 // ---------------- Backend connection ----------------
-// Points at the local PackSight FastAPI server (see the backend's README.md to run it).
-const API_BASE = 'http://127.0.0.1:8000';
+// Points at the local PackSight FastAPI server (matches window origin when served via app, falls back to 127.0.0.1:8000)
+const API_BASE = (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))
+  ? window.location.origin
+  : 'http://127.0.0.1:8000';
 
 // ---------------- View / auth state machine ----------------
 let currentUser = null;   // display first name
@@ -1465,9 +1467,13 @@ async function runScan(){
     renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image, data.brand_name, data.image_quality, data.original_image, data.barcode_data, data.veg_status, data.fssai_info, data.rule9_compliance, data.legal_liability);
     progress.textContent = 'Done.';
     loadDashboard();
-  }catch(networkErr){
-    progress.textContent = `Can't reach the PackSight API at ${API_BASE}. Is the backend running?`;
-    console.error(networkErr);
+  }catch(err){
+    console.error("Scan processing error:", err);
+    if(err instanceof TypeError && err.message && err.message.toLowerCase().includes('fetch')){
+      progress.textContent = `Can't reach the PackSight API at ${API_BASE}. Is the backend running?`;
+    } else {
+      progress.textContent = `Error rendering report: ${err.message}`;
+    }
   }finally{
     btn.disabled = false;
   }
@@ -1646,6 +1652,11 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   window.currentViewMode = 'overlay';
 
   const area = document.getElementById('reportArea');
+
+  // Verdict counts computed upfront for HUD, Legal Liability, and Filter Bar
+  const failCount = (fields || []).filter(f => f.verdict && f.verdict.toLowerCase() === 'fail').length;
+  const passCount = (fields || []).filter(f => f.verdict && f.verdict.toLowerCase() === 'pass').length;
+  const reviewCount = (fields || []).filter(f => f.verdict && f.verdict.toLowerCase() === 'review').length;
 
   // Statutory HUD Cards Configuration
   const STATUTORY_RULES = [
@@ -1935,10 +1946,6 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   }
 
   // Filter Pills & Search Input
-  const failCount = fields.filter(f=>f.verdict.toLowerCase()==='fail').length;
-  const passCount = fields.filter(f=>f.verdict.toLowerCase()==='pass').length;
-  const reviewCount = fields.filter(f=>f.verdict.toLowerCase()==='review').length;
-
   const filterBarHtml = `
     <div class="filter-bar">
       <div class="filter-pills">
