@@ -85,6 +85,19 @@
   nav .logout{opacity:0.55; font-size:12.5px;}
   nav .logout:hover{opacity:0.9;}
 
+  .lang-picker{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.2);
+    border-radius:20px; padding:4px 10px; color:inherit; font-size:12px;
+  }
+  .lang-select{
+    background:transparent; border:none; color:inherit;
+    font-family:'IBM Plex Sans', sans-serif; font-size:12px; font-weight:600;
+    cursor:pointer; outline:none;
+  }
+  .lang-select option{background:#151A2E; color:#FFFFFF;}
+  .land-nav .lang-picker{background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.18); color:#EDEBFB;}
+
   main{max-width:1080px; margin:0 auto; padding:40px 28px 100px;}
   .view{display:none;}
   .view.active{display:block; animation:fadeIn .35s ease;}
@@ -684,131 +697,138 @@
   <div class="land-nav">
     <div class="brand" onclick="goTo('landing')">
       <div class="mark">PS</div>
-      <div class="brand-text"><div class="name" style="color:#EDEBFB;">PackSight</div><div class="tagline" style="color:#9A96C6;">See. Verify. Comply.</div></div>
+      <div class="brand-text"><div class="name" style="color:#EDEBFB;">PackSight</div><div class="tagline" data-i18n="tagline" style="color:#9A96C6;">See. Verify. Comply.</div></div>
     </div>
     <div class="navlinks">
-      <a onclick="scrollToId('features')">Features</a>
-      <a onclick="scrollToId('rules-preview')">Rule set</a>
+      <a onclick="scrollToId('features')" data-i18n="nav_features">Features</a>
+      <a onclick="scrollToId('rules-preview')" data-i18n="nav_rules">Rule set</a>
     </div>
     <div class="cta-pair">
-      <button class="pill-btn" onclick="openAuth('signin')">Sign in</button>
-      <button class="pill-btn solid" onclick="openAuth('signup')">Create account</button>
+      <div class="lang-picker">
+        <label for="langSelectLanding" class="lang-icon" title="Language">🌐</label>
+        <select id="langSelectLanding" onchange="setLanguage(this.value)" class="lang-select" aria-label="Language selector">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
+      </div>
+      <button class="pill-btn" onclick="openAuth('signin')" data-i18n="nav_signin">Sign in</button>
+      <button class="pill-btn solid" onclick="openAuth('signup')" data-i18n="nav_create_account">Create account</button>
     </div>
   </div>
 
   <div class="land-hero">
     <div>
-      <div class="land-eyebrow"><span class="dot"></span> Legal Metrology (Packaged Commodities) Rules, 2011 · SIH26034</div>
-      <h1 class="land-title">See what's on the label.<br><span class="grad-text">Verify</span> what the law requires.<br>Comply, provably.</h1>
-      <p class="lede">PackSight scans a packaged-commodity label, extracts every mandatory declaration, checks it against Rule 6 and the font-height schedule, and hands an inspector a report — instead of a checklist filled in by hand.</p>
+      <div class="land-eyebrow"><span class="dot"></span> <span data-i18n="land_eyebrow">Legal Metrology (Packaged Commodities) Rules, 2011 · SIH26034</span></div>
+      <h1 class="land-title" data-i18n="land_title">See what's on the label.<br><span class="grad-text">Verify</span> what the law requires.<br>Comply, provably.</h1>
+      <p class="lede" data-i18n="land_lede">PackSight scans a packaged-commodity label, extracts every mandatory declaration, checks it against Rule 6 and the font-height schedule, and hands an inspector a report — instead of a checklist filled in by hand.</p>
       <div class="btn-row">
-        <button class="pill-btn solid" onclick="openAuth('signup')">Get started free →</button>
-        <button class="pill-btn" onclick="openAuth('signin')">Sign in</button>
+        <button class="pill-btn solid" onclick="openAuth('signup')" data-i18n="land_btn_start">Get started free →</button>
+        <button class="pill-btn" onclick="openAuth('signin')" data-i18n="nav_signin">Sign in</button>
       </div>
-      <div class="microcopy">No credit card. Runs OCR in your browser — label photos never leave your device.</div>
+      <div class="microcopy" data-i18n="land_microcopy">No credit card. Runs OCR in your browser — label photos never leave your device.</div>
     </div>
 
     <div class="scan-visual">
       <div class="scan-visual-inner">
         <div class="label-mock">
           <div class="scan-beam"></div>
-          <div class="lm-row hit"><span>Net quantity</span><span>200 g ✓</span></div>
-          <div class="lm-row hit"><span>Mfg. month / year</span><span>07/2026 ✓</span></div>
-          <div class="lm-row miss"><span>MRP declaration</span><span>MISSING</span></div>
-          <div class="lm-row miss"><span>Consumer care</span><span>MISSING</span></div>
-          <div class="lm-row hit"><span>Country of origin</span><span>India ✓</span></div>
+          <div class="lm-row hit"><span data-i18n="mock_net_qty">Net quantity</span><span>200 g ✓</span></div>
+          <div class="lm-row hit"><span data-i18n="mock_mfg_date">Mfg. month / year</span><span>07/2026 ✓</span></div>
+          <div class="lm-row miss"><span data-i18n="mock_mrp">MRP declaration</span><span data-i18n="mock_missing">MISSING</span></div>
+          <div class="lm-row miss"><span data-i18n="mock_care">Consumer care</span><span data-i18n="mock_missing">MISSING</span></div>
+          <div class="lm-row hit"><span data-i18n="mock_origin">Country of origin</span><span>India ✓</span></div>
         </div>
-        <div class="scan-caption"><span>compliance_scan.jpg</span><span>score: 62%</span></div>
+        <div class="scan-caption"><span>compliance_scan.jpg</span><span data-i18n="mock_score">score: 62%</span></div>
       </div>
     </div>
   </div>
 
   <div class="land-strip">
     <div class="strip-inner">
-      <span>08 mandatory declarations checked</span>
-      <span>Font-height schedule: 1mm – 4mm by area</span>
-      <span>On-device OCR</span>
-      <span>Built for SIH 2026 · PS-26034</span>
+      <span data-i18n="strip_1">08 mandatory declarations checked</span>
+      <span data-i18n="strip_2">Font-height schedule: 1mm – 4mm by area</span>
+      <span data-i18n="strip_3">On-device OCR</span>
+      <span data-i18n="strip_4">Built for SIH 2026 · PS-26034</span>
     </div>
   </div>
 
   <div class="land-features" id="features">
-    <div class="kicker">Why PackSight</div>
-    <h2>Built around the checklist an inspector already carries in their head.</h2>
+    <div class="kicker" data-i18n="feat_kicker">Why PackSight</div>
+    <h2 data-i18n="feat_heading">Built around the checklist an inspector already carries in their head.</h2>
     <div class="feat-grid">
       <div class="feat-card">
         <div class="feat-icon">◎</div>
-        <strong>Scan, don't transcribe</strong>
-        <span>Upload a label photo. OCR extracts every declaration automatically — no manual data entry.</span>
+        <strong data-i18n="feat_1_title">Scan, don't transcribe</strong>
+        <span data-i18n="feat_1_desc">Upload a label photo. OCR extracts every declaration automatically — no manual data entry.</span>
       </div>
       <div class="feat-card">
         <div class="feat-icon">⚖</div>
-        <strong>Rule-based, not guesswork</strong>
-        <span>Every verdict traces to a specific clause of LMPC 2011 — Rule 6 and the font-height schedule, laid out in the app.</span>
+        <strong data-i18n="feat_2_title">Rule-based, not guesswork</strong>
+        <span data-i18n="feat_2_desc">Every verdict traces to a specific clause of LMPC 2011 — Rule 6 and the font-height schedule, laid out in the app.</span>
       </div>
       <div class="feat-card">
         <div class="feat-icon">▤</div>
-        <strong>Evidence-grade reports</strong>
-        <span>Itemized pass/fail per declaration, with the extracted text as evidence — ready to attach to a case file.</span>
+        <strong data-i18n="feat_3_title">Evidence-grade reports</strong>
+        <span data-i18n="feat_3_desc">Itemized pass/fail per declaration, with the extracted text as evidence — ready to attach to a case file.</span>
       </div>
       <div class="feat-card">
         <div class="feat-icon">◫</div>
-        <strong>A repository, not a pile of PDFs</strong>
-        <span>Every scan lands in a searchable dashboard — compliance trends across products, not just one-off checks.</span>
+        <strong data-i18n="feat_4_title">A repository, not a pile of PDFs</strong>
+        <span data-i18n="feat_4_desc">Every scan lands in a searchable dashboard — compliance trends across products, not just one-off checks.</span>
       </div>
     </div>
   </div>
 
   <div class="land-cta" id="rules-preview">
     <div class="land-cta-card">
-      <h3>Eight declarations. One inspector's worth of judgment, automated.</h3>
-      <p>Manufacturer & address, net quantity, MRP, manufacture date, consumer care, country of origin, best-before, and font height — PackSight checks all eight in the time it takes to upload a photo.</p>
-      <button class="pill-btn solid" onclick="openAuth('signup')">Create your account →</button>
+      <h3 data-i18n="cta_title">Eight declarations. One inspector's worth of judgment, automated.</h3>
+      <p data-i18n="cta_desc">Manufacturer & address, net quantity, MRP, manufacture date, consumer care, country of origin, best-before, and font height — PackSight checks all eight in the time it takes to upload a photo.</p>
+      <button class="pill-btn solid" onclick="openAuth('signup')" data-i18n="cta_btn">Create your account →</button>
     </div>
   </div>
 
-  <div class="land-footer">PackSight — a compliance-checking prototype built for Smart India Hackathon 2026, problem statement SIH26034.</div>
+  <div class="land-footer" data-i18n="land_footer">PackSight — a compliance-checking prototype built for Smart India Hackathon 2026, problem statement SIH26034.</div>
 </section>
 
 <!-- ===================== AUTH ===================== -->
 <section id="auth" class="view">
   <div style="width:100%; max-width:960px;">
-    <div class="back-to-land" onclick="goTo('landing')">← Back to PackSight</div>
+    <div class="back-to-land" onclick="goTo('landing')" data-i18n="auth_back">← Back to PackSight</div>
     <div class="auth-shell">
       <div class="auth-side">
         <div class="beam-deco"></div>
         <div class="side-top">
           <div class="mark">PS</div>
           <div class="name">PackSight</div>
-          <div class="tagline">See. Verify. Comply.</div>
+          <div class="tagline" data-i18n="tagline">See. Verify. Comply.</div>
         </div>
-        <div class="side-quote">"Every label makes eight promises. PackSight checks them in seconds — not a shift."</div>
-        <div class="side-foot">LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011</div>
+        <div class="side-quote" data-i18n="auth_quote">"Every label makes eight promises. PackSight checks them in seconds — not a shift."</div>
+        <div class="side-foot" data-i18n="auth_foot">LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011</div>
       </div>
       <div class="auth-form-wrap">
         <div class="auth-tabs">
-          <button id="tabSignin" class="active" onclick="switchAuthTab('signin')">Sign in</button>
-          <button id="tabSignup" onclick="switchAuthTab('signup')">Create account</button>
+          <button id="tabSignin" class="active" onclick="switchAuthTab('signin')" data-i18n="tab_signin">Sign in</button>
+          <button id="tabSignup" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Create account</button>
         </div>
 
         <form class="auth-form active" id="formSignin" onsubmit="return handleAuth(event,'signin')">
-          <h3>Welcome back</h3>
-          <div class="sub">Sign in to your inspection workspace.</div>
-          <div class="field"><label>User ID</label><input type="text" id="signinUser" placeholder="e.g. inspector.rao" required></div>
-          <div class="field"><label>Password</label><input type="password" id="signinPass" placeholder="••••••••" required></div>
+          <h3 data-i18n="signin_title">Welcome back</h3>
+          <div class="sub" data-i18n="signin_sub">Sign in to your inspection workspace.</div>
+          <div class="field"><label data-i18n="label_userid">User ID</label><input type="text" id="signinUser" placeholder="e.g. inspector.rao" data-i18n-placeholder="ph_userid" required></div>
+          <div class="field"><label data-i18n="label_password">Password</label><input type="password" id="signinPass" placeholder="••••••••" required></div>
           <div class="auth-error" id="signinError"></div>
-          <button class="auth-submit" type="submit">Sign in</button>
+          <button class="auth-submit" type="submit" data-i18n="btn_signin">Sign in</button>
         </form>
 
         <form class="auth-form" id="formSignup" onsubmit="return handleAuth(event,'signup')">
-          <h3>Create your account</h3>
-          <div class="sub">Set up a workspace to start scanning labels.</div>
-          <div class="field"><label>Full name</label><input type="text" id="signupName" placeholder="e.g. Ananya Rao" required></div>
-          <div class="field"><label>User ID</label><input type="text" id="signupUser" placeholder="Choose a user ID" required></div>
-          <div class="field"><label>Password</label><input type="password" id="signupPass" placeholder="Create a password" required minlength="4"></div>
-          <div class="field"><label>Confirm password</label><input type="password" id="signupPass2" placeholder="Re-enter password" required minlength="4"></div>
+          <h3 data-i18n="signup_title">Create your account</h3>
+          <div class="sub" data-i18n="signup_sub">Set up a workspace to start scanning labels.</div>
+          <div class="field"><label data-i18n="label_fullname">Full name</label><input type="text" id="signupName" placeholder="e.g. Ananya Rao" data-i18n-placeholder="ph_fullname" required></div>
+          <div class="field"><label data-i18n="label_userid">User ID</label><input type="text" id="signupUser" placeholder="Choose a user ID" data-i18n-placeholder="ph_choose_userid" required></div>
+          <div class="field"><label data-i18n="label_password">Password</label><input type="password" id="signupPass" placeholder="Create a password" data-i18n-placeholder="ph_create_pass" required minlength="4"></div>
+          <div class="field"><label data-i18n="label_confirmpass">Confirm password</label><input type="password" id="signupPass2" placeholder="Re-enter password" data-i18n-placeholder="ph_reenter_pass" required minlength="4"></div>
           <div class="auth-error" id="signupError"></div>
-          <button class="auth-submit" type="submit">Create account</button>
+          <button class="auth-submit" type="submit" data-i18n="btn_signup">Create account</button>
         </form>
 
         <div class="auth-switch" id="switchLine">New to PackSight? <a onclick="switchAuthTab('signup')">Create an account</a></div>
@@ -824,16 +844,23 @@
     <div class="mark">PS</div>
     <div class="brand-text">
       <div class="name">PackSight</div>
-      <div class="tagline">See. Verify. Comply.</div>
+      <div class="tagline" data-i18n="tagline">See. Verify. Comply.</div>
     </div>
   </div>
   <nav id="mainNav">
-    <button data-view="home" class="active">Home</button>
-    <button data-view="scan">Scan a Label</button>
-    <button data-view="dashboard">Dashboard</button>
-    <button data-view="rules">Rules Reference</button>
+    <button data-view="home" class="active" data-i18n="nav_home">Home</button>
+    <button data-view="scan" data-i18n="nav_scan">Scan a Label</button>
+    <button data-view="dashboard" data-i18n="nav_dashboard">Dashboard</button>
+    <button data-view="rules" data-i18n="nav_rules_ref">Rules Reference</button>
+    <div class="lang-picker">
+      <label for="langSelectApp" class="lang-icon" title="Language">🌐</label>
+      <select id="langSelectApp" onchange="setLanguage(this.value)" class="lang-select" aria-label="Language selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+      </select>
+    </div>
     <span id="userChip" class="mono" style="opacity:0.6; font-size:12px; margin-left:8px;"></span>
-    <button class="logout" onclick="logout()">Log out</button>
+    <button class="logout" onclick="logout()" data-i18n="nav_logout">Log out</button>
   </nav>
 </header>
 
@@ -843,53 +870,53 @@
   <section id="home" class="view active">
     <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center; padding:20px 0 40px; border-bottom:1px dashed var(--paper-line); margin-bottom:44px;">
       <div>
-        <div class="section-num" style="display:inline-block; margin-bottom:14px;">Welcome</div>
-        <h1 style="font-family:'Fraunces',serif; font-weight:700; font-size:36px; line-height:1.12; margin-bottom:16px;">Ready when you are, <span class="grad-text" id="homeUserName">inspector</span>.</h1>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--ink-soft); max-width:46ch; margin-bottom:24px;">Upload a label photo to run a full compliance scan, or jump straight to your dashboard to see what you've checked so far.</p>
+        <div class="section-num" data-i18n="home_welcome" style="display:inline-block; margin-bottom:14px;">Welcome</div>
+        <h1 style="font-family:'Fraunces',serif; font-weight:700; font-size:36px; line-height:1.12; margin-bottom:16px;"><span data-i18n="home_ready">Ready when you are,</span> <span class="grad-text" id="homeUserName">inspector</span>.</h1>
+        <p data-i18n="home_sub" style="font-size:15.5px; line-height:1.65; color:var(--ink-soft); max-width:46ch; margin-bottom:24px;">Upload a label photo to run a full compliance scan, or jump straight to your dashboard to see what you've checked so far.</p>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="goTo('scan')">Scan a label →</button>
-          <button class="btn btn-ghost" onclick="goTo('rules')">See the rule set</button>
+          <button class="btn btn-primary" onclick="goTo('scan')" data-i18n="home_scan_btn">Scan a label →</button>
+          <button class="btn btn-ghost" onclick="goTo('rules')" data-i18n="home_rules_btn">See the rule set</button>
         </div>
       </div>
       <div class="panel" style="margin:0;">
-        <div class="rule-item" style="box-shadow:none; padding:0; border:none; margin-bottom:12px;"><div class="txt"><strong>Manufacturer / packer name</strong><span>—</span></div></div>
+        <div class="rule-item" style="box-shadow:none; padding:0; border:none; margin-bottom:12px;"><div class="txt"><strong data-i18n="mock_mfr">Manufacturer / packer name</strong><span>—</span></div></div>
         <table style="width:100%; font-size:13px;">
-          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);">Net quantity</td><td style="padding:8px 0; text-align:right; color:var(--ok); font-family:'IBM Plex Mono',monospace;">200 g</td></tr>
-          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);">MRP declaration</td><td style="padding:8px 0; text-align:right; color:var(--stamp-red); font-family:'IBM Plex Mono',monospace;">MISSING</td></tr>
-          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);">Mfg. month / year</td><td style="padding:8px 0; text-align:right; color:var(--ok); font-family:'IBM Plex Mono',monospace;">07/2026</td></tr>
-          <tr><td style="padding:8px 0; color:var(--ink-soft);">Consumer care</td><td style="padding:8px 0; text-align:right; color:var(--stamp-red); font-family:'IBM Plex Mono',monospace;">MISSING</td></tr>
+          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);" data-i18n="mock_net_qty">Net quantity</td><td style="padding:8px 0; text-align:right; color:var(--ok); font-family:'IBM Plex Mono',monospace;">200 g</td></tr>
+          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);" data-i18n="mock_mrp">MRP declaration</td><td style="padding:8px 0; text-align:right; color:var(--stamp-red); font-family:'IBM Plex Mono',monospace;" data-i18n="mock_missing">MISSING</td></tr>
+          <tr style="border-bottom:1px dotted var(--paper-line);"><td style="padding:8px 0; color:var(--ink-soft);" data-i18n="mock_mfg_date">Mfg. month / year</td><td style="padding:8px 0; text-align:right; color:var(--ok); font-family:'IBM Plex Mono',monospace;">07/2026</td></tr>
+          <tr><td style="padding:8px 0; color:var(--ink-soft);" data-i18n="mock_care">Consumer care</td><td style="padding:8px 0; text-align:right; color:var(--stamp-red); font-family:'IBM Plex Mono',monospace;" data-i18n="mock_missing">MISSING</td></tr>
         </table>
       </div>
     </div>
 
-    <div class="section-head"><span class="section-num">01</span><h2>What it checks</h2></div>
-    <div class="section-sub">Eight declarations, one font-height table — the same checklist a Legal Metrology inspector works through by hand.</div>
+    <div class="section-head"><span class="section-num">01</span><h2 data-i18n="home_checks_title">What it checks</h2></div>
+    <div class="section-sub" data-i18n="home_checks_sub">Eight declarations, one font-height table — the same checklist a Legal Metrology inspector works through by hand.</div>
     <div class="rule-list" style="margin-bottom:20px;">
-      <div class="rule-item"><span class="tag">R6(1)(a)</span><div class="txt"><strong>Manufacturer / packer / importer</strong><span>Name and complete address, legible and unambiguous.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(c)</span><div class="txt"><strong>Net quantity</strong><span>In standard units — grams/kilograms, millilitres/litres, or count.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(e)</span><div class="txt"><strong>Maximum Retail Price</strong><span>Stated as inclusive of all taxes.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(d)</span><div class="txt"><strong>Month & year of manufacture/packing/import</strong><span>Machine- or manually-printed, not just a lot code.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(f)</span><div class="txt"><strong>Consumer care details</strong><span>A phone number or email a buyer can actually reach.</span></div></div>
-      <div class="rule-item"><span class="tag">Sched.</span><div class="txt"><strong>Font / digit height</strong><span>Minimum height scales with package surface area — 1mm to 4mm.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(a)</span><div class="txt"><strong data-i18n="r6_1_a_title">Manufacturer / packer / importer</strong><span data-i18n="r6_1_a_desc">Name and complete address, legible and unambiguous.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(c)</span><div class="txt"><strong data-i18n="r6_1_c_title">Net quantity</strong><span data-i18n="r6_1_c_desc">In standard units — grams/kilograms, millilitres/litres, or count.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(e)</span><div class="txt"><strong data-i18n="r6_1_e_title">Maximum Retail Price</strong><span data-i18n="r6_1_e_desc">Stated as inclusive of all taxes.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(d)</span><div class="txt"><strong data-i18n="r6_1_d_title">Month & year of manufacture/packing/import</strong><span data-i18n="r6_1_d_desc">Machine- or manually-printed, not just a lot code.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(f)</span><div class="txt"><strong data-i18n="r6_1_f_title">Consumer care details</strong><span data-i18n="r6_1_f_desc">A phone number or email a buyer can actually reach.</span></div></div>
+      <div class="rule-item"><span class="tag">Sched.</span><div class="txt"><strong data-i18n="sched_title">Font / digit height</strong><span data-i18n="sched_desc">Minimum height scales with package surface area — 1mm to 4mm.</span></div></div>
     </div>
   </section>
 
   <!-- ============ SCAN ============ -->
   <section id="scan" class="view">
-    <div class="section-head"><span class="section-num">02</span><h2>Scan a label</h2></div>
-    <div class="section-sub">Upload a photo of a packaged-commodity label. OCR runs in your browser — nothing leaves this device. Package dimensions are optional but improve the font-height check.</div>
+    <div class="section-head"><span class="section-num">02</span><h2 data-i18n="scan_title">Scan a label</h2></div>
+    <div class="section-sub" data-i18n="scan_sub">Upload a photo of a packaged-commodity label. OCR runs in your browser — nothing leaves this device. Package dimensions are optional but improve the font-height check.</div>
 
     <div class="panel">
       <div class="dropzone" id="dropzone">
         <div class="icon">📷</div>
-        <p><strong>Click to upload or drag label panels here</strong></p>
-        <p style="font-size:12.5px;">Supports single or multi-panel scans (Front, Back, MRP/Date, Consumer Care panels)</p>
+        <p><strong data-i18n="dropzone_title">Click to upload or drag label panels here</strong></p>
+        <p style="font-size:12.5px;" data-i18n="dropzone_sub">Supports single or multi-panel scans (Front, Back, MRP/Date, Consumer Care panels)</p>
         
         <div class="upload-options" onclick="event.stopPropagation();">
-          <button type="button" class="upload-btn primary" onclick="fileInput.click()">📁 Choose Files</button>
-          <button type="button" class="upload-btn" onclick="openCameraModal()">📷 Open Camera</button>
-          <button type="button" class="upload-btn" onclick="cameraInput.click()">📱 Snap Photo</button>
-          <button type="button" class="upload-btn" onclick="openManualEntryModal(true)">✏️ Enter Manually</button>
+          <button type="button" class="upload-btn primary" onclick="fileInput.click()" data-i18n="btn_choose_files">📁 Choose Files</button>
+          <button type="button" class="upload-btn" onclick="openCameraModal()" data-i18n="btn_open_camera">📷 Open Camera</button>
+          <button type="button" class="upload-btn" onclick="cameraInput.click()" data-i18n="btn_snap_photo">📱 Snap Photo</button>
+          <button type="button" class="upload-btn" onclick="openManualEntryModal(true)" data-i18n="btn_enter_manually">✏️ Enter Manually</button>
         </div>
       </div>
 
@@ -901,7 +928,7 @@
       <div class="gallery-wrap" id="galleryWrap">
         <div class="gallery-header">
           <strong id="panelCountLabel">0 Panels Selected</strong>
-          <span>Click on ✕ to remove a panel</span>
+          <span data-i18n="gallery_remove_hint">Click on ✕ to remove a panel</span>
         </div>
         <div class="gallery-grid" id="galleryGrid">
           <!-- Dynamically populated panel cards -->
@@ -911,25 +938,25 @@
       <div class="preview-row" style="margin-top:22px;">
         <div class="field-grid">
           <div class="field">
-            <label>Product name (optional)</label>
-            <input type="text" id="productName" placeholder="e.g. Acme Biscuits 500g">
+            <label data-i18n="field_prod_name_label">Product name (optional)</label>
+            <input type="text" id="productName" placeholder="e.g. Acme Biscuits 500g" data-i18n-placeholder="ph_prod_name">
           </div>
           <div class="field">
-            <label>Package width × height (cm - optional)</label>
-            <input type="text" id="pkgDims" placeholder="e.g. 8 × 14">
+            <label data-i18n="field_pkg_dims_label">Package width × height (cm - optional)</label>
+            <input type="text" id="pkgDims" placeholder="e.g. 8 × 14" data-i18n-placeholder="ph_pkg_dims">
           </div>
         </div>
       </div>
 
       <div class="scan-btn-row">
-        <button class="btn btn-primary" id="runScanBtn" disabled>Run compliance scan</button>
-        <button class="btn btn-ghost" id="clearPanelsBtn" style="display:none;" onclick="clearAllPanels()">Clear panels</button>
+        <button class="btn btn-primary" id="runScanBtn" disabled data-i18n="btn_run_scan">Run compliance scan</button>
+        <button class="btn btn-ghost" id="clearPanelsBtn" style="display:none;" onclick="clearAllPanels()" data-i18n="btn_clear_panels">Clear panels</button>
         <span class="progress" id="progressText"></span>
       </div>
 
       <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--paper-line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-        <span style="font-size:12.5px; color:var(--ink-soft);">Can't scan clearly or no packaging photo?</span>
-        <button type="button" class="btn-manual-edit" onclick="openManualEntryModal(true)">✏️ Enter Declarations Manually (Direct Inspection)</button>
+        <span style="font-size:12.5px; color:var(--ink-soft);" data-i18n="direct_inspect_prompt">Can't scan clearly or no packaging photo?</span>
+        <button type="button" class="btn-manual-edit" onclick="openManualEntryModal(true)" data-i18n="btn_enter_direct">✏️ Enter Declarations Manually (Direct Inspection)</button>
       </div>
     </div>
 
@@ -937,7 +964,7 @@
     <div class="camera-modal" id="cameraModal">
       <div class="camera-box">
         <div class="camera-head">
-          <strong>📷 Live Label Scanner</strong>
+          <strong data-i18n="camera_modal_title">📷 Live Label Scanner</strong>
           <button class="btn-ghost" style="color:white; border:none; font-size:18px; cursor:pointer;" onclick="closeCameraModal()">✕</button>
         </div>
         <div class="camera-viewfinder">
@@ -945,12 +972,12 @@
           <div class="camera-frame"></div>
         </div>
         <div class="camera-controls">
-          <button type="button" class="upload-btn" onclick="switchCamera()">🔄 Flip Camera</button>
+          <button type="button" class="upload-btn" onclick="switchCamera()" data-i18n="btn_flip_camera">🔄 Flip Camera</button>
           <div style="text-align:center;">
             <button type="button" class="btn-snap" onclick="capturePhotoFrame()" title="Snap Panel Photo">📸</button>
             <div class="snap-counter" id="cameraSnapCount" style="margin-top:4px;">0 captured</div>
           </div>
-          <button type="button" class="upload-btn primary" onclick="closeCameraModal()">✓ Done & Review</button>
+          <button type="button" class="upload-btn primary" onclick="closeCameraModal()" data-i18n="btn_done_review">✓ Done & Review</button>
         </div>
       </div>
     </div>
@@ -960,80 +987,80 @@
       <div class="manual-box">
         <div class="manual-head">
           <div>
-            <div style="font-family:'Fraunces', serif; font-size:18px; font-weight:700;">✏️ Manual Declaration Entry &amp; Verification</div>
-            <div style="font-size:12px; opacity:0.8; margin-top:2px;">Enter or correct packaging declarations if OCR could not detect them clearly.</div>
+            <div style="font-family:'Fraunces', serif; font-size:18px; font-weight:700;" data-i18n="manual_modal_title">✏️ Manual Declaration Entry &amp; Verification</div>
+            <div style="font-size:12px; opacity:0.8; margin-top:2px;" data-i18n="manual_modal_sub">Enter or correct packaging declarations if OCR could not detect them clearly.</div>
           </div>
           <button type="button" class="btn-ghost" style="color:white; border:none; font-size:20px; cursor:pointer;" onclick="closeManualEntryModal()">✕</button>
         </div>
         <div class="manual-body">
-          <div style="background:rgba(155,123,247,0.08); border:1px solid rgba(155,123,247,0.25); border-radius:10px; padding:12px 16px; font-size:12.5px; color:var(--ink-soft); line-height:1.5;">
+          <div style="background:rgba(155,123,247,0.08); border:1px solid rgba(155,123,247,0.25); border-radius:10px; padding:12px 16px; font-size:12.5px; color:var(--ink-soft); line-height:1.5;" data-i18n="manual_guidance">
             💡 <strong>Inspector Guidance:</strong> Entering valid declarations will automatically update compliance to <span style="color:var(--ok); font-weight:700;">Compliant (100%)</span> and set statutory legal liability to <span style="color:var(--ok); font-weight:700;">No Fine Allocated (₹0)</span>.
           </div>
 
           <div class="manual-grid">
             <div class="manual-field">
-              <label>Commodity / Product Name <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_commodity_label">Commodity / Product Name</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualProdName" placeholder="e.g. Roasted Almonds / Condensed Milk">
             </div>
             <div class="manual-field">
-              <label>Brand Name</label>
+              <label data-i18n="field_brand_label">Brand Name</label>
               <input type="text" id="manualBrandName" placeholder="e.g. Candor / Amul / Parle">
             </div>
             <div class="manual-field">
-              <label>Net Quantity (Rule 6(1)(c)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_net_qty_label">Net Quantity (Rule 6(1)(c))</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualNetQty" placeholder="e.g. 200 g, 500 ml, 1 kg, 10 N">
             </div>
             <div class="manual-field">
-              <label>Maximum Retail Price (MRP - Rule 6(1)(e)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_mrp_label">Maximum Retail Price (MRP - Rule 6(1)(e))</span> <span style="color:var(--stamp-red);">*</span></label>
               <div style="display:flex; gap:10px; align-items:center;">
                 <input type="text" id="manualMrp" placeholder="e.g. 100.00 / Rs. 100" style="flex:1;">
                 <label style="display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; text-transform:none; color:var(--ink); white-space:nowrap;">
                   <input type="checkbox" id="manualMrpTaxes" checked style="width:16px; height:16px;">
-                  Incl. all taxes
+                  <span data-i18n="incl_all_taxes">Incl. all taxes</span>
                 </label>
               </div>
             </div>
             <div class="manual-field">
-              <label>Mfg / Packing Date (Rule 6(1)(d)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_mfg_date_label">Mfg / Packing Date (Rule 6(1)(d))</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualMfgDate" placeholder="e.g. 04/2026 or 27/04/2026">
             </div>
             <div class="manual-field">
-              <label>Best Before / Expiry (Proviso R6(1)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_exp_date_label">Best Before / Expiry (Proviso R6(1))</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualExpDate" placeholder="e.g. 12 Months or 28/10/2026">
             </div>
             <div class="manual-field" style="grid-column:1 / -1;">
-              <label>Manufacturer / Packer Name &amp; Address (Rule 6(1)(a)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_mfr_label">Manufacturer / Packer Name &amp; Address (Rule 6(1)(a))</span> <span style="color:var(--stamp-red);">*</span></label>
               <textarea id="manualMfr" rows="2" placeholder="e.g. Candor Foods Pvt. Ltd., Plot W-13, MIDC Taloja, Navi Mumbai - 410208"></textarea>
             </div>
             <div class="manual-field">
-              <label>Consumer Care (Phone / Email - Rule 6(1)(f)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_care_label">Consumer Care (Phone / Email - Rule 6(1)(f))</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualConsumerCare" placeholder="e.g. 022-71230555 / care@candor.com">
             </div>
             <div class="manual-field">
-              <label>Country of Origin (Rule 6(1)(g)) <span style="color:var(--stamp-red);">*</span></label>
+              <label><span data-i18n="field_origin_label">Country of Origin (Rule 6(1)(g))</span> <span style="color:var(--stamp-red);">*</span></label>
               <input type="text" id="manualOrigin" placeholder="e.g. India" value="India">
             </div>
             <div class="manual-field">
-              <label>Unit Sale Price (USP - Rule 6(11))</label>
+              <label data-i18n="field_usp_label">Unit Sale Price (USP - Rule 6(11))</label>
               <input type="text" id="manualUsp" placeholder="e.g. ₹0.50 / g">
             </div>
             <div class="manual-field">
-              <label>14-Digit FSSAI License Number</label>
+              <label data-i18n="field_fssai_label">14-Digit FSSAI License Number</label>
               <input type="text" id="manualFssai" placeholder="e.g. 10012063000064" maxlength="14">
             </div>
             <div class="manual-field" style="grid-column:1 / -1;">
-              <label>Food Classification / Symbol</label>
+              <label data-i18n="field_food_class_label">Food Classification / Symbol</label>
               <select id="manualVegStatus">
-                <option value="veg">🟢 100% Vegetarian (Green Circle Symbol)</option>
-                <option value="non_veg">🟤 Non-Vegetarian (Brown Triangle Symbol)</option>
-                <option value="none">⚪ General Commodity / Non-Food</option>
+                <option value="veg" data-i18n="opt_veg">🟢 100% Vegetarian (Green Circle Symbol)</option>
+                <option value="non_veg" data-i18n="opt_nonveg">🟤 Non-Vegetarian (Brown Triangle Symbol)</option>
+                <option value="none" data-i18n="opt_nonfood">⚪ General Commodity / Non-Food</option>
               </select>
             </div>
           </div>
         </div>
         <div class="manual-foot">
-          <button type="button" class="btn btn-ghost" onclick="closeManualEntryModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" id="btnSubmitManual" onclick="submitManualEntry()">✓ Save &amp; Recalculate Compliance</button>
+          <button type="button" class="btn btn-ghost" onclick="closeManualEntryModal()" data-i18n="btn_cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnSubmitManual" onclick="submitManualEntry()" data-i18n="btn_save_recalc">✓ Save &amp; Recalculate Compliance</button>
         </div>
       </div>
     </div>
@@ -1045,51 +1072,51 @@
   <section id="dashboard" class="view">
     <div class="section-head" style="justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
       <div style="display:flex; align-items:baseline; gap:12px;">
-        <span class="section-num">03</span><h2>Inspection dashboard</h2>
+        <span class="section-num">03</span><h2 data-i18n="dash_title">Inspection dashboard</h2>
       </div>
-      <button type="button" class="btn-pdf" onclick="exportCsvReport()" style="padding:8px 18px; font-size:13px; font-weight:700; background:var(--ink); color:var(--paper); border-color:var(--ink); display:inline-flex; align-items:center; gap:8px;">📊 Export Audit CSV</button>
+      <button type="button" class="btn-pdf" onclick="exportCsvReport()" style="padding:8px 18px; font-size:13px; font-weight:700; background:var(--ink); color:var(--paper); border-color:var(--ink); display:inline-flex; align-items:center; gap:8px;" data-i18n="btn_export_csv">📊 Export Audit CSV</button>
     </div>
-    <div class="section-sub">Aggregated from scans run in this session. In production this reads from the PostgreSQL scan repository across all inspectors.</div>
+    <div class="section-sub" data-i18n="dash_sub">Aggregated from scans run in this session. In production this reads from the PostgreSQL scan repository across all inspectors.</div>
 
     <div class="stat-grid">
-      <div class="stat-card grad"><div class="num" id="statTotal">0</div><div class="label">Labels scanned</div></div>
-      <div class="stat-card green"><div class="num" id="statCompliant">0</div><div class="label">Fully compliant</div></div>
-      <div class="stat-card red"><div class="num" id="statViolations">0</div><div class="label">With violations</div></div>
-      <div class="stat-card"><div class="num" id="statAvg">—</div><div class="label">Avg. compliance score</div></div>
+      <div class="stat-card grad"><div class="num" id="statTotal">0</div><div class="label" data-i18n="stat_labels_scanned">Labels scanned</div></div>
+      <div class="stat-card green"><div class="num" id="statCompliant">0</div><div class="label" data-i18n="stat_compliant">Fully compliant</div></div>
+      <div class="stat-card red"><div class="num" id="statViolations">0</div><div class="label" data-i18n="stat_violations">With violations</div></div>
+      <div class="stat-card"><div class="num" id="statAvg">—</div><div class="label" data-i18n="stat_avg_score">Avg. compliance score</div></div>
     </div>
 
     <div id="historyWrap">
       <div class="empty-state">
         <div class="glyph">◈</div>
-        <div>No scans yet this session.</div>
-        <div style="font-size:12px; margin-top:6px;">Run a scan to see it appear here.</div>
+        <div data-i18n="empty_dash_title">No scans yet this session.</div>
+        <div style="font-size:12px; margin-top:6px;" data-i18n="empty_dash_sub">Run a scan to see it appear here.</div>
       </div>
     </div>
   </section>
 
   <!-- ============ RULES ============ -->
   <section id="rules" class="view">
-    <div class="section-head"><span class="section-num">04</span><h2>Rule reference — LMPC 2011</h2></div>
-    <div class="section-sub">The exact checklist the engine runs, so a verdict is never a black box.</div>
+    <div class="section-head"><span class="section-num">04</span><h2 data-i18n="rules_page_title">Rule reference — LMPC 2011</h2></div>
+    <div class="section-sub" data-i18n="rules_page_sub">The exact checklist the engine runs, so a verdict is never a black box.</div>
 
     <div class="rule-list">
-      <div class="rule-item"><span class="tag">R6(1)(a)</span><div class="txt"><strong>Name & address of manufacturer/packer/importer</strong><span>Must be complete enough to identify and locate the responsible party.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(b)</span><div class="txt"><strong>Common or generic name of the commodity</strong><span>Not a brand name alone — the actual product category.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(c)</span><div class="txt"><strong>Net quantity</strong><span>In standard metric units: g, kg, ml, l, or count for discrete items.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(d)</span><div class="txt"><strong>Month and year of manufacture / packing / import</strong><span>A dedicated date declaration, distinct from any batch/lot code.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(e)</span><div class="txt"><strong>Maximum Retail Price</strong><span>Must state "inclusive of all taxes" alongside the figure.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(f)</span><div class="txt"><strong>Consumer care / grievance contact</strong><span>A reachable phone number or email address.</span></div></div>
-      <div class="rule-item"><span class="tag">R6(1)(g)</span><div class="txt"><strong>Country of origin</strong><span>Required for imported goods.</span></div></div>
-      <div class="rule-item"><span class="tag">Proviso</span><div class="txt"><strong>Best-before / use-by date</strong><span>Required for commodities with a defined shelf life (food, cosmetics, pharma).</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(a)</span><div class="txt"><strong data-i18n="r_name_mfr">Name & address of manufacturer/packer/importer</strong><span data-i18n="r_name_mfr_desc">Must be complete enough to identify and locate the responsible party.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(b)</span><div class="txt"><strong data-i18n="r_commodity">Common or generic name of the commodity</strong><span data-i18n="r_commodity_desc">Not a brand name alone — the actual product category.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(c)</span><div class="txt"><strong data-i18n="r_net_qty">Net quantity</strong><span data-i18n="r_net_qty_desc">In standard metric units: g, kg, ml, l, or count for discrete items.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(d)</span><div class="txt"><strong data-i18n="r_mfg_date">Month and year of manufacture / packing / import</strong><span data-i18n="r_mfg_date_desc">A dedicated date declaration, distinct from any batch/lot code.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(e)</span><div class="txt"><strong data-i18n="r_mrp">Maximum Retail Price</strong><span data-i18n="r_mrp_desc">Must state "inclusive of all taxes" alongside the figure.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(f)</span><div class="txt"><strong data-i18n="r_care">Consumer care / grievance contact</strong><span data-i18n="r_care_desc">A reachable phone number or email address.</span></div></div>
+      <div class="rule-item"><span class="tag">R6(1)(g)</span><div class="txt"><strong data-i18n="r_origin">Country of origin</strong><span data-i18n="r_origin_desc">Required for imported goods.</span></div></div>
+      <div class="rule-item"><span class="tag">Proviso</span><div class="txt"><strong data-i18n="r_proviso">Best-before / use-by date</strong><span data-i18n="r_proviso_desc">Required for commodities with a defined shelf life (food, cosmetics, pharma).</span></div></div>
     </div>
 
     <div class="panel" style="margin-top:26px;">
-      <strong style="font-family:'Fraunces',serif; font-size:16px;">Font/digit height schedule</strong>
+      <strong style="font-family:'Fraunces',serif; font-size:16px;" data-i18n="font_table_title">Font/digit height schedule</strong>
       <table class="font-table">
-        <tr><th>Max package surface area</th><th>Minimum digit/letter height</th></tr>
-        <tr><td>Up to 100 cm²</td><td>1 mm</td></tr>
-        <tr><td>100 cm² – 500 cm²</td><td>2 mm</td></tr>
-        <tr><td>Above 500 cm²</td><td>4 mm</td></tr>
+        <tr><th data-i18n="th_max_area">Max package surface area</th><th data-i18n="th_min_height">Minimum digit/letter height</th></tr>
+        <tr><td data-i18n="area_up_to_100">Up to 100 cm²</td><td>1 mm</td></tr>
+        <tr><td data-i18n="area_100_500">100 cm² – 500 cm²</td><td>2 mm</td></tr>
+        <tr><td data-i18n="area_above_500">Above 500 cm²</td><td>4 mm</td></tr>
       </table>
     </div>
   </section>
@@ -1101,8 +1128,8 @@
 <!-- Fullscreen Lightbox Modal for Fine Detail Inspection -->
 <div id="lightboxModal" class="lightbox-modal">
   <div class="lightbox-head">
-    <strong style="font-size:16px; font-family:'Fraunces', serif;">🔍 PackSight High-Resolution Visual Inspection</strong>
-    <button class="pill-btn" onclick="closeLightbox()" style="border-radius:20px; padding:6px 14px; font-size:12px; border-color:rgba(255,255,255,0.4);">✕ Close Viewer</button>
+    <strong style="font-size:16px; font-family:'Fraunces', serif;" data-i18n="lightbox_title">🔍 PackSight High-Resolution Visual Inspection</strong>
+    <button class="pill-btn" onclick="closeLightbox()" style="border-radius:20px; padding:6px 14px; font-size:12px; border-color:rgba(255,255,255,0.4);" data-i18n="lightbox_close">✕ Close Viewer</button>
   </div>
   <div class="lightbox-body" id="lightboxBody">
     <img id="lightboxImg" src="" alt="High resolution inspection">
@@ -1110,6 +1137,694 @@
 </div>
 
 <script>
+
+// ---------------- Internationalization (i18n) Engine ----------------
+const translations = {
+  en: {
+    // Brand & General
+    tagline: "See. Verify. Comply.",
+    nav_features: "Features",
+    nav_rules: "Rule set",
+    nav_signin: "Sign in",
+    nav_create_account: "Create account",
+    nav_home: "Home",
+    nav_scan: "Scan a Label",
+    nav_dashboard: "Dashboard",
+    nav_rules_ref: "Rules Reference",
+    nav_logout: "Log out",
+
+    // Landing Page
+    land_eyebrow: "Legal Metrology (Packaged Commodities) Rules, 2011 · SIH26034",
+    land_title: "See what's on the label.<br><span class='grad-text'>Verify</span> what the law requires.<br>Comply, provably.",
+    land_lede: "PackSight scans a packaged-commodity label, extracts every mandatory declaration, checks it against Rule 6 and the font-height schedule, and hands an inspector a report — instead of a checklist filled in by hand.",
+    land_btn_start: "Get started free →",
+    land_microcopy: "No credit card. Runs OCR in your browser — label photos never leave your device.",
+    mock_net_qty: "Net quantity",
+    mock_mfg_date: "Mfg. month / year",
+    mock_mrp: "MRP declaration",
+    mock_care: "Consumer care",
+    mock_origin: "Country of origin",
+    mock_missing: "MISSING",
+    mock_score: "score: 62%",
+    strip_1: "08 mandatory declarations checked",
+    strip_2: "Font-height schedule: 1mm – 4mm by area",
+    strip_3: "On-device OCR",
+    strip_4: "Built for SIH 2026 · PS-26034",
+    feat_kicker: "Why PackSight",
+    feat_heading: "Built around the checklist an inspector already carries in their head.",
+    feat_1_title: "Scan, don't transcribe",
+    feat_1_desc: "Upload a label photo. OCR extracts every declaration automatically — no manual data entry.",
+    feat_2_title: "Rule-based, not guesswork",
+    feat_2_desc: "Every verdict traces to a specific clause of LMPC 2011 — Rule 6 and the font-height schedule, laid out in the app.",
+    feat_3_title: "Evidence-grade reports",
+    feat_3_desc: "Itemized pass/fail per declaration, with the extracted text as evidence — ready to attach to a case file.",
+    feat_4_title: "A repository, not a pile of PDFs",
+    feat_4_desc: "Every scan lands in a searchable dashboard — compliance trends across products, not just one-off checks.",
+    cta_title: "Eight declarations. One inspector's worth of judgment, automated.",
+    cta_desc: "Manufacturer & address, net quantity, MRP, manufacture date, consumer care, country of origin, best-before, and font height — PackSight checks all eight in the time it takes to upload a photo.",
+    cta_btn: "Create your account →",
+    land_footer: "PackSight — a compliance-checking prototype built for Smart India Hackathon 2026, problem statement SIH26034.",
+
+    // Auth Page
+    auth_back: "← Back to PackSight",
+    auth_quote: "“Every label makes eight statutory promises. PackSight verifies all eight in seconds.”",
+    auth_foot: "LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011",
+    tab_signin: "Sign in",
+    tab_signup: "Create account",
+    signin_title: "Welcome back",
+    signin_sub: "Sign in to your inspection workspace.",
+    label_userid: "User ID",
+    label_password: "Password",
+    btn_signin: "Sign in",
+    signup_title: "Create your account",
+    signup_sub: "Set up a workspace to start scanning labels.",
+    label_fullname: "Full name",
+    label_confirmpass: "Confirm password",
+    btn_signup: "Create account",
+    ph_userid: "e.g. inspector.rao",
+    ph_fullname: "e.g. Ananya Rao",
+    ph_choose_userid: "Choose a user ID",
+    ph_create_pass: "Create a password",
+    ph_reenter_pass: "Re-enter password",
+    switch_signup_line: "New to PackSight? <a onclick='switchAuthTab(\"signup\")'>Create an account</a>",
+    switch_signin_line: "Already have an account? <a onclick='switchAuthTab(\"signin\")'>Sign in</a>",
+    err_enter_credentials: "Enter your user ID and password.",
+    err_fill_fields: "Please fill in every field.",
+    err_pass_match: "Passwords do not match.",
+    err_pass_len: "Password must be at least 4 characters.",
+    signing_in: "Signing in…",
+    creating_account: "Creating account…",
+    api_offline_err: "Can't reach the PackSight API at {api}. Is the backend running? (see README.md)",
+
+    // Home View
+    home_welcome: "Welcome",
+    home_ready: "Ready when you are,",
+    home_sub: "Upload a label photo to run a full compliance scan, or jump straight to your dashboard to see what you've checked so far.",
+    home_scan_btn: "Scan a label →",
+    home_rules_btn: "See the rule set",
+    mock_mfr: "Manufacturer / packer name",
+    home_checks_title: "What it checks",
+    home_checks_sub: "Eight declarations, one font-height table — the same checklist a Legal Metrology inspector works through by hand.",
+    r6_1_a_title: "Manufacturer / packer / importer",
+    r6_1_a_desc: "Name and complete address, legible and unambiguous.",
+    r6_1_c_title: "Net quantity",
+    r6_1_c_desc: "In standard units — grams/kilograms, millilitres/litres, or count.",
+    r6_1_e_title: "Maximum Retail Price",
+    r6_1_e_desc: "Stated as inclusive of all taxes.",
+    r6_1_d_title: "Month & year of manufacture/packing/import",
+    r6_1_d_desc: "Machine- or manually-printed, not just a lot code.",
+    r6_1_f_title: "Consumer care details",
+    r6_1_f_desc: "A phone number or email a buyer can actually reach.",
+    sched_title: "Font / digit height",
+    sched_desc: "Minimum height scales with package surface area — 1mm to 4mm.",
+
+    // Scan View
+    scan_title: "Scan a label",
+    scan_sub: "Upload a photo of a packaged-commodity label. OCR runs in your browser — nothing leaves this device. Package dimensions are optional but improve the font-height check.",
+    dropzone_title: "Click to upload or drag label panels here",
+    dropzone_sub: "Supports single or multi-panel scans (Front, Back, MRP/Date, Consumer Care panels)",
+    btn_choose_files: "📁 Choose Files",
+    btn_open_camera: "📷 Open Camera",
+    btn_snap_photo: "📱 Snap Photo",
+    btn_enter_manually: "✏️ Enter Manually",
+    gallery_remove_hint: "Click on ✕ to remove a panel",
+    add_panel: "Add Panel",
+    field_prod_name_label: "Product name (optional)",
+    ph_prod_name: "e.g. Acme Biscuits 500g",
+    field_pkg_dims_label: "Package width × height (cm - optional)",
+    ph_pkg_dims: "e.g. 8 × 14",
+    btn_run_scan: "Run compliance scan",
+    btn_run_multi_scan: "Run Multi-Panel Scan ({count} panels)",
+    btn_clear_panels: "Clear panels",
+    direct_inspect_prompt: "Can't scan clearly or no packaging photo?",
+    btn_enter_direct: "✏️ Enter Declarations Manually (Direct Inspection)",
+
+    // Camera Modal
+    camera_modal_title: "📷 Live Label Scanner",
+    camera_frame_hint: "ALIGN PACKAGING LABEL INSIDE BOX",
+    btn_flip_camera: "🔄 Flip Camera",
+    btn_done_review: "✓ Done & Review",
+    snap_counter_text: "{count} captured",
+
+    // Manual Entry Modal
+    manual_modal_title: "✏️ Manual Declaration Entry & Verification",
+    manual_modal_sub: "Enter or correct packaging declarations if OCR could not detect them clearly.",
+    manual_guidance: "💡 <strong>Inspector Guidance:</strong> Entering valid declarations will automatically update compliance to <span style='color:var(--ok); font-weight:700;'>Compliant (100%)</span> and set statutory legal liability to <span style='color:var(--ok); font-weight:700;'>No Fine Allocated (₹0)</span>.",
+    field_commodity_label: "Commodity / Product Name",
+    field_brand_label: "Brand Name",
+    field_net_qty_label: "Net Quantity (Rule 6(1)(c))",
+    field_mrp_label: "Maximum Retail Price (MRP - Rule 6(1)(e))",
+    incl_all_taxes: "Incl. all taxes",
+    field_mfg_date_label: "Mfg / Packing Date (Rule 6(1)(d))",
+    field_exp_date_label: "Best Before / Expiry (Proviso R6(1))",
+    field_mfr_label: "Manufacturer / Packer Name & Address (Rule 6(1)(a))",
+    field_care_label: "Consumer Care (Phone / Email - Rule 6(1)(f))",
+    field_origin_label: "Country of Origin (Rule 6(1)(g))",
+    field_usp_label: "Unit Sale Price (USP - Rule 6(11))",
+    field_fssai_label: "14-Digit FSSAI License Number",
+    field_food_class_label: "Food Classification / Symbol",
+    opt_veg: "🟢 100% Vegetarian (Green Circle Symbol)",
+    opt_nonveg: "🟤 Non-Vegetarian (Brown Triangle Symbol)",
+    opt_nonfood: "⚪ General Commodity / Non-Food",
+    btn_cancel: "Cancel",
+    btn_save_recalc: "✓ Save & Recalculate Compliance",
+    btn_create_manual: "✓ Create Manual Scan & Audit",
+    manual_evaluating: "⏳ Evaluating Compliance & Penalties…",
+
+    // Compliance Report
+    report_title: "Compliance Report",
+    stamp_compliant: "Compliant",
+    stamp_violation: "Violation found",
+    btn_download_pdf: "📥 Download Audit PDF",
+    btn_legal_notice: "⚖️ Legal Show-Cause Notice",
+    btn_manual_edit: "✏️ Manual Entry / Edit",
+    hud_overview_title: "Mandatory Declarations Overview",
+    hud_overview_sub: "Legal Metrology (Packaged Commodities) Rules, 2011",
+    verdict_verified: "✓ Verified",
+    verdict_violation: "✕ Violation",
+    verdict_review: "? Review",
+    verdict_compliant_pill: "Compliant ✓",
+    verdict_violation_pill: "Violation ✕",
+    verdict_review_pill: "Needs review ?",
+    missing_declaration: "Missing or not declared",
+    th_statutory_decl: "Statutory Declaration",
+    th_verdict: "Verdict",
+    th_extracted_evidence: "Extracted Evidence & Findings",
+    raw_ocr_summary: "Raw Multi-Pass OCR Text (for legal archive)",
+    no_text_detected: "(no text detected)",
+
+    // Field Label Translations (App's own UI labels)
+    field_LMPC_R6_1_A: "Manufacturer / Packer Details",
+    field_LMPC_R6_1_B: "Common / Generic Name of Commodity",
+    field_LMPC_R6_1_C: "Net Quantity",
+    field_LMPC_R6_1_D: "Date of Manufacture/Packing",
+    field_LMPC_R6_1_E: "Maximum Retail Price (MRP)",
+    field_LMPC_R6_1_F: "Consumer Care Contact",
+    field_LMPC_R6_1_G: "Country of Origin",
+    field_LMPC_R6_1_PROVISO: "Best-Before / Use-By Date",
+    field_LMPC_USP: "Unit Sale Price (Rule 6(11))",
+    field_LMPC_SCHEDULE_II: "Standard Pack Size (Schedule II)",
+    field_LMPC_FORMAT_UNIT: "Declaration Format (Count Units)",
+    field_LMPC_EXEMPT: "Small Package Exemption",
+
+    // Visual Studio
+    studio_title: "Statutory Visual Overlay Studio",
+    studio_subtitle: "(Upright Rotated & Super-Resolution Zoom)",
+    mode_overlay: "🟢 AI Highlight Overlay",
+    mode_original: "📷 Clean Packaging",
+    mode_split: "🔲 Side-by-Side",
+    btn_reset: "↺ Reset",
+    btn_fullscreen: "⛶ Fullscreen",
+    legend_green: "<strong>Green Box:</strong> Compliant Statutory Declaration",
+    legend_red: "<strong>Red Box:</strong> Violation / Missing Tax Statement",
+    legend_amber: "<strong>Amber Box:</strong> Schedule II / Review Item",
+    studio_tip: "💡 Drag image to pan &nbsp;|&nbsp; Scroll wheel to zoom",
+    side_original_title: "📷 Clean Packaging Photo",
+    side_overlay_title: "🟢 AI Statutory Overlay (Red / Green Boxes)",
+    lightbox_title: "🔍 PackSight High-Resolution Visual Inspection",
+    lightbox_close: "✕ Close Viewer",
+
+    // Filter & Search
+    filter_all: "All Declarations ({count})",
+    filter_fail: "🔴 Violations ({count})",
+    filter_pass: "🟢 Compliant ({count})",
+    filter_review: "🟡 Review ({count})",
+    ph_search_rules: "Search rules / evidence...",
+
+    // Advancements & Legal Intelligence
+    veg_verified: "<strong>Veg Symbol:</strong> 100% Vegetarian (Verified)",
+    nonveg_verified: "<strong>Non-Veg Symbol:</strong> Non-Vegetarian",
+    no_veg_detected: "No Veg Symbol Detected",
+    fssai_lic_chip: "<strong>FSSAI Lic:</strong>",
+    clearance_title: "No Fine Allocated — Fully Compliant",
+    clearance_desc: "Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.",
+    fine_zero_pill: "₹0 Fine Allocated ✓",
+    btn_edit_details: "✏️ Edit Details",
+    liability_title: "Statutory Legal Metrology Liability Assessment",
+    liability_sub: "Assessed under Section 36 of Legal Metrology Act, 2009 & Rule 32 of LMPC Rules, 2011",
+    btn_correct_manual: "✏️ Correct / Enter Manually",
+    btn_download_notice: "📜 Download Show-Cause Notice (PDF)",
+    compounding_fine_label: "Allocated Compounding Fine",
+    statutory_first_max: "Statutory 1st Offense Max",
+    second_offense_label: "Second Offense Liability",
+    section_ceiling: "Section 36(1) Ceiling",
+    escalated_fine: "Escalated statutory fine",
+    itemized_summary_title: "Itemized Infractions & Penalty Allocation:",
+    allocated_fine_badge: "Allocated Fine: ₹",
+    rule9_title: "Rule 9 Numeral & Letter Height Compliance (Table 1)",
+    rule9_sub: "Calibrated metric height verification for Net Quantity declaration",
+    rule9_compliant: "Compliant ✓",
+    rule9_violation: "Height Violation ✕",
+    rule9_review: "Review Required ?",
+    rule9_pdp: "Principal Display Panel (PDP)",
+    rule9_min_height: "Min. Prescribed Height",
+    rule9_measured: "Measured Numeral Height",
+    rule9_scale: "Calibration Scale",
+    quality_frame: "Frame Quality",
+    quality_sharpness: "Sharpness Score",
+    quality_brightness: "Brightness",
+    quality_glare: "Specular Glare",
+    quality_blurry: "(Blurry)",
+    quality_sharp: "(Sharp)",
+    quality_advice: "⚠️ <strong>Camera Advice:</strong>",
+
+    // Dashboard
+    dash_title: "Inspection dashboard",
+    dash_sub: "Aggregated from scans run in this session. In production this reads from the PostgreSQL scan repository across all inspectors.",
+    btn_export_csv: "📊 Export Audit CSV",
+    stat_labels_scanned: "Labels scanned",
+    stat_compliant: "Fully compliant",
+    stat_violations: "With violations",
+    stat_avg_score: "Avg. compliance score",
+    empty_dash_title: "No scans yet this session.",
+    empty_dash_sub: "Run a scan to see it appear here.",
+    th_product: "Product",
+    th_timestamp: "Timestamp",
+    th_score: "Score",
+    th_status: "Status",
+    th_violations: "Violations",
+    th_actions: "Actions",
+    btn_inspect: "👁️ Inspect",
+    btn_pdf: "📥 PDF",
+    btn_notice: "⚖️ Notice",
+
+    // Rules Reference View
+    rules_page_title: "Rule reference — LMPC 2011",
+    rules_page_sub: "The exact checklist the engine runs, so a verdict is never a black box.",
+    r_name_mfr: "Name & address of manufacturer/packer/importer",
+    r_name_mfr_desc: "Must be complete enough to identify and locate the responsible party.",
+    r_commodity: "Common or generic name of the commodity",
+    r_commodity_desc: "Not a brand name alone — the actual product category.",
+    r_net_qty: "Net quantity",
+    r_net_qty_desc: "In standard metric units: g, kg, ml, l, or count for discrete items.",
+    r_mfg_date: "Month and year of manufacture / packing / import",
+    r_mfg_date_desc: "A dedicated date declaration, distinct from any batch/lot code.",
+    r_mrp: "Maximum Retail Price",
+    r_mrp_desc: "Must state 'inclusive of all taxes' alongside the figure.",
+    r_care: "Consumer care / grievance contact",
+    r_care_desc: "A reachable phone number or email address.",
+    r_origin: "Country of origin",
+    r_origin_desc: "Required for imported goods.",
+    r_proviso: "Best-before / use-by date",
+    r_proviso_desc: "Required for commodities with a defined shelf life (food, cosmetics, pharma).",
+    font_table_title: "Font/digit height schedule",
+    th_max_area: "Max package surface area",
+    th_min_height: "Minimum digit/letter height",
+    area_up_to_100: "Up to 100 cm²",
+    area_100_500: "100 cm² – 500 cm²",
+    area_above_500: "Above 500 cm²",
+
+    // Alerts & Progress
+    uploading_single: "Uploading to PackSight API…",
+    uploading_multi: "Uploading {count} panels to PackSight API…",
+    running_ocr_single: "Running OCR + rule engine…",
+    running_ocr_multi: "Running multi-panel OCR & rule engine ({count} panels)…",
+    scan_done: "Done.",
+    scan_failed: "Scan failed.",
+    session_expired: "Session expired. Please sign in again.",
+    panel_single_selected: "1 Panel Selected",
+    panels_multi_selected: "{count} Panels Selected",
+    panel_title: "Panel {num}",
+    remove_panel_title: "Remove panel"
+  },
+
+  hi: {
+    // Brand & General
+    tagline: "देखें। सत्यापित करें। अनुपालन करें।",
+    nav_features: "विशेषताएं",
+    nav_rules: "नियम संदर्भ",
+    nav_signin: "साइन इन करें",
+    nav_create_account: "खाता बनाएं",
+    nav_home: "होम",
+    nav_scan: "लेबल स्कैन करें",
+    nav_dashboard: "डैशबोर्ड",
+    nav_rules_ref: "नियम संदर्भ",
+    nav_logout: "लॉग आउट",
+
+    // Landing Page
+    land_eyebrow: "विधिक मापविज्ञान (डिब्बाबंद वस्तुएं) नियम, 2011 · SIH26034",
+    land_title: "लेबल पर क्या है देखें।<br>कानूनी आवश्यकताओं को <span class='grad-text'>सत्यापित</span> करें।<br>प्रमाणित अनुपालन सुनिश्चित करें।",
+    land_lede: "PackSight डिब्बाबंद वस्तुओं के लेबल को स्कैन करता है, प्रत्येक अनिवार्य घोषणा निकालता है, नियम 6 और अक्षर-ऊंचाई तालिका के अनुसार जांचता है, और निरीक्षक को तत्काल रिपोर्ट सौंपता है — हाथ से चेकलिस्ट भरने के स्थान पर।",
+    land_btn_start: "निःशुल्क शुरू करें →",
+    land_microcopy: "क्रेडिट कार्ड की आवश्यकता नहीं। ब्राउज़र में ओसीआर चलता है — लेबल फोटो आपके उपकरण से बाहर नहीं जाता।",
+    mock_net_qty: "शुद्ध मात्रा (Net Qty)",
+    mock_mfg_date: "निर्माण माह / वर्ष",
+    mock_mrp: "एमआरपी घोषणा (MRP)",
+    mock_care: "उपभोक्ता सेवा संपर्क",
+    mock_origin: "मूल देश (Origin)",
+    mock_missing: "अनुपलब्ध",
+    mock_score: "स्कोर: 62%",
+    strip_1: "08 अनिवार्य घोषणाओं की जांच",
+    strip_2: "अक्षर-ऊंचाई अनुसूची: क्षेत्रफल अनुसार 1मिमी – 4मिमी",
+    strip_3: "ब्राउज़र-आधारित ओसीआर",
+    strip_4: "SIH 2026 · PS-26034 हेतु निर्मित",
+    feat_kicker: "PackSight क्यों",
+    feat_heading: "निरीक्षक की व्यक्तिगत चेकलिस्ट और विशेषज्ञता के अनुरूप निर्मित।",
+    feat_1_title: "स्कैन करें, लिखें नहीं",
+    feat_1_desc: "लेबल की फोटो अपलोड करें। ओसीआर सभी घोषणाओं को स्वचालित निकालता है — कोई मैन्युअल डेटा प्रविष्टि नहीं।",
+    feat_2_title: "नियम-आधारित, अनुमान नहीं",
+    feat_2_desc: "प्रत्येक निर्णय LMPC 2011 के विशिष्ट खंड (नियम 6 एवं अक्षर-ऊंचाई अनुसूची) से सीधे संबंधित है।",
+    feat_3_title: "साक्ष्य-युक्त कानूनी रिपोर्ट",
+    feat_3_desc: "प्रत्येक घोषणा पर क्रमबद्ध पास/फेल परिणाम, मूल निकाले गए पाठ के साक्ष्य सहित — केस फाइल हेतु तैयार।",
+    feat_4_title: "सुरक्षित रिपॉजिटरी, बिखरी फाइलें नहीं",
+    feat_4_desc: "प्रत्येक स्कैन सीधे खोजने योग्य डैशबोर्ड में दर्ज होता है — विभिन्न उत्पादों में अनुपालन विश्लेषण हेतु।",
+    cta_title: "आठ घोषणाएं। निरीक्षक के निर्णय का पूर्ण स्वचालन।",
+    cta_desc: "निर्माता व पता, शुद्ध मात्रा, एमआरपी, निर्माण तिथि, उपभोक्ता संपर्क, मूल देश, बेस्ट-बिफोर, और अक्षर ऊंचाई — PackSight फोटो अपलोड होते ही सभी आठ की जांच करता है।",
+    cta_btn: "अपना खाता बनाएं →",
+    land_footer: "PackSight — स्मार्ट इंडिया हैकाथॉन 2026, समस्या विवरण SIH26034 हेतु विकसित अनुपालन जांच प्रोटोटाइप।",
+
+    // Auth Page
+    auth_back: "← PackSight पर वापस जाएं",
+    auth_quote: "“प्रत्येक लेबल आठ वैधानिक वादे करता है। PackSight उनकी जांच कुछ ही सेकंडों में कर देता है।”",
+    auth_foot: "विधिक मापविज्ञान (डिब्बाबंद वस्तुएं) नियम, 2011",
+    tab_signin: "साइन इन करें",
+    tab_signup: "खाता बनाएं",
+    signin_title: "वापसी पर स्वागत है",
+    signin_sub: "अपने निरीक्षण कार्यक्षेत्र में साइन इन करें।",
+    label_userid: "यूज़र आईडी (User ID)",
+    label_password: "पासवर्ड",
+    btn_signin: "साइन इन करें",
+    signup_title: "अपना खाता बनाएं",
+    signup_sub: "लेबल स्कैनिंग शुरू करने हेतु कार्यक्षेत्र बनाएं।",
+    label_fullname: "पूरा नाम",
+    label_confirmpass: "पासवर्ड की पुष्टि करें",
+    btn_signup: "खाता बनाएं",
+    ph_userid: "उदा. inspector.rao",
+    ph_fullname: "उदा. अनन्य राव",
+    ph_choose_userid: "यूज़र आईडी चुनें",
+    ph_create_pass: "पासवर्ड बनाएं",
+    ph_reenter_pass: "पासवर्ड पुन: दर्ज करें",
+    switch_signup_line: "PackSight पर नए हैं? <a onclick='switchAuthTab(\"signup\")'>खाता बनाएं</a>",
+    switch_signin_line: "पहले से खाता है? <a onclick='switchAuthTab(\"signin\")'>साइन इन करें</a>",
+    err_enter_credentials: "कृपया अपना यूज़र आईडी और पासवर्ड दर्ज करें।",
+    err_fill_fields: "कृपया सभी फ़ील्ड भरें।",
+    err_pass_match: "पासवर्ड मेल नहीं खा रहे हैं।",
+    err_pass_len: "पासवर्ड कम से कम 4 अक्षरों का होना चाहिए।",
+    signing_in: "साइन इन हो रहा है…",
+    creating_account: "खाता बनाया जा रहा है…",
+    api_offline_err: "PackSight API ({api}) से संपर्क नहीं हो पा रहा है। क्या बैकएंड चालू है? (README.md देखें)",
+
+    // Home View
+    home_welcome: "स्वागत है",
+    home_ready: "आपके निर्देश पर तैयार,",
+    home_sub: "पूर्ण अनुपालन स्कैन चलाने हेतु लेबल फोटो अपलोड करें, या अब तक की गई जांच देखने के लिए सीधे डैशबोर्ड पर जाएं।",
+    home_scan_btn: "लेबल स्कैन करें →",
+    home_rules_btn: "नियम सूची देखें",
+    mock_mfr: "निर्माता / पैकर का नाम",
+    home_checks_title: "प्रणाली क्या जांचती है",
+    home_checks_sub: "आठ अनिवार्य घोषणाएं, एक अक्षर-ऊंचाई तालिका — वही चेकलिस्ट जिसे विधिक मापविज्ञान निरीक्षक जांचते हैं।",
+    r6_1_a_title: "निर्माता / पैकर / आयातक",
+    r6_1_a_desc: "नाम और पूरा पता, सुपाठ्य और स्पष्ट।",
+    r6_1_c_title: "शुद्ध मात्रा (Net Quantity)",
+    r6_1_c_desc: "मानक मीट्रिक इकाइयों में — ग्राम/किलोग्राम, मिली/लीटर, या संख्या।",
+    r6_1_e_title: "अधिकतम खुदरा मूल्य (MRP)",
+    r6_1_e_desc: "सभी करों सहित (Inclusive of all taxes) घोषित होना अनिवार्य।",
+    r6_1_d_title: "निर्माण / पैकिंग / आयात का माह व वर्ष",
+    r6_1_d_desc: "मशीन या हाथ से मुद्रित स्पष्ट तिथि, केवल लॉट कोड नहीं।",
+    r6_1_f_title: "उपभोक्ता सेवा संपर्क (Consumer Care)",
+    r6_1_f_desc: "सक्रिय फोन नंबर या ईमेल पता जिस पर संपर्क किया जा सके।",
+    sched_title: "अक्षर / अंक की ऊंचाई",
+    sched_desc: "पैकेज सतह क्षेत्र के अनुसार न्यूनतम ऊंचाई — 1मिमी से 4मिमी।",
+
+    // Scan View
+    scan_title: "लेबल स्कैन करें",
+    scan_sub: "डिब्बाबंद वस्तु के लेबल की फोटो अपलोड करें। ओसीआर आपके ब्राउज़र में चलता है — कोई भी डेटा बाहर नहीं जाता। पैकेज आयाम वैकल्पिक हैं परंतु अक्षर-ऊंचाई जांच को बेहतर बनाते हैं।",
+    dropzone_title: "अपलोड करने के लिए क्लिक करें या लेबल पैनल यहाँ खींचें",
+    dropzone_sub: "सिंगल या मल्टी-पैनल स्कैन का समर्थन (सामने, पीछे, एमआरपी/तिथि, उपभोक्ता सेवा पैनल)",
+    btn_choose_files: "📁 फ़ाइलें चुनें",
+    btn_open_camera: "📷 कैमरा खोलें",
+    btn_snap_photo: "📱 फोटो खींचें",
+    btn_enter_manually: "✏️ मैन्युअल दर्ज करें",
+    gallery_remove_hint: "पैनल हटाने के लिए ✕ पर क्लिक करें",
+    add_panel: "पैनल जोड़ें",
+    field_prod_name_label: "उत्पाद का नाम (वैकल्पिक)",
+    ph_prod_name: "उदा. पारले बिस्कुट 500 ग्राम",
+    field_pkg_dims_label: "पैकेज चौड़ाई × ऊंचाई (सेमी - वैकल्पिक)",
+    ph_pkg_dims: "उदा. 8 × 14",
+    btn_run_scan: "अनुपालन स्कैन चलाएं",
+    btn_run_multi_scan: "मल्टी-पैनल स्कैन चलाएं ({count} पैनल)",
+    btn_clear_panels: "पैनल हटाएं",
+    direct_inspect_prompt: "क्या फोटो धुंधली है या पैकेज उपलब्ध नहीं?",
+    btn_enter_direct: "✏️ घोषणाएं मैन्युअल रूप से दर्ज करें (प्रत्यक्ष निरीक्षण)",
+
+    // Camera Modal
+    camera_modal_title: "📷 लाइव लेबल स्कैनर",
+    camera_frame_hint: "लेबल को बॉक्स के अंदर संरेखित करें",
+    btn_flip_camera: "🔄 कैमरा बदलें",
+    btn_done_review: "✓ पूर्ण एवं समीक्षा",
+    snap_counter_text: "{count} फोटो ली गई",
+
+    // Manual Entry Modal
+    manual_modal_title: "✏️ मैन्युअल घोषणा प्रविष्टि एवं सत्यापन",
+    manual_modal_sub: "यदि ओसीआर स्पष्ट रूप से नहीं पढ़ सका, तो पैकेजिंग घोषणाएं दर्ज या सुधारें।",
+    manual_guidance: "💡 <strong>निरीक्षक मार्गदर्शन:</strong> वैध घोषणाएं दर्ज करने पर अनुपालन स्वतः <span style='color:var(--ok); font-weight:700;'>पूर्णतः अनुपालक (100%)</span> हो जाएगा और वैधानिक जुर्माना <span style='color:var(--ok); font-weight:700;'>शून्य जुर्माना (₹0)</span> निर्धारित होगा।",
+    field_commodity_label: "वस्तु / उत्पाद का नाम",
+    field_brand_label: "ब्रांड का नाम",
+    field_net_qty_label: "शुद्ध मात्रा (नियम 6(1)(c))",
+    field_mrp_label: "अधिकतम खुदरा मूल्य (MRP - नियम 6(1)(e))",
+    incl_all_taxes: "सभी करों सहित",
+    field_mfg_date_label: "निर्माण / पैकिंग तिथि (नियम 6(1)(d))",
+    field_exp_date_label: "उपयोग की अंतिम तिथि (Proviso R6(1))",
+    field_mfr_label: "निर्माता / पैकर का नाम व पता (नियम 6(1)(a))",
+    field_care_label: "उपभोक्ता सेवा (फोन / ईमेल - नियम 6(1)(f))",
+    field_origin_label: "मूल देश (नियम 6(1)(g))",
+    field_usp_label: "इकाई बिक्री मूल्य (USP - नियम 6(11))",
+    field_fssai_label: "14-अंकीय FSSAI लाइसेंस नंबर",
+    field_food_class_label: "खाद्य वर्गीकरण / प्रतीक",
+    opt_veg: "🟢 100% शाकाहारी (हरा गोल प्रतीक)",
+    opt_nonveg: "🟤 मांसाहारी (भूरा त्रिकोण प्रतीक)",
+    opt_nonfood: "⚪ सामान्य वस्तु / अखाद्य उत्पाद",
+    btn_cancel: "रद्द करें",
+    btn_save_recalc: "✓ सहेजें एवं अनुपालन की पुनर्गणना करें",
+    btn_create_manual: "✓ मैन्युअल स्कैन व ऑडिट बनाएं",
+    manual_evaluating: "⏳ अनुपालन एवं जुर्माने का मूल्यांकन हो रहा है…",
+
+    // Compliance Report
+    report_title: "अनुपालन रिपोर्ट",
+    stamp_compliant: "अनुपालक (Compliant)",
+    stamp_violation: "उल्लंघन पाया गया",
+    btn_download_pdf: "📥 ऑडिट PDF डाउनलोड करें",
+    btn_legal_notice: "⚖️ कानूनी कारण बताओ नोटिस",
+    btn_manual_edit: "✏️ मैन्युअल प्रविष्टि / सुधार",
+    hud_overview_title: "अनिवार्य घोषणाओं का संक्षिप्त विवरण",
+    hud_overview_sub: "विधिक मापविज्ञान (डिब्बाबंद वस्तुएं) नियम, 2011",
+    verdict_verified: "✓ सत्यापित",
+    verdict_violation: "✕ उल्लंघन",
+    verdict_review: "? समीक्षा",
+    verdict_compliant_pill: "अनुपालक ✓",
+    verdict_violation_pill: "उल्लंघन ✕",
+    verdict_review_pill: "समीक्षा आवश्यक ?",
+    missing_declaration: "अनुपलब्ध या अघोषित",
+    th_statutory_decl: "वैधानिक घोषणा",
+    th_verdict: "निर्णय",
+    th_extracted_evidence: "प्राप्त साक्ष्य एवं निष्कर्ष",
+    raw_ocr_summary: "कच्चा बहु-चरणीय ओसीआर पाठ (कानूनी अभिलेख हेतु)",
+    no_text_detected: "(कोई पाठ नहीं मिला)",
+
+    // Field Label Translations (App's own UI labels)
+    field_LMPC_R6_1_A: "निर्माता / पैकर विवरण",
+    field_LMPC_R6_1_B: "वस्तु का सामान्य / श्रेणी नाम",
+    field_LMPC_R6_1_C: "शुद्ध मात्रा (Net Quantity)",
+    field_LMPC_R6_1_D: "निर्माण / पैकिंग की तिथि",
+    field_LMPC_R6_1_E: "अधिकतम खुदरा मूल्य (MRP)",
+    field_LMPC_R6_1_F: "उपभोक्ता सेवा संपर्क",
+    field_LMPC_R6_1_G: "मूल देश (Country of Origin)",
+    field_LMPC_R6_1_PROVISO: "उपयोग की अंतिम तिथि / Best Before",
+    field_LMPC_USP: "इकाई बिक्री मूल्य (नियम 6(11))",
+    field_LMPC_SCHEDULE_II: "मानक पैक आकार (Schedule II)",
+    field_LMPC_FORMAT_UNIT: "घोषणा प्रारूप (संख्यात्मक इकाइयां)",
+    field_LMPC_EXEMPT: "छोटे पैकेज की छूट",
+
+    // Visual Studio
+    studio_title: "वैधानिक दृश्य ओवरले स्टूडियो",
+    studio_subtitle: "(सीधा संरेखित एवं उच्च-रिज़ॉल्यूशन ज़ूम)",
+    mode_overlay: "🟢 एआई हाइलाइट ओवरले",
+    mode_original: "📷 मूल पैकेजिंग",
+    mode_split: "🔲 अगल-बगल (Split)",
+    btn_reset: "↺ रीसेट",
+    btn_fullscreen: "⛶ पूर्ण स्क्रीन",
+    legend_green: "<strong>हरा बॉक्स:</strong> अनुपालक वैधानिक घोषणा",
+    legend_red: "<strong>लाल बॉक्स:</strong> उल्लंघन / अनुपलब्ध कर विवरण",
+    legend_amber: "<strong>पीला बॉक्स:</strong> अनुसूची II / समीक्षा मद",
+    studio_tip: "💡 चित्र को खींचकर खिसकाएं &nbsp;|&nbsp; ज़ूम हेतु माउस व्हील घुमाएं",
+    side_original_title: "📷 मूल पैकेजिंग फोटो",
+    side_overlay_title: "🟢 एआई वैधानिक ओवरले (लाल / हरे बॉक्स)",
+    lightbox_title: "🔍 PackSight उच्च-रिज़ॉल्यूशन दृश्य निरीक्षण",
+    lightbox_close: "✕ व्यूअर बंद करें",
+
+    // Filter & Search
+    filter_all: "सभी घोषणाएं ({count})",
+    filter_fail: "🔴 उल्लंघन ({count})",
+    filter_pass: "🟢 अनुपालक ({count})",
+    filter_review: "🟡 समीक्षा ({count})",
+    ph_search_rules: "नियम या साक्ष्य खोजें...",
+
+    // Advancements & Legal Intelligence
+    veg_verified: "<strong>शाकाहारी प्रतीक:</strong> 100% शाकाहारी (सत्यापित)",
+    nonveg_verified: "<strong>मांसाहारी प्रतीक:</strong> मांसाहारी",
+    no_veg_detected: "कोई शाकाहारी प्रतीक नहीं मिला",
+    fssai_lic_chip: "<strong>FSSAI लाइसेंस:</strong>",
+    clearance_title: "कोई जुर्माना नहीं — पूर्णतः अनुपालक",
+    clearance_desc: "विधिक मापविज्ञान अधिनियम, 2009 की धारा 36 के तहत शून्य जुर्माना देयता। सभी अनिवार्य घोषणाएं सत्यापित।",
+    fine_zero_pill: "₹0 जुर्माना आवंटित ✓",
+    btn_edit_details: "✏️ विवरण संपादित करें",
+    liability_title: "वैधानिक विधिक मापविज्ञान देयता मूल्यांकन",
+    liability_sub: "विधिक मापविज्ञान अधिनियम, 2009 की धारा 36 एवं LMPC नियम 32 के तहत मूल्यांकित",
+    btn_correct_manual: "✏️ सुधारें / मैन्युअल दर्ज करें",
+    btn_download_notice: "📜 कारण बताओ नोटिस (PDF)",
+    compounding_fine_label: "आवंटित शमन जुर्माना",
+    statutory_first_max: "वैधानिक प्रथम अपराध अधिकतम",
+    second_offense_label: "द्वितीय अपराध देयता",
+    section_ceiling: "धारा 36(1) अधिकतम सीमा",
+    escalated_fine: "बढ़ा हुआ वैधानिक जुर्माना",
+    itemized_summary_title: "उल्लंघन एवं जुर्माना आवंटन का विवरण:",
+    allocated_fine_badge: "आवंटित जुर्माना: ₹",
+    rule9_title: "नियम 9 अंक व अक्षर ऊंचाई अनुपालन (सारणी 1)",
+    rule9_sub: "शुद्ध मात्रा घोषणा हेतु कैलिब्रेटेड मीट्रिक ऊंचाई सत्यापन",
+    rule9_compliant: "अनुपालक ✓",
+    rule9_violation: "ऊंचाई उल्लंघन ✕",
+    rule9_review: "समीक्षा आवश्यक ?",
+    rule9_pdp: "प्रमुख प्रदर्शन पैनल (PDP)",
+    rule9_min_height: "न्यूनतम निर्धारित ऊंचाई",
+    rule9_measured: "मापी गई अंक ऊंचाई",
+    rule9_scale: "कैलिब्रेशन पैमाना",
+    quality_frame: "फ़्रेम गुणवत्ता",
+    quality_sharpness: "तीक्ष्णता स्कोर",
+    quality_brightness: "चमक",
+    quality_glare: "प्रतिबिंब चमक",
+    quality_blurry: "(धुंधला)",
+    quality_sharp: "(स्पष्ट)",
+    quality_advice: "⚠️ <strong>कैमरा सुझाव:</strong>",
+
+    // Dashboard
+    dash_title: "निरीक्षण डैशबोर्ड",
+    dash_sub: "इस सत्र में चलाए गए स्कैन का संकलन। उत्पादन में यह सभी निरीक्षकों के पोस्टग्रेएसक्यूएल रिपॉजिटरी से डेटा पढ़ता है।",
+    btn_export_csv: "📊 ऑडिट CSV निर्यात करें",
+    stat_labels_scanned: "स्कैन किए गए लेबल",
+    stat_compliant: "पूर्णतः अनुपालक",
+    stat_violations: "उल्लंघन सहित",
+    stat_avg_score: "औसत अनुपालन स्कोर",
+    empty_dash_title: "इस सत्र में अभी तक कोई स्कैन नहीं हुआ।",
+    empty_dash_sub: "यहाँ देखने के लिए एक स्कैन चलाएं।",
+    th_product: "उत्पाद",
+    th_timestamp: "समय",
+    th_score: "स्कोर",
+    th_status: "स्थिति",
+    th_violations: "उल्लंघन",
+    th_actions: "कार्रवाई",
+    btn_inspect: "👁️ निरीक्षण",
+    btn_pdf: "📥 PDF",
+    btn_notice: "⚖️ नोटिस",
+
+    // Rules Reference View
+    rules_page_title: "नियम संदर्भ — LMPC 2011",
+    rules_page_sub: "इंजन द्वारा जांची जाने वाली सटीक चेकलिस्ट, ताकि परिणाम कभी अस्पष्ट न रहे।",
+    r_name_mfr: "निर्माता / पैकर / आयातक का नाम व पता",
+    r_name_mfr_desc: "उत्तरदायी पक्ष की पहचान और स्थान सुनिश्चित करने हेतु पर्याप्त रूप से पूर्ण होना चाहिए।",
+    r_commodity: "वस्तु का सामान्य या श्रेणी नाम",
+    r_commodity_desc: "केवल ब्रांड का नाम नहीं — उत्पाद की वास्तविक श्रेणी।",
+    r_net_qty: "शुद्ध मात्रा (Net Quantity)",
+    r_net_qty_desc: "मानक मीट्रिक इकाइयों में: g, kg, ml, l, या अलग-अलग वस्तुओं के लिए संख्या।",
+    r_mfg_date: "निर्माण / पैकिंग / आयात का माह और वर्ष",
+    r_mfg_date_desc: "एक समर्पित तिथि घोषणा, किसी भी बैच/लॉट कोड से अलग।",
+    r_mrp: "अधिकतम खुदरा मूल्य (MRP)",
+    r_mrp_desc: "मूल्य के साथ 'सभी करों सहित' (inclusive of all taxes) लिखा होना अनिवार्य है।",
+    r_care: "उपभोक्ता सेवा / शिकायत निवारण संपर्क",
+    r_care_desc: "एक संपर्क योग्य फोन नंबर या ईमेल पता।",
+    r_origin: "मूल देश (Country of Origin)",
+    r_origin_desc: "आयातित वस्तुओं के लिए अनिवार्य।",
+    r_proviso: "उपयोग की अंतिम तिथि / Best Before",
+    r_proviso_desc: "निश्चित शेल्फ लाइफ वाली वस्तुओं (खाद्य, सौंदर्य प्रसाधन) के लिए अनिवार्य।",
+    font_table_title: "अक्षर / अंक ऊंचाई अनुसूची",
+    th_max_area: "पैकेज का अधिकतम सतह क्षेत्रफल",
+    th_min_height: "अंक/अक्षर की न्यूनतम ऊंचाई",
+    area_up_to_100: "100 सेमी² तक",
+    area_100_500: "100 सेमी² – 500 सेमी²",
+    area_above_500: "500 सेमी² से अधिक",
+
+    // Alerts & Progress
+    uploading_single: "PackSight API पर अपलोड हो रहा है…",
+    uploading_multi: "{count} पैनल PackSight API पर अपलोड हो रहे हैं…",
+    running_ocr_single: "OCR और नियम इंजन चल रहा है…",
+    running_ocr_multi: "मल्टी-पैनल OCR और नियम इंजन चल रहा है ({count} पैनल)…",
+    scan_done: "पूर्ण।",
+    scan_failed: "स्कैन विफल रहा।",
+    session_expired: "सत्र समाप्त हो गया। कृपया पुन: साइन इन करें।",
+    panel_single_selected: "1 पैनल चुना गया",
+    panels_multi_selected: "{count} पैनल चुने गए",
+    panel_title: "पैनल {num}",
+    remove_panel_title: "पैनल हटाएं"
+  }
+};
+
+let currentLang = localStorage.getItem('ps_lang') || 'en';
+if (!translations[currentLang]) currentLang = 'en';
+
+function t(key, fallback = '') {
+  const dict = translations[currentLang] || translations.en;
+  if (dict && dict[key] !== undefined) return dict[key];
+  if (translations.en && translations.en[key] !== undefined) return translations.en[key];
+  return fallback || key;
+}
+
+function setLanguage(lang) {
+  if (!translations[lang]) lang = 'en';
+  currentLang = lang;
+  if (typeof window !== 'undefined') window.currentLang = lang;
+  localStorage.setItem('ps_lang', lang);
+
+  // Sync selectors
+  const sel1 = document.getElementById('langSelectLanding');
+  const sel2 = document.getElementById('langSelectApp');
+  if (sel1) sel1.value = lang;
+  if (sel2) sel2.value = lang;
+
+  // Update elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    const trans = t(k);
+    if (trans) el.innerHTML = trans;
+  });
+
+  // Update elements with data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder');
+    const trans = t(k);
+    if (trans) el.placeholder = trans;
+  });
+
+  // Update elements with data-i18n-title
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const k = el.getAttribute('data-i18n-title');
+    const trans = t(k);
+    if (trans) el.title = trans;
+  });
+
+  updateDynamicUiLanguage();
+}
+
+function updateDynamicUiLanguage() {
+  // Update gallery counters if panels are loaded
+  if (typeof updateGallery === 'function' && typeof selectedFiles !== 'undefined' && selectedFiles.length > 0) {
+    updateGallery();
+  }
+
+  // Update dashboard if visible
+  if (document.getElementById('dashboard')?.classList?.contains('active') && typeof scanHistory !== 'undefined' && scanHistory.length > 0) {
+    loadDashboard();
+  }
+
+  // Re-render report chrome if active scan data exists
+  if (window.currentScanData && document.getElementById('reportArea')?.style.display !== 'none') {
+    const d = window.currentScanData;
+    renderReport(
+      d.scanId, d.fields, d.score, d.hasViolation, d.ocrText, d.productName,
+      d.createdAt, d.annotatedImage, d.brandName, d.imageQuality, d.originalImage,
+      d.barcodeData, d.vegStatus, d.fssaiInfo, d.rule9Compliance, d.legalLiability
+    );
+  }
+}
+
 // ---------------- Backend connection ----------------
 // Points at the local PackSight FastAPI server (matches window origin when served via app, falls back to 127.0.0.1:8000)
 const API_BASE = (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))
@@ -1153,8 +1868,8 @@ function switchAuthTab(tab){
   document.getElementById('formSignup').classList.toggle('active', tab==='signup');
   const switchLine = document.getElementById('switchLine');
   switchLine.innerHTML = tab==='signin'
-    ? `New to PackSight? <a onclick="switchAuthTab('signup')">Create an account</a>`
-    : `Already have an account? <a onclick="switchAuthTab('signin')">Sign in</a>`;
+    ? t('switch_signup_line', `New to PackSight? <a onclick="switchAuthTab('signup')">Create an account</a>`)
+    : t('switch_signin_line', `Already have an account? <a onclick="switchAuthTab('signin')">Sign in</a>`);
 }
 
 async function handleAuth(e, mode){
@@ -1166,7 +1881,7 @@ async function handleAuth(e, mode){
     const pass = document.getElementById('signinPass').value;
     err = document.getElementById('signinError');
     submitBtn = document.querySelector('#formSignin .auth-submit');
-    if(!userRaw || !pass){ err.textContent = 'Enter your user ID and password.'; return false; }
+    if(!userRaw || !pass){ err.textContent = t('err_enter_credentials', 'Enter your user ID and password.'); return false; }
     endpoint = '/auth/login';
     payload = { user_id: userRaw, password: pass };
   } else {
@@ -1176,9 +1891,9 @@ async function handleAuth(e, mode){
     const pass2 = document.getElementById('signupPass2').value;
     err = document.getElementById('signupError');
     submitBtn = document.querySelector('#formSignup .auth-submit');
-    if(!name || !userRaw || !pass){ err.textContent = 'Please fill in every field.'; return false; }
-    if(pass !== pass2){ err.textContent = 'Passwords do not match.'; return false; }
-    if(pass.length < 4){ err.textContent = 'Password must be at least 4 characters.'; return false; }
+    if(!name || !userRaw || !pass){ err.textContent = t('err_fill_fields', 'Please fill in every field.'); return false; }
+    if(pass !== pass2){ err.textContent = t('err_pass_match', 'Passwords do not match.'); return false; }
+    if(pass.length < 4){ err.textContent = t('err_pass_len', 'Password must be at least 4 characters.'); return false; }
     endpoint = '/auth/signup';
     payload = { full_name: name, user_id: userRaw, password: pass };
   }
@@ -1186,7 +1901,7 @@ async function handleAuth(e, mode){
   err.textContent = '';
   submitBtn.disabled = true;
   const originalLabel = submitBtn.textContent;
-  submitBtn.textContent = mode==='signin' ? 'Signing in…' : 'Creating account…';
+  submitBtn.textContent = mode==='signin' ? t('signing_in', 'Signing in…') : t('creating_account', 'Creating account…');
 
   try{
     const res = await fetch(API_BASE + endpoint, {
@@ -1209,7 +1924,7 @@ async function handleAuth(e, mode){
     document.getElementById('homeUserName').textContent = currentUser;
     goTo('home');
   }catch(networkErr){
-    err.textContent = `Can't reach the PackSight API at ${API_BASE}. Is the backend running? (see README.md)`;
+    err.textContent = t('api_offline_err', `Can't reach the PackSight API at {api}. Is the backend running? (see README.md)`).replace('{api}', API_BASE);
     console.error(networkErr);
   }finally{
     submitBtn.disabled = false;
@@ -1298,7 +2013,7 @@ function updateGallery(){
   if(count === 0){
     galleryWrap.style.display = 'none';
     runScanBtn.disabled = true;
-    runScanBtn.textContent = 'Run compliance scan';
+    runScanBtn.textContent = t('btn_run_scan', 'Run compliance scan');
     clearPanelsBtn.style.display = 'none';
     return;
   }
@@ -1306,8 +2021,8 @@ function updateGallery(){
   galleryWrap.style.display = 'block';
   clearPanelsBtn.style.display = 'inline-block';
   runScanBtn.disabled = false;
-  panelCountLabel.textContent = `${count} ${count === 1 ? 'Panel' : 'Panels'} Selected`;
-  runScanBtn.textContent = count > 1 ? `Run Multi-Panel Scan (${count} panels)` : 'Run compliance scan';
+  panelCountLabel.textContent = count === 1 ? t('panel_single_selected', '1 Panel Selected') : t('panels_multi_selected', '{count} Panels Selected').replace('{count}', count);
+  runScanBtn.textContent = count > 1 ? t('btn_run_multi_scan', 'Run Multi-Panel Scan ({count} panels)').replace('{count}', count) : t('btn_run_scan', 'Run compliance scan');
 
   selectedFiles.forEach((file, idx)=>{
     const card = document.createElement('div');
@@ -1317,9 +2032,9 @@ function updateGallery(){
 
     card.innerHTML = `
       <img src="${objUrl}" alt="Panel ${idx + 1}">
-      <button type="button" class="del-btn" onclick="removeFile(${idx})" title="Remove panel">✕</button>
+      <button type="button" class="del-btn" onclick="removeFile(${idx})" title="${t('remove_panel_title', 'Remove panel')}">✕</button>
       <div class="card-info">
-        <span class="badge">Panel ${idx + 1}</span>
+        <span class="badge">${t('panel_title', 'Panel {num}').replace('{num}', idx + 1)}</span>
         <span>${sizeKb} KB</span>
       </div>
     `;
@@ -1331,7 +2046,7 @@ function updateGallery(){
   addCard.className = 'gallery-add-card';
   addCard.innerHTML = `
     <div style="font-size:24px;">＋</div>
-    <div>Add Panel</div>
+    <div>${t('add_panel', 'Add Panel')}</div>
   `;
   addCard.onclick = () => fileInput.click();
   galleryGrid.appendChild(addCard);
@@ -1346,7 +2061,7 @@ async function openCameraModal(){
   const modal = document.getElementById('cameraModal');
   modal.classList.add('active');
   capturedInSession = 0;
-  document.getElementById('cameraSnapCount').textContent = '0 captured';
+  document.getElementById('cameraSnapCount').textContent = t('snap_counter_text', '{count} captured').replace('{count}', 0);
   await startCameraStream();
 }
 
@@ -1399,7 +2114,7 @@ function capturePhotoFrame(){
       const file = new File([blob], `camera_panel_${panelIndex}.jpg`, { type: 'image/jpeg' });
       selectedFiles.push(file);
       capturedInSession++;
-      document.getElementById('cameraSnapCount').textContent = `${capturedInSession} captured`;
+      document.getElementById('cameraSnapCount').textContent = t('snap_counter_text', '{count} captured').replace('{count}', capturedInSession);
       updateGallery();
 
       // Flash feedback
@@ -1434,7 +2149,7 @@ async function runScan(){
 
   const isMulti = selectedFiles.length > 1;
   const endpoint = isMulti ? '/scans/multi' : '/scans';
-  progress.textContent = isMulti ? `Uploading ${selectedFiles.length} panels to PackSight API…` : 'Uploading to PackSight API…';
+  progress.textContent = isMulti ? t('uploading_multi', `Uploading {count} panels to PackSight API…`).replace('{count}', selectedFiles.length) : t('uploading_single', 'Uploading to PackSight API…');
 
   const formData = new FormData();
   formData.append('product_name', document.getElementById('productName').value || 'Untitled scan');
@@ -1446,7 +2161,7 @@ async function runScan(){
   }
 
   try{
-    progress.textContent = isMulti ? `Running multi-panel OCR & rule engine (${selectedFiles.length} panels)…` : 'Running OCR + rule engine…';
+    progress.textContent = isMulti ? t('running_ocr_multi', `Running multi-panel OCR & rule engine ({count} panels)…`).replace('{count}', selectedFiles.length) : t('running_ocr_single', 'Running OCR + rule engine…');
     const res = await fetch(API_BASE + endpoint, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken },
@@ -1454,18 +2169,18 @@ async function runScan(){
     });
     if (res.status === 401) {
       logout();
-      alert("Session expired. Please sign in again.");
+      alert(t('session_expired', "Session expired. Please sign in again."));
       return;
     }
     const data = await res.json();
     if(!res.ok){
-      progress.textContent = data.detail || 'Scan failed.';
+      progress.textContent = data.detail || t('scan_failed', 'Scan failed.');
       btn.disabled = false;
       return;
     }
 
     renderReport(data.id, data.fields, data.score, data.has_violation, data.raw_ocr_text, data.product_name, data.created_at, data.annotated_image, data.brand_name, data.image_quality, data.original_image, data.barcode_data, data.veg_status, data.fssai_info, data.rule9_compliance, data.legal_liability);
-    progress.textContent = 'Done.';
+    progress.textContent = t('scan_done', 'Done.');
     loadDashboard();
   }catch(err){
     console.error("Scan processing error:", err);
@@ -1660,27 +2375,28 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
 
   // Statutory HUD Cards Configuration
   const STATUTORY_RULES = [
-    { id: 'LMPC_R6_1_C', label: 'Net Quantity', icon: '⚖️', rule: 'Rule 6(1)(c)' },
-    { id: 'LMPC_R6_1_E', label: 'MRP & Taxes', icon: '💰', rule: 'Rule 6(1)(e)' },
-    { id: 'LMPC_R6_1_D', label: 'Mfg / Packing Date', icon: '📅', rule: 'Rule 6(1)(d)' },
-    { id: 'LMPC_R6_1_PROVISO', label: 'Best Before / Expiry', icon: '⏳', rule: 'Proviso to R6(1)' },
-    { id: 'LMPC_R6_1_A', label: 'Manufacturer / Packer', icon: '🏭', rule: 'Rule 6(1)(a)' },
-    { id: 'LMPC_R6_1_B', label: 'Commodity Name', icon: '🏷️', rule: 'Rule 6(1)(b)' },
-    { id: 'LMPC_R6_1_F', label: 'Consumer Care', icon: '☎️', rule: 'Rule 6(1)(f)' },
-    { id: 'LMPC_R6_1_G', label: 'Country of Origin', icon: '🇮🇳', rule: 'Rule 6(1)(g)' },
-    { id: 'LMPC_USP', label: 'Unit Sale Price', icon: '📏', rule: 'Rule 6(11)' },
+    { id: 'LMPC_R6_1_C', labelKey: 'field_LMPC_R6_1_C', defaultLabel: 'Net Quantity', icon: '⚖️', rule: 'Rule 6(1)(c)' },
+    { id: 'LMPC_R6_1_E', labelKey: 'field_LMPC_R6_1_E', defaultLabel: 'MRP & Taxes', icon: '💰', rule: 'Rule 6(1)(e)' },
+    { id: 'LMPC_R6_1_D', labelKey: 'field_LMPC_R6_1_D', defaultLabel: 'Mfg / Packing Date', icon: '📅', rule: 'Rule 6(1)(d)' },
+    { id: 'LMPC_R6_1_PROVISO', labelKey: 'field_LMPC_R6_1_PROVISO', defaultLabel: 'Best Before / Expiry', icon: '⏳', rule: 'Proviso to R6(1)' },
+    { id: 'LMPC_R6_1_A', labelKey: 'field_LMPC_R6_1_A', defaultLabel: 'Manufacturer / Packer', icon: '🏭', rule: 'Rule 6(1)(a)' },
+    { id: 'LMPC_R6_1_B', labelKey: 'field_LMPC_R6_1_B', defaultLabel: 'Commodity Name', icon: '🏷️', rule: 'Rule 6(1)(b)' },
+    { id: 'LMPC_R6_1_F', labelKey: 'field_LMPC_R6_1_F', defaultLabel: 'Consumer Care', icon: '☎️', rule: 'Rule 6(1)(f)' },
+    { id: 'LMPC_R6_1_G', labelKey: 'field_LMPC_R6_1_G', defaultLabel: 'Country of Origin', icon: '🇮🇳', rule: 'Rule 6(1)(g)' },
+    { id: 'LMPC_USP', labelKey: 'field_LMPC_USP', defaultLabel: 'Unit Sale Price', icon: '📏', rule: 'Rule 6(11)' },
   ];
 
   const hudCardsHtml = STATUTORY_RULES.map(sr => {
     const match = fields.find(f => f.rule_id === sr.id);
     const verdict = match ? match.verdict.toLowerCase() : 'fail';
-    const val = match ? match.evidence : 'Missing or not declared';
-    const verdictLabel = verdict === 'pass' ? '✓ Verified' : (verdict === 'fail' ? '✕ Violation' : '? Review');
+    const val = match ? match.evidence : t('missing_declaration', 'Missing or not declared');
+    const verdictLabel = verdict === 'pass' ? t('verdict_verified', '✓ Verified') : (verdict === 'fail' ? t('verdict_violation', '✕ Violation') : t('verdict_review', '? Review'));
     const cardClass = verdict === 'pass' ? 'pass' : (verdict === 'fail' ? 'fail' : 'review');
+    const translatedLabel = t(sr.labelKey, sr.defaultLabel);
     return `
-      <div class="hud-card ${cardClass}" onclick="focusTableRow('${sr.id}')" title="Click to view '${sr.label}' in the audit table below">
+      <div class="hud-card ${cardClass}" onclick="focusTableRow('${sr.id}')" title="${translatedLabel}">
         <div class="hud-top">
-          <span class="hud-icon-label">${sr.icon} ${sr.label}</span>
+          <span class="hud-icon-label">${sr.icon} ${translatedLabel}</span>
           <span class="verdict-pill ${cardClass}">${verdictLabel}</span>
         </div>
         <div class="hud-val">${escapeHtml(val)}</div>
@@ -1690,13 +2406,17 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   }).join('');
 
   // Rows for full rule checklist table
-  const rowsHtml = fields.map(r=>`
-    <tr id="row-${r.rule_id}" class="rule-row verdict-${r.verdict.toLowerCase()}">
-      <td><span class="mono" style="color:var(--violet); font-size:11.5px; font-weight:600;">${r.rule_id}</span><br><strong>${escapeHtml(r.field)}</strong></td>
-      <td><span class="verdict-pill ${r.verdict.toLowerCase()}">${r.verdict.toLowerCase()==='pass'?'Compliant ✓':r.verdict.toLowerCase()==='fail'?'Violation ✕':'Needs review ?'}</span></td>
-      <td class="evidence" style="font-size:12.5px; line-height:1.45;">${escapeHtml(r.evidence || '')}</td>
-    </tr>
-  `).join('');
+  const rowsHtml = fields.map(r=>{
+    const translatedFieldName = t('field_' + r.rule_id, r.field);
+    const pillText = r.verdict.toLowerCase()==='pass' ? t('verdict_compliant_pill', 'Compliant ✓') : (r.verdict.toLowerCase()==='fail' ? t('verdict_violation_pill', 'Violation ✕') : t('verdict_review_pill', 'Needs review ?'));
+    return `
+      <tr id="row-${r.rule_id}" class="rule-row verdict-${r.verdict.toLowerCase()}">
+        <td><span class="mono" style="color:var(--violet); font-size:11.5px; font-weight:600;">${r.rule_id}</span><br><strong>${escapeHtml(translatedFieldName)}</strong></td>
+        <td><span class="verdict-pill ${r.verdict.toLowerCase()}">${pillText}</span></td>
+        <td class="evidence" style="font-size:12.5px; line-height:1.45;">${escapeHtml(r.evidence || '')}</td>
+      </tr>
+    `;
+  }).join('');
 
   const brandBadgeHtml = (brandName && brandName !== 'Packaged Commodity')
     ? `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(63,232,208,0.18); color:var(--cyan); border:1px solid rgba(63,232,208,0.45); padding:2px 10px; border-radius:20px; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; letter-spacing:0.02em;">🏷️ ${escapeHtml(brandName)}</span>`
@@ -1709,15 +2429,15 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   }
   if(vegStatus && vegStatus.detected){
     if(vegStatus.is_veg){
-      intelChips.push(`<span class="intel-chip veg"><span style="font-size:13px; color:#0f5132;">●</span> <strong>Veg Symbol:</strong> 100% Vegetarian (Verified)</span>`);
+      intelChips.push(`<span class="intel-chip veg"><span style="font-size:13px; color:#0f5132;">●</span> ${t('veg_verified', '<strong>Veg Symbol:</strong> 100% Vegetarian (Verified)')}</span>`);
     } else {
-      intelChips.push(`<span class="intel-chip nonveg"><span style="font-size:13px; color:#842029;">▲</span> <strong>Non-Veg Symbol:</strong> Non-Vegetarian</span>`);
+      intelChips.push(`<span class="intel-chip nonveg"><span style="font-size:13px; color:#842029;">▲</span> ${t('nonveg_verified', '<strong>Non-Veg Symbol:</strong> Non-Vegetarian')}</span>`);
     }
   } else if (vegStatus && !vegStatus.detected) {
-    intelChips.push(`<span class="intel-chip mono" style="color:var(--ink-soft);"><span class="chip-dot warn"></span> No Veg Symbol Detected</span>`);
+    intelChips.push(`<span class="intel-chip mono" style="color:var(--ink-soft);"><span class="chip-dot warn"></span> ${t('no_veg_detected', 'No Veg Symbol Detected')}</span>`);
   }
   if(fssaiInfo && fssaiInfo.detected){
-    intelChips.push(`<span class="intel-chip fssai mono"><span class="chip-dot ok"></span> <strong>FSSAI Lic:</strong> ${escapeHtml(fssaiInfo.license_number)} (${escapeHtml(fssaiInfo.type)})</span>`);
+    intelChips.push(`<span class="intel-chip fssai mono"><span class="chip-dot ok"></span> ${t('fssai_lic_chip', '<strong>FSSAI Lic:</strong>')} ${escapeHtml(fssaiInfo.license_number)} (${escapeHtml(fssaiInfo.type)})</span>`);
   }
   const intelBarHtml = intelChips.length ? `<div class="intel-bar">${intelChips.join('')}</div>` : '';
 
@@ -1738,13 +2458,13 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:26px;">🛡️</span>
           <div>
-            <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:#0f5132;">No Fine Allocated — Fully Compliant</div>
-            <div style="font-size:12px; color:#146c43; margin-top:2px;">Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.</div>
+            <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:#0f5132;">${t('clearance_title', 'No Fine Allocated — Fully Compliant')}</div>
+            <div style="font-size:12px; color:#146c43; margin-top:2px;">${t('clearance_desc', 'Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.')}</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:11.5px; padding:6px 12px;">✏️ Edit Details</button>
-          <span class="verdict-pill pass" style="font-size:12px; padding:6px 16px; font-weight:700;">₹0 Fine Allocated ✓</span>
+          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:11.5px; padding:6px 12px;">${t('btn_edit_details', '✏️ Edit Details')}</button>
+          <span class="verdict-pill pass" style="font-size:12px; padding:6px 16px; font-weight:700;">${t('fine_zero_pill', '₹0 Fine Allocated ✓')}</span>
         </div>
       </div>
     `;
@@ -1775,34 +2495,34 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="font-size:26px;">⚖️</span>
             <div>
-              <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">Statutory Legal Metrology Liability Assessment</div>
-              <div style="font-size:11.5px; color:#58151c;">Assessed under Section 36 of Legal Metrology Act, 2009 &amp; Rule 32 of LMPC Rules, 2011</div>
+              <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">${t('liability_title', 'Statutory Legal Metrology Liability Assessment')}</div>
+              <div style="font-size:11.5px; color:#58151c;">${t('liability_sub', 'Assessed under Section 36 of Legal Metrology Act, 2009 &amp; Rule 32 of LMPC Rules, 2011')}</div>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()">✏️ Correct / Enter Manually</button>
-            <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">📜 Download Show-Cause Notice (PDF)</button>
+            <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()">${t('btn_correct_manual', '✏️ Correct / Enter Manually')}</button>
+            <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">${t('btn_download_notice', '📜 Download Show-Cause Notice (PDF)')}</button>
           </div>
         </div>
         <div class="penalty-grid">
           <div class="penalty-box highlight">
-            <span class="p-label">Allocated Compounding Fine</span>
+            <span class="p-label">${t('compounding_fine_label', 'Allocated Compounding Fine')}</span>
             <span class="p-val">₹${allocatedFine.toLocaleString('en-IN')}</span>
-            <span class="p-sub">${failCount} Infraction${failCount > 1 ? 's' : ''} on this SKU (${compoundingText})</span>
+            <span class="p-sub">${failCount} Infraction${failCount > 1 ? 's' : ''} (${compoundingText})</span>
           </div>
           <div class="penalty-box">
-            <span class="p-label">Statutory 1st Offense Max</span>
+            <span class="p-label">${t('statutory_first_max', 'Statutory 1st Offense Max')}</span>
             <span class="p-val">Up to ₹25,000</span>
-            <span class="p-sub">Section 36(1) Ceiling</span>
+            <span class="p-sub">${t('section_ceiling', 'Section 36(1) Ceiling')}</span>
           </div>
           <div class="penalty-box">
-            <span class="p-label">Second Offense Liability</span>
+            <span class="p-label">${t('second_offense_label', 'Second Offense Liability')}</span>
             <span class="p-val">Up to ₹50,000</span>
-            <span class="p-sub">Escalated statutory fine</span>
+            <span class="p-sub">${t('escalated_fine', 'Escalated statutory fine')}</span>
           </div>
         </div>
         <div class="infraction-summary">
-          <strong>Itemized Infractions &amp; Penalty Allocation:</strong>
+          <strong>${t('itemized_summary_title', 'Itemized Infractions &amp; Penalty Allocation:')}</strong>
           <ul style="margin:8px 0 0 18px; line-height:1.55;">
             ${itemizedHtml}
           </ul>
@@ -1815,7 +2535,7 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   let rule9Html = '';
   if(rule9Compliance){
     const r9PillClass = rule9Compliance.verdict === 'pass' ? 'pass' : (rule9Compliance.verdict === 'fail' ? 'fail' : 'review');
-    const r9Label = rule9Compliance.verdict === 'pass' ? 'Compliant ✓' : (rule9Compliance.verdict === 'fail' ? 'Height Violation ✕' : 'Review Required ?');
+    const r9Label = rule9Compliance.verdict === 'pass' ? t('rule9_compliant', 'Compliant ✓') : (rule9Compliance.verdict === 'fail' ? t('rule9_violation', 'Height Violation ✕') : t('rule9_review', 'Review Required ?'));
 
     rule9Html = `
       <div class="rule9-card">
@@ -1823,27 +2543,27 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:18px;">📐</span>
             <div>
-              <strong style="font-size:14px;">Rule 9 Numeral &amp; Letter Height Compliance (Table 1)</strong>
-              <div style="font-size:11px; color:var(--ink-soft);">Calibrated metric height verification for Net Quantity declaration</div>
+              <strong style="font-size:14px;">${t('rule9_title', 'Rule 9 Numeral &amp; Letter Height Compliance (Table 1)')}</strong>
+              <div style="font-size:11px; color:var(--ink-soft);">${t('rule9_sub', 'Calibrated metric height verification for Net Quantity declaration')}</div>
             </div>
           </div>
           <span class="verdict-pill ${r9PillClass}">${r9Label}</span>
         </div>
         <div class="rule9-grid">
           <div class="rule9-item">
-            <span class="r9-label">Principal Display Panel (PDP)</span>
+            <span class="r9-label">${t('rule9_pdp', 'Principal Display Panel (PDP)')}</span>
             <span class="r9-val">${rule9Compliance.pdp_area_sq_cm} cm²</span>
           </div>
           <div class="rule9-item">
-            <span class="r9-label">Min. Prescribed Height</span>
+            <span class="r9-label">${t('rule9_min_height', 'Min. Prescribed Height')}</span>
             <span class="r9-val">≥ ${rule9Compliance.min_required_numeral_height_mm} mm</span>
           </div>
           <div class="rule9-item">
-            <span class="r9-label">Measured Numeral Height</span>
+            <span class="r9-label">${t('rule9_measured', 'Measured Numeral Height')}</span>
             <span class="r9-val">${rule9Compliance.measured_numeral_height_mm} mm</span>
           </div>
           <div class="rule9-item">
-            <span class="r9-label">Calibration Scale</span>
+            <span class="r9-label">${t('rule9_scale', 'Calibration Scale')}</span>
             <span class="r9-val">${rule9Compliance.scale_mm_per_px} mm/px</span>
           </div>
         </div>
@@ -1866,19 +2586,19 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
     qualityHtml = `
       <div class="quality-card">
         <div class="quality-metric">
-          <span class="q-label">Frame Quality</span>
+          <span class="q-label">${t('quality_frame', 'Frame Quality')}</span>
           <span class="verdict-pill ${qPillClass}">${escapeHtml(qStatus)}</span>
         </div>
         <div class="quality-metric">
-          <span class="q-label">Sharpness Score</span>
-          <span class="q-val">${imageQuality.blur_score != null ? imageQuality.blur_score : '—'} ${imageQuality.is_blurry ? '<span style="color:var(--stamp-red); font-size:11px;">(Blurry)</span>' : '<span style="color:var(--ok); font-size:11px;">(Sharp)</span>'}</span>
+          <span class="q-label">${t('quality_sharpness', 'Sharpness Score')}</span>
+          <span class="q-val">${imageQuality.blur_score != null ? imageQuality.blur_score : '—'} ${imageQuality.is_blurry ? `<span style="color:var(--stamp-red); font-size:11px;">${t('quality_blurry', '(Blurry)')}</span>` : `<span style="color:var(--ok); font-size:11px;">${t('quality_sharp', '(Sharp)')}</span>`}</span>
         </div>
         <div class="quality-metric">
-          <span class="q-label">Brightness</span>
+          <span class="q-label">${t('quality_brightness', 'Brightness')}</span>
           <span class="q-val">${imageQuality.brightness != null ? imageQuality.brightness : '—'} / 255</span>
         </div>
         <div class="quality-metric">
-          <span class="q-label">Specular Glare</span>
+          <span class="q-label">${t('quality_glare', 'Specular Glare')}</span>
           <span class="q-val">${imageQuality.glare_percent != null ? imageQuality.glare_percent + '%' : '0%'}</span>
         </div>
         ${recHtml}
@@ -1893,13 +2613,13 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
       <div class="studio-card">
         <div class="studio-head">
           <div class="studio-title">
-            <span>🔍</span> <strong>Statutory Visual Overlay Studio</strong>
-            <span style="font-size:11px; font-weight:normal; color:var(--ink-soft);">(Upright Rotated &amp; Super-Resolution Zoom)</span>
+            <span>🔍</span> <strong>${t('studio_title', 'Statutory Visual Overlay Studio')}</strong>
+            <span style="font-size:11px; font-weight:normal; color:var(--ink-soft);">${t('studio_subtitle', '(Upright Rotated &amp; Super-Resolution Zoom)')}</span>
           </div>
           <div class="view-switch">
-            <button type="button" id="btnModeOverlay" class="active" onclick="switchViewMode('overlay')">🟢 AI Highlight Overlay</button>
-            ${originalImage ? `<button type="button" id="btnModeOriginal" onclick="switchViewMode('original')">📷 Clean Packaging</button>
-            <button type="button" id="btnModeSplit" onclick="switchViewMode('split')">🔲 Side-by-Side</button>` : ''}
+            <button type="button" id="btnModeOverlay" class="active" onclick="switchViewMode('overlay')">${t('mode_overlay', '🟢 AI Highlight Overlay')}</button>
+            ${originalImage ? `<button type="button" id="btnModeOriginal" onclick="switchViewMode('original')">${t('mode_original', '📷 Clean Packaging')}</button>
+            <button type="button" id="btnModeSplit" onclick="switchViewMode('split')">${t('mode_split', '🔲 Side-by-Side')}</button>` : ''}
           </div>
           <div class="studio-controls">
             <div class="zoom-ctl">
@@ -1908,8 +2628,8 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
               <button type="button" onclick="zoomStep(0.25)" title="Zoom In">+</button>
               <span id="zoomPercent" style="font-family:'IBM Plex Mono', monospace; font-size:11px; width:36px; text-align:center;">100%</span>
             </div>
-            <button type="button" class="btn-tool" onclick="resetStudioZoom()" title="Reset Zoom">↺ Reset</button>
-            <button type="button" class="btn-tool" onclick="openLightbox()" title="View Fullscreen">⛶ Fullscreen</button>
+            <button type="button" class="btn-tool" onclick="resetStudioZoom()" title="Reset Zoom">${t('btn_reset', '↺ Reset')}</button>
+            <button type="button" class="btn-tool" onclick="openLightbox()" title="View Fullscreen">${t('btn_fullscreen', '⛶ Fullscreen')}</button>
           </div>
         </div>
 
@@ -1935,11 +2655,11 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
 
         <div class="studio-foot">
           <div class="legend-chips">
-            <span class="legend-chip"><span class="dot" style="background:var(--ok);"></span> <strong>Green Box:</strong> Compliant Statutory Declaration</span>
-            <span class="legend-chip"><span class="dot" style="background:var(--stamp-red);"></span> <strong>Red Box:</strong> Violation / Missing Tax Statement</span>
-            <span class="legend-chip"><span class="dot" style="background:var(--warn);"></span> <strong>Amber Box:</strong> Schedule II / Review Item</span>
+            <span class="legend-chip"><span class="dot" style="background:var(--ok);"></span> ${t('legend_green', '<strong>Green Box:</strong> Compliant Statutory Declaration')}</span>
+            <span class="legend-chip"><span class="dot" style="background:var(--stamp-red);"></span> ${t('legend_red', '<strong>Red Box:</strong> Violation / Missing Tax Statement')}</span>
+            <span class="legend-chip"><span class="dot" style="background:var(--warn);"></span> ${t('legend_amber', '<strong>Amber Box:</strong> Schedule II / Review Item')}</span>
           </div>
-          <div>💡 Drag image to pan &nbsp;|&nbsp; Scroll wheel to zoom</div>
+          <div>${t('studio_tip', '💡 Drag image to pan &nbsp;|&nbsp; Scroll wheel to zoom')}</div>
         </div>
       </div>
     `;
@@ -1949,12 +2669,12 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
   const filterBarHtml = `
     <div class="filter-bar">
       <div class="filter-pills">
-        <button type="button" class="filter-btn active" onclick="filterReportTable('all', this)">All Declarations (${fields.length})</button>
-        <button type="button" class="filter-btn" onclick="filterReportTable('fail', this)">🔴 Violations (${failCount})</button>
-        <button type="button" class="filter-btn" onclick="filterReportTable('pass', this)">🟢 Compliant (${passCount})</button>
-        <button type="button" class="filter-btn" onclick="filterReportTable('review', this)">🟡 Review (${reviewCount})</button>
+        <button type="button" class="filter-btn active" onclick="filterReportTable('all', this)">${t('filter_all', 'All Declarations ({count})').replace('{count}', fields.length)}</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('fail', this)">${t('filter_fail', '🔴 Violations ({count})').replace('{count}', failCount)}</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('pass', this)">${t('filter_pass', '🟢 Compliant ({count})').replace('{count}', passCount)}</button>
+        <button type="button" class="filter-btn" onclick="filterReportTable('review', this)">${t('filter_review', '🟡 Review ({count})').replace('{count}', reviewCount)}</button>
       </div>
-      <input type="text" class="search-rule-input" placeholder="Search rules / evidence..." oninput="searchReportTable(this.value)">
+      <input type="text" class="search-rule-input" placeholder="${t('ph_search_rules', 'Search rules / evidence...')}" oninput="searchReportTable(this.value)">
     </div>
   `;
 
@@ -1962,19 +2682,19 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
     <div class="report-shell">
       <div class="report-top">
         <div>
-          <div class="title" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">Compliance Report ${brandBadgeHtml}</div>
+          <div class="title" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">${t('report_title', 'Compliance Report')} ${brandBadgeHtml}</div>
           <div class="meta">${escapeHtml(productName || 'Untitled scan')} · ${new Date(createdAt || Date.now()).toLocaleString()}</div>
         </div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:12px; padding:7px 14px; background:var(--white); color:var(--ink);">✏️ Manual Entry / Edit</button>
-          ${hasViolation ? `<button class="pill-btn" onclick="downloadNoticePdf(${scanId})" style="font-size:12px; padding:8px 14px; background:#f8d7da; color:#842029; border:1px solid #f5c2c7; font-weight:700;">⚖️ Legal Show-Cause Notice</button>` : ''}
-          <button class="pill-btn solid" onclick="downloadPdf(${scanId})" style="font-size:12.5px; padding:8px 16px;">📥 Download Audit PDF</button>
+          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:12px; padding:7px 14px; background:var(--white); color:var(--ink);">${t('btn_manual_edit', '✏️ Manual Entry / Edit')}</button>
+          ${hasViolation ? `<button class="pill-btn" onclick="downloadNoticePdf(${scanId})" style="font-size:12px; padding:8px 14px; background:#f8d7da; color:#842029; border:1px solid #f5c2c7; font-weight:700;">${t('btn_legal_notice', '⚖️ Legal Show-Cause Notice')}</button>` : ''}
+          <button class="pill-btn solid" onclick="downloadPdf(${scanId})" style="font-size:12.5px; padding:8px 16px;">${t('btn_download_pdf', '📥 Download Audit PDF')}</button>
           <div class="score-badge">${score}</div>
         </div>
       </div>
       <div class="report-body">
         <div class="stamp-wrap">
-          <div class="stamp ${hasViolation?'violation':'compliant'}">${hasViolation?'Violation found':'Compliant'}</div>
+          <div class="stamp ${hasViolation?'violation':'compliant'}">${hasViolation? t('stamp_violation', 'Violation found') : t('stamp_compliant', 'Compliant')}</div>
         </div>
         ${intelBarHtml}
         ${legalHtml}
@@ -1983,8 +2703,8 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
         <!-- Key Statutory Declarations HUD -->
         <div class="statutory-hud">
           <div class="hud-title">
-            <h3>Mandatory Declarations Overview</h3>
-            <span style="font-size:12px; color:var(--ink-soft);">Legal Metrology (Packaged Commodities) Rules, 2011</span>
+            <h3>${t('hud_overview_title', 'Mandatory Declarations Overview')}</h3>
+            <span style="font-size:12px; color:var(--ink-soft);">${t('hud_overview_sub', 'Legal Metrology (Packaged Commodities) Rules, 2011')}</span>
           </div>
           <div class="hud-grid">
             ${hudCardsHtml}
@@ -2002,13 +2722,13 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
 
         <!-- Complete Audit Table -->
         <table class="field-table">
-          <tr><th>Statutory Declaration</th><th>Verdict</th><th>Extracted Evidence &amp; Findings</th></tr>
+          <tr><th>${t('th_statutory_decl', 'Statutory Declaration')}</th><th>${t('th_verdict', 'Verdict')}</th><th>${t('th_extracted_evidence', 'Extracted Evidence &amp; Findings')}</th></tr>
           ${rowsHtml}
         </table>
 
         <details class="raw-ocr">
-          <summary>Raw Multi-Pass OCR Text (for legal archive)</summary>
-          ${escapeHtml(ocrText || '(no text detected)')}
+          <summary>${t('raw_ocr_summary', 'Raw Multi-Pass OCR Text (for legal archive)')}</summary>
+          ${escapeHtml(ocrText || t('no_text_detected', '(no text detected)'))}
         </details>
       </div>
     </div>
@@ -2098,8 +2818,8 @@ function openManualEntryModal(isNew = false) {
   const submitBtn = document.getElementById('btnSubmitManual');
 
   if(isNew || !window.currentScanData){
-    if(titleEl) titleEl.textContent = '✏️ Manual Declaration Entry (Direct Inspection)';
-    if(submitBtn) submitBtn.textContent = '✓ Create Manual Scan & Audit';
+    if(titleEl) titleEl.textContent = t('manual_modal_title', '✏️ Manual Declaration Entry & Verification');
+    if(submitBtn) submitBtn.textContent = t('btn_create_manual', '✓ Create Manual Scan & Audit');
     document.getElementById('manualProdName').value = '';
     document.getElementById('manualBrandName').value = '';
     document.getElementById('manualNetQty').value = '';
@@ -2115,7 +2835,7 @@ function openManualEntryModal(isNew = false) {
     document.getElementById('manualVegStatus').value = 'veg';
   } else {
     if(titleEl) titleEl.textContent = '✏️ Override / Correct Declarations (Scan #' + window.currentScanData.scanId + ')';
-    if(submitBtn) submitBtn.textContent = '✓ Save Override & Recalculate Compliance';
+    if(submitBtn) submitBtn.textContent = t('btn_save_recalc', '✓ Save & Recalculate Compliance');
 
     const getFieldVal = (ruleId) => {
       if(!window.currentScanData.fields) return '';
@@ -2160,7 +2880,7 @@ async function submitManualEntry(){
   const submitBtn = document.getElementById('btnSubmitManual');
   const originalText = submitBtn.textContent;
   submitBtn.disabled = true;
-  submitBtn.textContent = '⏳ Evaluating Compliance & Penalties…';
+  submitBtn.textContent = t('manual_evaluating', '⏳ Evaluating Compliance & Penalties…');
 
   const payload = {
     product_name: document.getElementById('manualProdName').value.trim() || 'Manual Inspected Commodity',
@@ -2202,7 +2922,7 @@ async function submitManualEntry(){
 
     if(res.status === 401){
       logout();
-      alert("Session expired. Please sign in again.");
+      alert(t('session_expired', "Session expired. Please sign in again."));
       return;
     }
 
@@ -2253,7 +2973,7 @@ async function loadDashboard(){
     ]);
     if (statsRes.status === 401 || scansRes.status === 401) {
       logout();
-      alert("Session expired. Please sign in again.");
+      alert(t('session_expired', "Session expired. Please sign in again."));
       return;
     }
     const stats = await statsRes.json();
@@ -2273,7 +2993,7 @@ async function loadDashboard(){
     }
     wrap.innerHTML = `
       <table class="history-table">
-        <tr><th>Product</th><th>Timestamp</th><th>Score</th><th>Status</th><th>Violations</th><th>Actions</th></tr>
+        <tr><th>${t('th_product', 'Product')}</th><th>${t('th_timestamp', 'Timestamp')}</th><th>${t('th_score', 'Score')}</th><th>${t('th_status', 'Status')}</th><th>${t('th_violations', 'Violations')}</th><th>${t('th_actions', 'Actions')}</th></tr>
         ${scans.map(h=>`
           <tr>
             <td>
@@ -2283,12 +3003,12 @@ async function loadDashboard(){
             </td>
             <td class="mono">${new Date(h.created_at).toLocaleString()}</td>
             <td class="mono">${h.score}%</td>
-            <td><span class="verdict-pill ${h.has_violation?'fail':'pass'}">${h.has_violation?'Violation':'Compliant'}</span></td>
+            <td><span class="verdict-pill ${h.has_violation?'fail':'pass'}">${h.has_violation? t('stamp_violation', 'Violation') : t('stamp_compliant', 'Compliant')}</span></td>
             <td class="mono">${h.fail_count}</td>
             <td>
-              <button type="button" class="btn-inspect" onclick="viewHistoricalScan(${h.id})">👁️ Inspect</button>
-              <button type="button" class="btn-pdf" onclick="downloadPdf(${h.id})">📥 PDF</button>
-              ${h.has_violation ? `<button type="button" class="btn-notice" onclick="downloadNoticePdf(${h.id})" title="Download Statutory Form LMPC-INSP Notice">⚖️ Notice</button>` : ''}
+              <button type="button" class="btn-inspect" onclick="viewHistoricalScan(${h.id})">${t('btn_inspect', '👁️ Inspect')}</button>
+              <button type="button" class="btn-pdf" onclick="downloadPdf(${h.id})">${t('btn_pdf', '📥 PDF')}</button>
+              ${h.has_violation ? `<button type="button" class="btn-notice" onclick="downloadNoticePdf(${h.id})" title="Download Statutory Form LMPC-INSP Notice">${t('btn_notice', '⚖️ Notice')}</button>` : ''}
             </td>
           </tr>
         `).join('')}
@@ -2302,13 +3022,17 @@ async function loadDashboard(){
 
 // ---------------- Session Auto-Restore on Page Load ----------------
 window.addEventListener('DOMContentLoaded', () => {
+  // Restore language preference
+  const savedLang = localStorage.getItem('ps_lang') || 'en';
+  setLanguage(savedLang);
+
   const savedToken = localStorage.getItem('ps_token');
   const savedUser = localStorage.getItem('ps_user');
   const savedUserId = localStorage.getItem('ps_userid');
 
   if(savedToken && savedUserId){
     authToken = savedToken;
-    currentUser = savedUser || 'Inspector';
+    currentUser = savedUser || (savedLang === 'hi' ? 'निरीक्षक' : 'Inspector');
     document.getElementById('userChip').textContent = '@' + savedUserId;
     document.getElementById('homeUserName').textContent = currentUser;
     goTo('home');
