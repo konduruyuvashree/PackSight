@@ -58,6 +58,38 @@ class StatSummary(BaseModel):
     avg_score: Optional[float] = None
 
 
+class ManualScanRequest(BaseModel):
+    product_name: str = "Manual Commodity Inspection"
+    brand_name: Optional[str] = None
+    net_quantity: Optional[str] = None
+    mrp: Optional[str] = None
+    mrp_inclusive_taxes: bool = True
+    mfg_date: Optional[str] = None
+    expiry_date: Optional[str] = None
+    manufacturer: Optional[str] = None
+    consumer_care: Optional[str] = None
+    country_of_origin: Optional[str] = "India"
+    unit_sale_price: Optional[str] = None
+    fssai_license: Optional[str] = None
+    veg_status: Optional[str] = None
+
+
+class ManualScanOverride(BaseModel):
+    product_name: Optional[str] = None
+    brand_name: Optional[str] = None
+    net_quantity: Optional[str] = None
+    mrp: Optional[str] = None
+    mrp_inclusive_taxes: Optional[bool] = True
+    mfg_date: Optional[str] = None
+    expiry_date: Optional[str] = None
+    manufacturer: Optional[str] = None
+    consumer_care: Optional[str] = None
+    country_of_origin: Optional[str] = None
+    unit_sale_price: Optional[str] = None
+    fssai_license: Optional[str] = None
+    veg_status: Optional[str] = None
+
+
 # Aliases for backwards and alternative naming conventions
 SignupRequest = UserSignup
 LoginRequest = UserLogin

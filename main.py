@@ -20,6 +20,7 @@ from auth_utils import (
 from ocr_rules import (
     evaluate_label_rules, run_tesseract_ocr, extract_text_with_boxes,
     annotate_image, extract_text, run_rule_engine, score_and_verdict,
+    evaluate_manual_override,
 )
 from report_generator import generate_compliance_pdf_report, generate_legal_show_cause_notice_pdf
 from scanner import run_advanced_scan, assess_image_quality
@@ -336,6 +337,110 @@ async def create_multi_scan(
     db.refresh(db_scan)
 
     return _scan_to_response(db_scan)
+
+
+@app.put("/scans/{scan_id}/manual-override", response_model=schemas.ScanResponse)
+def manual_override_scan(
+    scan_id: int,
+    override_data: schemas.ManualScanOverride,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    Manually enter or correct statutory declarations for a scan when OCR is unable to read.
+    Automatically recalculates compliance score and allocates fine only when violations persist.
+    """
+    scan = (
+        db.query(models.Scan)
+        .filter(models.Scan.id == scan_id)
+        .filter((models.Scan.user_id == current_user.id) | (models.Scan.owner_id == current_user.id))
+        .first()
+    )
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+
+    existing_fields = json.loads(scan.fields_json) if scan.fields_json else []
+    manual_dict = override_data.model_dump(exclude_unset=True)
+
+    eval_result = evaluate_manual_override(
+        manual_data=manual_dict,
+        existing_fields=existing_fields,
+        raw_ocr_text=scan.raw_ocr_text or ""
+    )
+
+    if override_data.product_name:
+        scan.product_name = override_data.product_name
+    if override_data.brand_name:
+        scan.brand_name = override_data.brand_name
+
+    scan.score = eval_result["score"]
+    scan.has_violation = eval_result["has_violation"]
+    scan.fail_count = eval_result["fail_count"]
+    scan.fields_json = json.dumps(eval_result["fields"])
+
+    adv = json.loads(scan.advancements_json) if scan.advancements_json else {}
+    adv["fssai_info"] = eval_result.get("fssai")
+    adv["legal_liability"] = eval_result.get("statutory_liability")
+    if override_data.veg_status:
+        v_stat = override_data.veg_status.lower()
+        if v_stat in ["veg", "vegetarian"]:
+            adv["veg_status"] = {"detected": True, "is_veg": True, "symbol": "Vegetarian", "color": "Green"}
+        elif v_stat in ["non_veg", "non-veg", "nonveg"]:
+            adv["veg_status"] = {"detected": True, "is_veg": False, "symbol": "Non-Vegetarian", "color": "Brown"}
+
+    scan.advancements_json = json.dumps(adv)
+    db.commit()
+    db.refresh(scan)
+    return _scan_to_response(scan)
+
+
+@app.post("/scans/manual", response_model=schemas.ScanResponse)
+def create_manual_scan(
+    manual_data: schemas.ManualScanRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    Direct manual declaration entry without packaging photograph.
+    Runs complete Legal Metrology rule engine and statutory liability assessment.
+    """
+    manual_dict = manual_data.model_dump()
+    eval_result = evaluate_manual_override(manual_data=manual_dict)
+
+    adv_dict = {
+        "barcode_data": None,
+        "veg_status": None,
+        "fssai_info": eval_result.get("fssai"),
+        "rule9_compliance": None,
+        "legal_liability": eval_result.get("statutory_liability"),
+        "is_manual_entry": True
+    }
+    if manual_data.veg_status:
+        v_stat = manual_data.veg_status.lower()
+        if v_stat in ["veg", "vegetarian"]:
+            adv_dict["veg_status"] = {"detected": True, "is_veg": True, "symbol": "Vegetarian", "color": "Green"}
+        elif v_stat in ["non_veg", "non-veg", "nonveg"]:
+            adv_dict["veg_status"] = {"detected": True, "is_veg": False, "symbol": "Non-Vegetarian", "color": "Brown"}
+
+    scan = models.Scan(
+        user_id=current_user.id,
+        owner_id=current_user.id,
+        product_name=manual_data.product_name or "Manual Commodity Inspection",
+        score=eval_result["score"],
+        has_violation=eval_result["has_violation"],
+        fail_count=eval_result["fail_count"],
+        raw_ocr_text="[Manual Inspection Entry by Inspector]",
+        fields_json=json.dumps(eval_result["fields"]),
+        brand_name=manual_data.brand_name or "Packaged Commodity",
+        annotated_image=None,
+        original_image=None,
+        image_quality_json=None,
+        advancements_json=json.dumps(adv_dict),
+    )
+    db.add(scan)
+    db.commit()
+    db.refresh(scan)
+    return _scan_to_response(scan)
 
 
 @app.get("/scans/{scan_id}/pdf")

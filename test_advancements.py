@@ -144,7 +144,76 @@ def test_api_advancements_endpoints():
     assert batch_data[0]["product_name"] == "Sku1"
     assert batch_data[1]["product_name"] == "Sku2"
 
-    print("\n[ALL ADVANCEMENTS TESTS PASSED!]")
+
+def test_manual_entry_and_fine_allocation():
+    user_id = f"manual_user_{os.getpid()}"
+    signup_resp = client.post("/auth/signup", json={"full_name": "Manual Inspector", "user_id": user_id, "password": "securepassword123"})
+    assert signup_resp.status_code == 200
+    token = signup_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Image with missing fields (only shows brand name)
+    img_bytes = create_synthetic_label_image("JUST A LOGO")
+    scan_resp = client.post("/scans", headers=headers, files={"image": ("logo.png", img_bytes, "image/png")}, data={"product_name": "Unknown Product"})
+    assert scan_resp.status_code == 200
+    scan_data = scan_resp.json()
+    scan_id = scan_data["id"]
+    assert scan_data["has_violation"] is True
+    assert scan_data["legal_liability"]["allocated_fine"] > 0
+    assert scan_data["legal_liability"]["has_liability"] is True
+
+    # 2. Manual override: Inspector enters all mandatory details
+    override_payload = {
+        "product_name": "Premium Almonds 250g",
+        "brand_name": "NutriTreat",
+        "net_quantity": "250 g",
+        "mrp": "Rs. 250 (incl. of all taxes)",
+        "mrp_inclusive_taxes": True,
+        "mfg_date": "04/2026",
+        "expiry_date": "12 Months from packing",
+        "manufacturer": "NutriTreat Foods Pvt Ltd, GIDC Mumbai",
+        "consumer_care": "care@nutritreat.com / 1800-11-2233",
+        "country_of_origin": "India",
+        "unit_sale_price": "Rs. 1.00 / g",
+        "fssai_license": "10012063000064",
+        "veg_status": "veg"
+    }
+    override_resp = client.put(f"/scans/{scan_id}/manual-override", headers=headers, json=override_payload)
+    assert override_resp.status_code == 200
+    updated_data = override_resp.json()
+    assert updated_data["score"] == 100
+    assert updated_data["has_violation"] is False
+    assert updated_data["fail_count"] == 0
+    # Crucial assertion: ZERO FINE ALLOCATED when all declarations satisfied
+    assert updated_data["legal_liability"]["has_liability"] is False
+    assert updated_data["legal_liability"]["allocated_fine"] == 0
+    assert "No Fine Allocated" in updated_data["legal_liability"]["penalty_display"]
+
+    # 3. Direct manual scan endpoint (no image required)
+    manual_scan_payload = {
+        "product_name": "Direct Manual Tea 500g",
+        "brand_name": "Tata Tea",
+        "net_quantity": "500 g",
+        "mrp": "Rs. 180",
+        "mrp_inclusive_taxes": True,
+        "mfg_date": "01/2026",
+        "expiry_date": "12 Months",
+        "manufacturer": "Tata Consumer Products Ltd, Kolkata",
+        "consumer_care": "1800-345-1720",
+        "country_of_origin": "India",
+        "unit_sale_price": "Rs. 0.36 / g",
+        "fssai_license": "10014031001025",
+        "veg_status": "veg"
+    }
+    direct_resp = client.post("/scans/manual", headers=headers, json=manual_scan_payload)
+    assert direct_resp.status_code == 200
+    direct_data = direct_resp.json()
+    assert direct_data["score"] == 100
+    assert direct_data["has_violation"] is False
+    assert direct_data["legal_liability"]["allocated_fine"] == 0
+    assert direct_data["legal_liability"]["has_liability"] is False
+
+    print("\n[ALL ADVANCEMENTS & MANUAL ENTRY TESTS PASSED!]")
 
 if __name__ == "__main__":
     test_fssai_extractor()
@@ -159,3 +228,5 @@ if __name__ == "__main__":
     print("[PASS] Legal Show-Cause Notice PDF Generator test")
     test_api_advancements_endpoints()
     print("[PASS] API Advancements Endpoints test")
+    test_manual_entry_and_fine_allocation()
+    print("[PASS] Manual Entry & Fine Allocation test")

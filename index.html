@@ -625,12 +625,37 @@
     background:var(--white); border:1px solid rgba(225,75,75,0.25); border-radius:10px;
     padding:12px 14px; display:flex; flex-direction:column; gap:4px;
   }
+  .penalty-box.highlight{border-color:var(--stamp-red); background:#FFF5F5;}
   .penalty-box .p-label{font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#842029; font-weight:700;}
   .penalty-box .p-val{font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:800; color:#b71c1c;}
   .penalty-box .p-sub{font-size:10.5px; color:var(--ink-soft);}
   .infraction-summary{
     font-size:12px; line-height:1.5; color:#58151c; padding-top:10px; border-top:1px dashed #f5c2c7;
   }
+  .btn-manual-edit{
+    background:linear-gradient(135deg, rgba(63,232,208,0.2), rgba(155,123,247,0.2));
+    border:1px solid var(--violet); color:var(--deep); border-radius:20px;
+    padding:8px 16px; font-family:'IBM Plex Sans', sans-serif; font-size:12px; font-weight:700;
+    cursor:pointer; transition:all .18s ease; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-manual-edit:hover{background:var(--violet); color:white;}
+
+  /* Manual Entry Modal Styles */
+  .manual-modal{display:none; position:fixed; inset:0; background:rgba(10,11,26,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto;}
+  .manual-modal.active{display:flex; animation:fadeIn .2s ease;}
+  .manual-box{background:var(--white); border-radius:18px; width:100%; max-width:800px; max-height:92vh; overflow-y:auto; box-shadow:var(--shadow); border:1px solid var(--paper-line); display:flex; flex-direction:column;}
+  .manual-head{padding:20px 24px; border-bottom:1px solid var(--paper-line); display:flex; justify-content:space-between; align-items:center; background:var(--ink); color:var(--paper); border-radius:17px 17px 0 0;}
+  .manual-body{padding:24px; display:flex; flex-direction:column; gap:16px;}
+  .manual-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:680px){.manual-grid{grid-template-columns:1fr;}}
+  .manual-field{display:flex; flex-direction:column; gap:5px;}
+  .manual-field label{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft);}
+  .manual-field input, .manual-field select, .manual-field textarea{
+    font-family:'IBM Plex Sans', sans-serif; font-size:13px; padding:9px 12px;
+    border:1px solid var(--paper-line); border-radius:8px; background:var(--white); color:var(--ink);
+  }
+  .manual-field input:focus, .manual-field select:focus, .manual-field textarea:focus{outline:none; border-color:var(--violet);}
+  .manual-foot{padding:16px 24px; border-top:1px solid var(--paper-line); display:flex; justify-content:flex-end; gap:12px; background:var(--paper);}
 
   .rule9-card{
     background:var(--white); border:1.5px solid var(--paper-line); border-radius:14px;
@@ -864,6 +889,7 @@
           <button type="button" class="upload-btn primary" onclick="fileInput.click()">📁 Choose Files</button>
           <button type="button" class="upload-btn" onclick="openCameraModal()">📷 Open Camera</button>
           <button type="button" class="upload-btn" onclick="cameraInput.click()">📱 Snap Photo</button>
+          <button type="button" class="upload-btn" onclick="openManualEntryModal(true)">✏️ Enter Manually</button>
         </div>
       </div>
 
@@ -900,6 +926,11 @@
         <button class="btn btn-ghost" id="clearPanelsBtn" style="display:none;" onclick="clearAllPanels()">Clear panels</button>
         <span class="progress" id="progressText"></span>
       </div>
+
+      <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--paper-line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <span style="font-size:12.5px; color:var(--ink-soft);">Can't scan clearly or no packaging photo?</span>
+        <button type="button" class="btn-manual-edit" onclick="openManualEntryModal(true)">✏️ Enter Declarations Manually (Direct Inspection)</button>
+      </div>
     </div>
 
     <!-- Live Camera Viewfinder Modal -->
@@ -920,6 +951,89 @@
             <div class="snap-counter" id="cameraSnapCount" style="margin-top:4px;">0 captured</div>
           </div>
           <button type="button" class="upload-btn primary" onclick="closeCameraModal()">✓ Done & Review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual Declaration Entry & Verification Modal -->
+    <div class="manual-modal" id="manualEntryModal">
+      <div class="manual-box">
+        <div class="manual-head">
+          <div>
+            <div style="font-family:'Fraunces', serif; font-size:18px; font-weight:700;">✏️ Manual Declaration Entry &amp; Verification</div>
+            <div style="font-size:12px; opacity:0.8; margin-top:2px;">Enter or correct packaging declarations if OCR could not detect them clearly.</div>
+          </div>
+          <button type="button" class="btn-ghost" style="color:white; border:none; font-size:20px; cursor:pointer;" onclick="closeManualEntryModal()">✕</button>
+        </div>
+        <div class="manual-body">
+          <div style="background:rgba(155,123,247,0.08); border:1px solid rgba(155,123,247,0.25); border-radius:10px; padding:12px 16px; font-size:12.5px; color:var(--ink-soft); line-height:1.5;">
+            💡 <strong>Inspector Guidance:</strong> Entering valid declarations will automatically update compliance to <span style="color:var(--ok); font-weight:700;">Compliant (100%)</span> and set statutory legal liability to <span style="color:var(--ok); font-weight:700;">No Fine Allocated (₹0)</span>.
+          </div>
+
+          <div class="manual-grid">
+            <div class="manual-field">
+              <label>Commodity / Product Name <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualProdName" placeholder="e.g. Roasted Almonds / Condensed Milk">
+            </div>
+            <div class="manual-field">
+              <label>Brand Name</label>
+              <input type="text" id="manualBrandName" placeholder="e.g. Candor / Amul / Parle">
+            </div>
+            <div class="manual-field">
+              <label>Net Quantity (Rule 6(1)(c)) <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualNetQty" placeholder="e.g. 200 g, 500 ml, 1 kg, 10 N">
+            </div>
+            <div class="manual-field">
+              <label>Maximum Retail Price (MRP - Rule 6(1)(e)) <span style="color:var(--stamp-red);">*</span></label>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="manualMrp" placeholder="e.g. 100.00 / Rs. 100" style="flex:1;">
+                <label style="display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer; text-transform:none; color:var(--ink); white-space:nowrap;">
+                  <input type="checkbox" id="manualMrpTaxes" checked style="width:16px; height:16px;">
+                  Incl. all taxes
+                </label>
+              </div>
+            </div>
+            <div class="manual-field">
+              <label>Mfg / Packing Date (Rule 6(1)(d)) <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualMfgDate" placeholder="e.g. 04/2026 or 27/04/2026">
+            </div>
+            <div class="manual-field">
+              <label>Best Before / Expiry (Proviso R6(1)) <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualExpDate" placeholder="e.g. 12 Months or 28/10/2026">
+            </div>
+            <div class="manual-field" style="grid-column:1 / -1;">
+              <label>Manufacturer / Packer Name &amp; Address (Rule 6(1)(a)) <span style="color:var(--stamp-red);">*</span></label>
+              <textarea id="manualMfr" rows="2" placeholder="e.g. Candor Foods Pvt. Ltd., Plot W-13, MIDC Taloja, Navi Mumbai - 410208"></textarea>
+            </div>
+            <div class="manual-field">
+              <label>Consumer Care (Phone / Email - Rule 6(1)(f)) <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualConsumerCare" placeholder="e.g. 022-71230555 / care@candor.com">
+            </div>
+            <div class="manual-field">
+              <label>Country of Origin (Rule 6(1)(g)) <span style="color:var(--stamp-red);">*</span></label>
+              <input type="text" id="manualOrigin" placeholder="e.g. India" value="India">
+            </div>
+            <div class="manual-field">
+              <label>Unit Sale Price (USP - Rule 6(11))</label>
+              <input type="text" id="manualUsp" placeholder="e.g. ₹0.50 / g">
+            </div>
+            <div class="manual-field">
+              <label>14-Digit FSSAI License Number</label>
+              <input type="text" id="manualFssai" placeholder="e.g. 10012063000064" maxlength="14">
+            </div>
+            <div class="manual-field" style="grid-column:1 / -1;">
+              <label>Food Classification / Symbol</label>
+              <select id="manualVegStatus">
+                <option value="veg">🟢 100% Vegetarian (Green Circle Symbol)</option>
+                <option value="non_veg">🟤 Non-Vegetarian (Brown Triangle Symbol)</option>
+                <option value="none">⚪ General Commodity / Non-Food</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="manual-foot">
+          <button type="button" class="btn btn-ghost" onclick="closeManualEntryModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnSubmitManual" onclick="submitManualEntry()">✓ Save &amp; Recalculate Compliance</button>
         </div>
       </div>
     </div>
@@ -1598,59 +1712,90 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
 
   // Advancements: Statutory Legal Liability (Section 36) / Clearance Banner
   let legalHtml = '';
-  if(hasViolation || (legalLiability && legalLiability.statutory_infractions && legalLiability.statutory_infractions.length > 0)){
-    const fine1 = (legalLiability && legalLiability.first_offense_fine) ? legalLiability.first_offense_fine : 25000;
-    const fine2 = (legalLiability && legalLiability.second_offense_fine) ? legalLiability.second_offense_fine : 50000;
-    const compoundingText = (legalLiability && legalLiability.compounding_applicable) ? 'Eligible for Compounding (Sec 48)' : 'Non-Compoundable';
-    const infractions = (legalLiability && legalLiability.statutory_infractions && legalLiability.statutory_infractions.length > 0)
-      ? legalLiability.statutory_infractions.join('; ')
-      : 'Non-compliance with mandatory packaged commodity declarations under Rule 6.';
+  const hasLiability = (legalLiability && legalLiability.has_liability != null)
+    ? legalLiability.has_liability
+    : (hasViolation && failCount > 0);
+
+  const allocatedFine = (legalLiability && legalLiability.allocated_fine != null)
+    ? legalLiability.allocated_fine
+    : ((legalLiability && legalLiability.first_offense_fine) ? legalLiability.first_offense_fine : (hasLiability ? (failCount * 5000) : 0));
+
+  if (!hasLiability || allocatedFine === 0 || !hasViolation) {
+    // ZERO FINE ALLOCATED — FULLY COMPLIANT
+    legalHtml = `
+      <div class="legal-clearance-card">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:26px;">🛡️</span>
+          <div>
+            <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:#0f5132;">No Fine Allocated — Fully Compliant</div>
+            <div style="font-size:12px; color:#146c43; margin-top:2px;">Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:11.5px; padding:6px 12px;">✏️ Edit Details</button>
+          <span class="verdict-pill pass" style="font-size:12px; padding:6px 16px; font-weight:700;">₹0 Fine Allocated ✓</span>
+        </div>
+      </div>
+    `;
+  } else {
+    // VIOLATIONS FOUND — ALLOCATED FINE SPECIFIC TO THIS COMMODITY
+    const compoundingText = (legalLiability && legalLiability.compounding_applicable) ? 'Eligible for Compounding (Sec 48)' : 'Court Cognizance';
+
+    // Itemized infractions list
+    let itemizedHtml = '';
+    if (legalLiability && legalLiability.violation_details && legalLiability.violation_details.length > 0) {
+      itemizedHtml = legalLiability.violation_details.map(v => `
+        <li style="margin-bottom:4px;">
+          <strong>${escapeHtml(v.field || v.rule_id)}:</strong> ${escapeHtml(v.reason || '')}
+          <span style="display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; color:#b71c1c; background:#fee2e2; padding:1px 6px; border-radius:6px; margin-left:6px;">Allocated Fine: ₹${(v.allocated_fine || 2500).toLocaleString('en-IN')}</span>
+        </li>
+      `).join('');
+    } else {
+      itemizedHtml = fields.filter(f => f.verdict.toLowerCase() === 'fail').map(f => `
+        <li style="margin-bottom:4px;">
+          <strong>${escapeHtml(f.field)}:</strong> ${escapeHtml(f.evidence || 'Missing mandatory declaration')}
+        </li>
+      `).join('');
+    }
 
     legalHtml = `
       <div class="legal-liability-card">
         <div class="legal-head">
           <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:24px;">⚖️</span>
+            <span style="font-size:26px;">⚖️</span>
             <div>
               <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">Statutory Legal Metrology Liability Assessment</div>
               <div style="font-size:11.5px; color:#58151c;">Assessed under Section 36 of Legal Metrology Act, 2009 &amp; Rule 32 of LMPC Rules, 2011</div>
             </div>
           </div>
-          <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">📜 Download Show-Cause Notice (PDF)</button>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()">✏️ Correct / Enter Manually</button>
+            <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">📜 Download Show-Cause Notice (PDF)</button>
+          </div>
         </div>
         <div class="penalty-grid">
-          <div class="penalty-box">
-            <span class="p-label">First Offense fine (Sec 36(1))</span>
-            <span class="p-val">₹${fine1.toLocaleString('en-IN')}</span>
-            <span class="p-sub">${compoundingText}</span>
+          <div class="penalty-box highlight">
+            <span class="p-label">Allocated Compounding Fine</span>
+            <span class="p-val">₹${allocatedFine.toLocaleString('en-IN')}</span>
+            <span class="p-sub">${failCount} Infraction${failCount > 1 ? 's' : ''} on this SKU (${compoundingText})</span>
           </div>
           <div class="penalty-box">
-            <span class="p-label">Second Offense fine (Sec 36(2))</span>
-            <span class="p-val">₹${fine2.toLocaleString('en-IN')}</span>
-            <span class="p-sub">Escalated statutory liability</span>
+            <span class="p-label">Statutory 1st Offense Max</span>
+            <span class="p-val">Up to ₹25,000</span>
+            <span class="p-sub">Section 36(1) Ceiling</span>
           </div>
           <div class="penalty-box">
-            <span class="p-label">Subsequent Offenses</span>
-            <span class="p-val">₹1,00,000</span>
-            <span class="p-sub">+ Imprisonment up to 1 Year</span>
+            <span class="p-label">Second Offense Liability</span>
+            <span class="p-val">Up to ₹50,000</span>
+            <span class="p-sub">Escalated statutory fine</span>
           </div>
         </div>
         <div class="infraction-summary">
-          <strong>Schedule of Infractions:</strong> ${escapeHtml(infractions)}
+          <strong>Itemized Infractions &amp; Penalty Allocation:</strong>
+          <ul style="margin:8px 0 0 18px; line-height:1.55;">
+            ${itemizedHtml}
+          </ul>
         </div>
-      </div>
-    `;
-  } else {
-    legalHtml = `
-      <div class="legal-clearance-card">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:24px;">🛡️</span>
-          <div>
-            <div style="font-family:'Fraunces', serif; font-size:15.5px; font-weight:700; color:#0f5132;">Full Statutory Compliance — Legal Metrology Act, 2009</div>
-            <div style="font-size:12px; color:#146c43;">All mandatory declarations verified in accordance with Rule 6 &amp; Rule 9. Zero statutory penalty liability assessed.</div>
-          </div>
-        </div>
-        <span class="verdict-pill pass" style="font-size:12px; padding:5px 14px;">Passed All LMPC Checks ✓</span>
       </div>
     `;
   }
@@ -1814,6 +1959,7 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
           <div class="meta">${escapeHtml(productName || 'Untitled scan')} · ${new Date(createdAt || Date.now()).toLocaleString()}</div>
         </div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:12px; padding:7px 14px; background:var(--white); color:var(--ink);">✏️ Manual Entry / Edit</button>
           ${hasViolation ? `<button class="pill-btn" onclick="downloadNoticePdf(${scanId})" style="font-size:12px; padding:8px 14px; background:#f8d7da; color:#842029; border:1px solid #f5c2c7; font-weight:700;">⚖️ Legal Show-Cause Notice</button>` : ''}
           <button class="pill-btn solid" onclick="downloadPdf(${scanId})" style="font-size:12.5px; padding:8px 16px;">📥 Download Audit PDF</button>
           <div class="score-badge">${score}</div>
@@ -1929,6 +2075,163 @@ async function exportCsvReport(){
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ---------------- Manual Declaration Entry & Verification ----------------
+let isManualNewScan = false;
+
+function openManualEntryModal(isNew = false) {
+  if(!authToken){
+    goTo('auth');
+    return;
+  }
+  isManualNewScan = isNew;
+  const modal = document.getElementById('manualEntryModal');
+  const titleEl = modal.querySelector('.manual-head div div');
+  const submitBtn = document.getElementById('btnSubmitManual');
+
+  if(isNew || !window.currentScanData){
+    if(titleEl) titleEl.textContent = '✏️ Manual Declaration Entry (Direct Inspection)';
+    if(submitBtn) submitBtn.textContent = '✓ Create Manual Scan & Audit';
+    document.getElementById('manualProdName').value = '';
+    document.getElementById('manualBrandName').value = '';
+    document.getElementById('manualNetQty').value = '';
+    document.getElementById('manualMrp').value = '';
+    document.getElementById('manualMrpTaxes').checked = true;
+    document.getElementById('manualMfgDate').value = '';
+    document.getElementById('manualExpDate').value = '';
+    document.getElementById('manualMfr').value = '';
+    document.getElementById('manualConsumerCare').value = '';
+    document.getElementById('manualOrigin').value = 'India';
+    document.getElementById('manualUsp').value = '';
+    document.getElementById('manualFssai').value = '';
+    document.getElementById('manualVegStatus').value = 'veg';
+  } else {
+    if(titleEl) titleEl.textContent = '✏️ Override / Correct Declarations (Scan #' + window.currentScanData.scanId + ')';
+    if(submitBtn) submitBtn.textContent = '✓ Save Override & Recalculate Compliance';
+
+    const getFieldVal = (ruleId) => {
+      if(!window.currentScanData.fields) return '';
+      const f = window.currentScanData.fields.find(item => item.rule_id === ruleId);
+      if(!f || !f.evidence || f.evidence === 'Missing or not declared' || f.evidence.startsWith('Missing')) return '';
+      return f.evidence;
+    };
+
+    document.getElementById('manualProdName').value = window.currentScanData.productName || '';
+    document.getElementById('manualBrandName').value = (window.currentScanData.brandName && window.currentScanData.brandName !== 'Packaged Commodity') ? window.currentScanData.brandName : '';
+    document.getElementById('manualNetQty').value = getFieldVal('LMPC_R6_1_C');
+    document.getElementById('manualMrp').value = getFieldVal('LMPC_R6_1_E');
+    document.getElementById('manualMrpTaxes').checked = true;
+    document.getElementById('manualMfgDate').value = getFieldVal('LMPC_R6_1_D');
+    document.getElementById('manualExpDate').value = getFieldVal('LMPC_R6_1_PROVISO');
+    document.getElementById('manualMfr').value = getFieldVal('LMPC_R6_1_A');
+    document.getElementById('manualConsumerCare').value = getFieldVal('LMPC_R6_1_F');
+    document.getElementById('manualOrigin').value = getFieldVal('LMPC_R6_1_G') || 'India';
+    document.getElementById('manualUsp').value = getFieldVal('LMPC_USP');
+    document.getElementById('manualFssai').value = (window.currentScanData.fssaiInfo && window.currentScanData.fssaiInfo.license_number) ? window.currentScanData.fssaiInfo.license_number : '';
+
+    let vegVal = 'veg';
+    if(window.currentScanData.vegStatus && window.currentScanData.vegStatus.detected){
+      vegVal = window.currentScanData.vegStatus.is_veg ? 'veg' : 'nonveg';
+    }
+    document.getElementById('manualVegStatus').value = vegVal;
+  }
+
+  modal.classList.add('active');
+}
+
+function closeManualEntryModal(){
+  const modal = document.getElementById('manualEntryModal');
+  if(modal) modal.classList.remove('active');
+}
+
+async function submitManualEntry(){
+  if(!authToken){
+    goTo('auth');
+    return;
+  }
+  const submitBtn = document.getElementById('btnSubmitManual');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ Evaluating Compliance & Penalties…';
+
+  const payload = {
+    product_name: document.getElementById('manualProdName').value.trim() || 'Manual Inspected Commodity',
+    brand_name: document.getElementById('manualBrandName').value.trim() || undefined,
+    net_quantity: document.getElementById('manualNetQty').value.trim() || undefined,
+    mrp: document.getElementById('manualMrp').value.trim() || undefined,
+    mrp_inclusive_taxes: document.getElementById('manualMrpTaxes').checked,
+    mfg_date: document.getElementById('manualMfgDate').value.trim() || undefined,
+    exp_date: document.getElementById('manualExpDate').value.trim() || undefined,
+    manufacturer: document.getElementById('manualMfr').value.trim() || undefined,
+    consumer_care: document.getElementById('manualConsumerCare').value.trim() || undefined,
+    country_of_origin: document.getElementById('manualOrigin').value.trim() || undefined,
+    unit_sale_price: document.getElementById('manualUsp').value.trim() || undefined,
+    fssai_license: document.getElementById('manualFssai').value.trim() || undefined,
+    veg_status: document.getElementById('manualVegStatus').value,
+  };
+
+  try {
+    let res;
+    if(isManualNewScan || !window.currentScanData){
+      res = await fetch(API_BASE + '/scans/manual', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(API_BASE + '/scans/' + window.currentScanData.scanId + '/manual-override', {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if(res.status === 401){
+      logout();
+      alert("Session expired. Please sign in again.");
+      return;
+    }
+
+    const data = await res.json();
+    if(!res.ok){
+      alert("Error saving manual declarations: " + (data.detail || JSON.stringify(data)));
+      return;
+    }
+
+    closeManualEntryModal();
+    goTo('scan');
+    renderReport(
+      data.id,
+      data.fields,
+      data.score,
+      data.has_violation,
+      data.raw_ocr_text,
+      data.product_name,
+      data.created_at,
+      data.annotated_image,
+      data.brand_name,
+      data.image_quality,
+      data.original_image,
+      data.barcode_data,
+      data.veg_status,
+      data.fssai_info,
+      data.rule9_compliance,
+      data.legal_liability
+    );
+    loadDashboard();
+  } catch(err){
+    alert("Network error: " + err.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
 }
 
 // ---------------- Dashboard (fetched live from the backend) ----------------
