@@ -1356,11 +1356,11 @@ const translations = {
     nonveg_verified: "<strong>Non-Veg Symbol:</strong> Non-Vegetarian",
     no_veg_detected: "No Veg Symbol Detected",
     fssai_lic_chip: "<strong>FSSAI Lic:</strong>",
-    clearance_title: "No Fine Allocated — Fully Compliant",
-    clearance_desc: "Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.",
-    fine_zero_pill: "₹0 Fine Allocated ✓",
+    clearance_title: "Statutory Clearance — Fully Compliant",
+    clearance_desc: "All mandatory declarations verified under Legal Metrology Act, 2009 & LMPC Rules, 2011.",
+    fine_zero_pill: "Compliant ✓",
     btn_edit_details: "✏️ Edit Details",
-    liability_title: "Statutory Legal Metrology Liability Assessment",
+    liability_title: "Statutory Legal Metrology Assessment",
     liability_sub: "Assessed under Section 36 of Legal Metrology Act, 2009 & Rule 32 of LMPC Rules, 2011",
     btn_correct_manual: "✏️ Correct / Enter Manually",
     btn_download_notice: "📜 Download Show-Cause Notice (PDF)",
@@ -1369,7 +1369,7 @@ const translations = {
     second_offense_label: "Second Offense Liability",
     section_ceiling: "Section 36(1) Ceiling",
     escalated_fine: "Escalated statutory fine",
-    itemized_summary_title: "Itemized Infractions & Penalty Allocation:",
+    itemized_summary_title: "Itemized Statutory Infractions Detected:",
     allocated_fine_badge: "Allocated Fine: ₹",
     rule9_title: "Rule 9 Numeral & Letter Height Compliance (Table 1)",
     rule9_sub: "Calibrated metric height verification for Net Quantity declaration",
@@ -1664,11 +1664,11 @@ const translations = {
     nonveg_verified: "<strong>मांसाहारी प्रतीक:</strong> मांसाहारी",
     no_veg_detected: "कोई शाकाहारी प्रतीक नहीं मिला",
     fssai_lic_chip: "<strong>FSSAI लाइसेंस:</strong>",
-    clearance_title: "कोई जुर्माना नहीं — पूर्णतः अनुपालक",
-    clearance_desc: "विधिक मापविज्ञान अधिनियम, 2009 की धारा 36 के तहत शून्य जुर्माना देयता। सभी अनिवार्य घोषणाएं सत्यापित।",
-    fine_zero_pill: "₹0 जुर्माना आवंटित ✓",
+    clearance_title: "वैधानिक अनापत्ति — पूर्णतः अनुपालक",
+    clearance_desc: "विधिक मापविज्ञान अधिनियम, 2009 एवं LMPC नियम, 2011 के तहत सभी अनिवार्य घोषणाएं सत्यापित।",
+    fine_zero_pill: "अनुपालक ✓",
     btn_edit_details: "✏️ विवरण संपादित करें",
-    liability_title: "वैधानिक विधिक मापविज्ञान देयता मूल्यांकन",
+    liability_title: "वैधानिक विधिक मापविज्ञान मूल्यांकन",
     liability_sub: "विधिक मापविज्ञान अधिनियम, 2009 की धारा 36 एवं LMPC नियम 32 के तहत मूल्यांकित",
     btn_correct_manual: "✏️ सुधारें / मैन्युअल दर्ज करें",
     btn_download_notice: "📜 कारण बताओ नोटिस (PDF)",
@@ -1677,7 +1677,7 @@ const translations = {
     second_offense_label: "द्वितीय अपराध देयता",
     section_ceiling: "धारा 36(1) अधिकतम सीमा",
     escalated_fine: "बढ़ा हुआ वैधानिक जुर्माना",
-    itemized_summary_title: "उल्लंघन एवं जुर्माना आवंटन का विवरण:",
+    itemized_summary_title: "चिह्नित वैधानिक उल्लंघन विवरण:",
     allocated_fine_badge: "आवंटित जुर्माना: ₹",
     rule9_title: "नियम 9 अंक व अक्षर ऊंचाई अनुपालन (सारणी 1)",
     rule9_sub: "शुद्ध मात्रा घोषणा हेतु कैलिब्रेटेड मीट्रिक ऊंचाई सत्यापन",
@@ -2458,27 +2458,24 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:26px;">🛡️</span>
           <div>
-            <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:#0f5132;">${t('clearance_title', 'No Fine Allocated — Fully Compliant')}</div>
-            <div style="font-size:12px; color:#146c43; margin-top:2px;">${t('clearance_desc', 'Zero statutory penalty liability under Section 36 of Legal Metrology Act, 2009. All mandatory declarations verified.')}</div>
+            <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:700; color:#0f5132;">${t('clearance_title', 'Statutory Clearance — Fully Compliant')}</div>
+            <div style="font-size:12px; color:#146c43; margin-top:2px;">${t('clearance_desc', 'All mandatory declarations verified under Legal Metrology Act, 2009 &amp; LMPC Rules, 2011.')}</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <button type="button" class="btn-manual-edit" onclick="openManualEntryModal()" style="font-size:11.5px; padding:6px 12px;">${t('btn_edit_details', '✏️ Edit Details')}</button>
-          <span class="verdict-pill pass" style="font-size:12px; padding:6px 16px; font-weight:700;">${t('fine_zero_pill', '₹0 Fine Allocated ✓')}</span>
+          <span class="verdict-pill pass" style="font-size:12px; padding:6px 16px; font-weight:700;">${t('verdict_compliant_pill', 'Compliant ✓')}</span>
         </div>
       </div>
     `;
   } else {
-    // VIOLATIONS FOUND — ALLOCATED FINE SPECIFIC TO THIS COMMODITY
-    const compoundingText = (legalLiability && legalLiability.compounding_applicable) ? 'Eligible for Compounding (Sec 48)' : 'Court Cognizance';
-
-    // Itemized infractions list
+    // VIOLATIONS FOUND — STATUTORY INFRACTIONS SUMMARY (MONETARY FINES RESERVED FOR FORMAL AUDIT PDF)
+    // Itemized infractions list (without on-screen monetary fine badge)
     let itemizedHtml = '';
     if (legalLiability && legalLiability.violation_details && legalLiability.violation_details.length > 0) {
       itemizedHtml = legalLiability.violation_details.map(v => `
         <li style="margin-bottom:4px;">
           <strong>${escapeHtml(v.field || v.rule_id)}:</strong> ${escapeHtml(v.reason || '')}
-          <span style="display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; color:#b71c1c; background:#fee2e2; padding:1px 6px; border-radius:6px; margin-left:6px;">Allocated Fine: ₹${(v.allocated_fine || 2500).toLocaleString('en-IN')}</span>
         </li>
       `).join('');
     } else {
@@ -2495,7 +2492,7 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="font-size:26px;">⚖️</span>
             <div>
-              <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">${t('liability_title', 'Statutory Legal Metrology Liability Assessment')}</div>
+              <div style="font-family:'Fraunces', serif; font-size:16.5px; font-weight:700; color:#842029;">${t('liability_title', 'Statutory Legal Metrology Assessment')}</div>
               <div style="font-size:11.5px; color:#58151c;">${t('liability_sub', 'Assessed under Section 36 of Legal Metrology Act, 2009 &amp; Rule 32 of LMPC Rules, 2011')}</div>
             </div>
           </div>
@@ -2504,25 +2501,8 @@ function renderReport(scanId, fields, score, hasViolation, ocrText, productName,
             <button type="button" class="btn-legal-notice" onclick="downloadNoticePdf(${scanId})">${t('btn_download_notice', '📜 Download Show-Cause Notice (PDF)')}</button>
           </div>
         </div>
-        <div class="penalty-grid">
-          <div class="penalty-box highlight">
-            <span class="p-label">${t('compounding_fine_label', 'Allocated Compounding Fine')}</span>
-            <span class="p-val">₹${allocatedFine.toLocaleString('en-IN')}</span>
-            <span class="p-sub">${failCount} Infraction${failCount > 1 ? 's' : ''} (${compoundingText})</span>
-          </div>
-          <div class="penalty-box">
-            <span class="p-label">${t('statutory_first_max', 'Statutory 1st Offense Max')}</span>
-            <span class="p-val">Up to ₹25,000</span>
-            <span class="p-sub">${t('section_ceiling', 'Section 36(1) Ceiling')}</span>
-          </div>
-          <div class="penalty-box">
-            <span class="p-label">${t('second_offense_label', 'Second Offense Liability')}</span>
-            <span class="p-val">Up to ₹50,000</span>
-            <span class="p-sub">${t('escalated_fine', 'Escalated statutory fine')}</span>
-          </div>
-        </div>
         <div class="infraction-summary">
-          <strong>${t('itemized_summary_title', 'Itemized Infractions &amp; Penalty Allocation:')}</strong>
+          <strong>${t('itemized_summary_title', 'Itemized Statutory Infractions Detected:')}</strong>
           <ul style="margin:8px 0 0 18px; line-height:1.55;">
             ${itemizedHtml}
           </ul>

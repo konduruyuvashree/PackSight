@@ -112,6 +112,8 @@ def _scan_to_response(scan: models.Scan) -> schemas.ScanResponse:
     fields_list = raw["fields"] if isinstance(raw, dict) and "fields" in raw else raw
     quality = json.loads(scan.image_quality_json) if getattr(scan, "image_quality_json", None) else None
     adv_data = json.loads(scan.advancements_json) if getattr(scan, "advancements_json", None) else {}
+    if not isinstance(adv_data, dict):
+        adv_data = {}
     return schemas.ScanResponse(
         id=scan.id,
         product_name=scan.product_name,
@@ -138,20 +140,25 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/jpg",
     "image/png",
     "image/webp",
+    "image/bmp",
+    "image/tiff",
 }
 
 
 def validate_image_upload(upload_file: UploadFile, image_bytes: bytes) -> None:
     """Validate that the uploaded file has an allowed image content-type and is decodable."""
     if not image_bytes:
-        raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Uploaded file is not a valid image.",
+        )
 
     # Reject non-image content-types early
     if upload_file.content_type:
         raw_ct = upload_file.content_type.split(";")[0].strip().lower()
-        if raw_ct and raw_ct not in ALLOWED_IMAGE_CONTENT_TYPES:
+        if raw_ct and (raw_ct not in ALLOWED_IMAGE_CONTENT_TYPES and not raw_ct.startswith("image/")):
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Uploaded file is not a valid image.",
             )
 
@@ -160,7 +167,10 @@ def validate_image_upload(upload_file: UploadFile, image_bytes: bytes) -> None:
     try:
         with Image.open(io.BytesIO(image_bytes)) as pil_img:
             pil_img.verify()
-        is_valid = True
+        with Image.open(io.BytesIO(image_bytes)) as pil_img:
+            pil_img.load()
+            if pil_img.size[0] > 0 and pil_img.size[1] > 0:
+                is_valid = True
     except Exception:
         pass
 
@@ -175,7 +185,7 @@ def validate_image_upload(upload_file: UploadFile, image_bytes: bytes) -> None:
 
     if not is_valid:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Uploaded file is not a valid image.",
         )
 
@@ -205,8 +215,10 @@ async def create_scan(
         veg_status = scan_cv.get("veg_status")
         rule9_compliance = scan_cv.get("rule9_compliance")
     except Exception as cv_err:
-        if isinstance(cv_err, (ValueError, HTTPException)):
-            raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
+        if isinstance(cv_err, HTTPException):
+            raise cv_err
+        if isinstance(cv_err, ValueError) and "Could not decode" in str(cv_err):
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Uploaded file is not a valid image.")
         print(f"Advanced scanner fallback: {cv_err}")
         try:
             ocr_text, box_data = extract_text_with_boxes(image_bytes)
@@ -330,8 +342,10 @@ async def create_multi_scan(
             elif brand_name == "Packaged Commodity" and panel_cv["brand_name"] != "Packaged Commodity":
                 brand_name = panel_cv["brand_name"]
         except Exception as panel_err:
-            if isinstance(panel_err, (ValueError, HTTPException)):
-                raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
+            if isinstance(panel_err, HTTPException):
+                raise panel_err
+            if isinstance(panel_err, ValueError) and "Could not decode" in str(panel_err):
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Uploaded file is not a valid image.")
             if i == 0:
                 first_image_bytes = contents
                 try:
@@ -435,6 +449,8 @@ def manual_override_scan(
     scan.fields_json = json.dumps(eval_result["fields"])
 
     adv = json.loads(scan.advancements_json) if scan.advancements_json else {}
+    if not isinstance(adv, dict):
+        adv = {}
     adv["fssai_info"] = eval_result.get("fssai")
     adv["legal_liability"] = eval_result.get("statutory_liability")
     if override_data.veg_status:
@@ -516,6 +532,11 @@ async def download_scan_pdf(
     raw = json.loads(scan.fields_json) if scan.fields_json else []
     fields = raw["fields"] if isinstance(raw, dict) and "fields" in raw else raw
 
+    adv_data = json.loads(scan.advancements_json) if getattr(scan, "advancements_json", None) else {}
+    if not isinstance(adv_data, dict):
+        adv_data = {}
+    liability = adv_data.get("legal_liability") or {}
+
     buffer = generate_compliance_pdf_report(
         scan_id=scan.id,
         product_name=scan.product_name or "Packaged Commodity",
@@ -525,7 +546,9 @@ async def download_scan_pdf(
         created_at=scan.created_at,
         user_name=current_user.full_name or current_user.user_id,
         annotated_image_b64=getattr(scan, "annotated_image", None),
+        original_image_b64=getattr(scan, "original_image", None),
         brand_name=getattr(scan, "brand_name", None),
+        liability_info=liability,
     )
 
     return StreamingResponse(
@@ -552,8 +575,10 @@ def download_legal_notice(
         raise HTTPException(status_code=404, detail="Scan not found")
 
     adv_data = json.loads(scan.advancements_json) if getattr(scan, "advancements_json", None) else {}
+    if not isinstance(adv_data, dict):
+        adv_data = {}
     liability = adv_data.get("legal_liability") or {}
-    violations = liability.get("violation_details", [])
+    violations = liability.get("violation_details") or []
 
     pdf_buffer = generate_legal_show_cause_notice_pdf(
         scan_id=scan.id,
@@ -602,8 +627,10 @@ async def create_batch_scans(
             veg_status = scan_cv.get("veg_status")
             rule9_compliance = scan_cv.get("rule9_compliance")
         except Exception as batch_err:
-            if isinstance(batch_err, (ValueError, HTTPException)):
-                raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
+            if isinstance(batch_err, HTTPException):
+                raise batch_err
+            if isinstance(batch_err, ValueError) and "Could not decode" in str(batch_err):
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Uploaded file is not a valid image.")
             ocr_text = run_tesseract_ocr(content)
             box_data = {}
             oriented_bytes = content
@@ -681,11 +708,16 @@ def export_scans_csv(
     ])
     for s in scans:
         adv = json.loads(s.advancements_json) if getattr(s, "advancements_json", None) else {}
-        fssai_no = adv.get("fssai_info", {}).get("license_number") or "N/A"
-        b_codes = ", ".join(b.get("code", "") for b in adv.get("barcode_data", [])) or "N/A"
-        veg_sym = adv.get("veg_status", {}).get("symbol") or "N/A"
-        rule9_h = f"{adv.get('rule9_compliance', {}).get('measured_numeral_height_mm', 'N/A')}mm"
-        penalty = adv.get("legal_liability", {}).get("penalty_display") or "₹0"
+        if not isinstance(adv, dict):
+            adv = {}
+        fssai_no = (adv.get("fssai_info") or {}).get("license_number") or "N/A"
+        barcode_list = adv.get("barcode_data") or []
+        b_codes = ", ".join(b.get("code", "") for b in barcode_list if isinstance(b, dict)) or "N/A"
+        veg_sym = (adv.get("veg_status") or {}).get("symbol") or "N/A"
+        rule9_info = adv.get("rule9_compliance") or {}
+        rule9_val = rule9_info.get("measured_numeral_height_mm")
+        rule9_h = f"{rule9_val}mm" if rule9_val and rule9_val != "N/A" else "N/A"
+        penalty = (adv.get("legal_liability") or {}).get("penalty_display") or "₹0"
         status_str = "COMPLIANT" if not s.has_violation else "NON-COMPLIANT"
 
         writer.writerow([
