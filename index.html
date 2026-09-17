@@ -63,7 +63,74 @@
     position:relative;
   }
   header.letterhead::after{content:''; position:absolute; inset:auto 0 -3px 0; height:3px; background:linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));}
-  .brand{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  /* ===================== PACKSIGHT 3D LOGO PRESENTATION ===================== */
+  .brand{display:flex; align-items:center; gap:12px; cursor:pointer; text-decoration:none; user-select:none; -webkit-user-select:none;}
+  .logo-3d-scene{
+    perspective:800px;
+    width:68px; height:52px;
+    position:relative;
+    display:inline-block;
+    flex-shrink:0;
+  }
+  .logo-3d-card{
+    position:relative;
+    width:100%; height:100%;
+    transform-style:preserve-3d;
+    will-change:transform, filter;
+    transform:rotateX(0deg) rotateY(0deg);
+    transition:transform .16s cubic-bezier(.2,.8,.4,1), filter .16s cubic-bezier(.2,.8,.4,1);
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,0.45));
+  }
+  .logo-3d-layer{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    transform-style:preserve-3d;
+    pointer-events:none;
+  }
+  .logo-3d-layer img{
+    width:100%; height:100%;
+    object-fit:contain;
+    display:block;
+    pointer-events:none;
+  }
+  /* Layer 1: Isometric box, scanner brackets & magnifying glass (elevated forward in Z-space) */
+  .logo-layer-icon{
+    clip-path:inset(0 0 44% 0);
+    -webkit-clip-path:inset(0 0 44% 0);
+    transform:translateZ(9px);
+  }
+  /* Layer 2: "packsight" wordmark & "see. verify. comply." tagline (base plane) */
+  .logo-layer-text{
+    clip-path:inset(56% 0 0 0);
+    -webkit-clip-path:inset(56% 0 0 0);
+    transform:translateZ(0px);
+  }
+  /* Idle ambient gentle sway */
+  .logo-3d-card.idle-tilt{
+    animation:logoIdleSway 6s ease-in-out infinite alternate;
+  }
+  @keyframes logoIdleSway{
+    0%{
+      transform:rotateX(-2deg) rotateY(-3.5deg);
+      filter:drop-shadow(3px 4px 6px rgba(0,0,0,0.5));
+    }
+    50%{
+      transform:rotateX(2deg) rotateY(1deg);
+      filter:drop-shadow(-1px 3px 5px rgba(0,0,0,0.45));
+    }
+    100%{
+      transform:rotateX(-1.5deg) rotateY(3.5deg);
+      filter:drop-shadow(-3px 4px 7px rgba(0,0,0,0.55));
+    }
+  }
+  /* Graceful degradation on touch devices or reduced motion */
+  @media (hover:none), (prefers-reduced-motion:reduce){
+    .logo-3d-card.idle-tilt{
+      animation:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35)) !important;
+    }
+  }
   .mark{
     width:38px; height:38px; border-radius:10px;
     background:linear-gradient(135deg, var(--cyan), var(--violet));
@@ -695,9 +762,17 @@
 <!-- ===================== LANDING ===================== -->
 <section id="landing" class="view active">
   <div class="land-nav">
-    <div class="brand" onclick="goTo('landing')">
-      <div class="mark">PS</div>
-      <div class="brand-text"><div class="name" style="color:#EDEBFB;">PackSight</div><div class="tagline" data-i18n="tagline" style="color:#9A96C6;">See. Verify. Comply.</div></div>
+    <div class="brand logo-3d-brand" onclick="goTo('landing')" aria-label="PackSight — See. Verify. Comply.">
+      <div class="logo-3d-scene">
+        <div class="logo-3d-card idle-tilt">
+          <div class="logo-3d-layer logo-layer-icon">
+            <img src="packsight-logo-transparent.png" alt="PackSight Icon" draggable="false">
+          </div>
+          <div class="logo-3d-layer logo-layer-text">
+            <img src="packsight-logo-transparent.png" alt="PackSight — See. Verify. Comply." draggable="false">
+          </div>
+        </div>
+      </div>
     </div>
     <div class="navlinks">
       <a onclick="scrollToId('features')" data-i18n="nav_features">Features</a>
@@ -840,11 +915,16 @@
 <!-- ===================== APP (post-login) ===================== -->
 <div id="appShell" style="display:none;">
 <header class="letterhead">
-  <div class="brand" onclick="goTo('home')">
-    <div class="mark">PS</div>
-    <div class="brand-text">
-      <div class="name">PackSight</div>
-      <div class="tagline" data-i18n="tagline">See. Verify. Comply.</div>
+  <div class="brand logo-3d-brand" onclick="goTo('home')" aria-label="PackSight — See. Verify. Comply.">
+    <div class="logo-3d-scene">
+      <div class="logo-3d-card idle-tilt">
+        <div class="logo-3d-layer logo-layer-icon">
+          <img src="packsight-logo-transparent.png" alt="PackSight Icon" draggable="false">
+        </div>
+        <div class="logo-3d-layer logo-layer-text">
+          <img src="packsight-logo-transparent.png" alt="PackSight — See. Verify. Comply." draggable="false">
+        </div>
+      </div>
     </div>
   </div>
   <nav id="mainNav">
@@ -3000,8 +3080,67 @@ async function loadDashboard(){
   }
 }
 
+// ---------------- PackSight 3D Logo Interactive Controller ----------------
+function init3DLogos() {
+  // Graceful degradation: touch devices or reduced motion stay on gentle ambient / static
+  if (window.matchMedia && window.matchMedia('(hover: none), (prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const brands = document.querySelectorAll('.logo-3d-brand');
+  const maxTilt = 6.5; // subtle, professional limit (degrees)
+
+  brands.forEach(brand => {
+    const card = brand.querySelector('.logo-3d-card');
+    if (!card) return;
+
+    let isHovering = false;
+    let restoreTimer = null;
+
+    brand.addEventListener('mouseenter', () => {
+      isHovering = true;
+      if (restoreTimer) clearTimeout(restoreTimer);
+      card.classList.remove('idle-tilt');
+    });
+
+    brand.addEventListener('mousemove', (e) => {
+      if (!isHovering) return;
+      const rect = brand.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      // Coordinate from -1 to 1 relative to brand center
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+
+      const rotX = -Math.max(-1, Math.min(1, y)) * maxTilt;
+      const rotY = Math.max(-1, Math.min(1, x)) * maxTilt;
+
+      // Drop shadow shifts opposite to tilt direction
+      const shadowX = -rotY * 0.9;
+      const shadowY = rotX * 0.9 + 3.5;
+
+      card.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`;
+      card.style.filter = `drop-shadow(${shadowX.toFixed(1)}px ${shadowY.toFixed(1)}px 7px rgba(0,0,0,0.55))`;
+    });
+
+    brand.addEventListener('mouseleave', () => {
+      isHovering = false;
+      card.style.transform = '';
+      card.style.filter = '';
+      restoreTimer = setTimeout(() => {
+        if (!isHovering) {
+          card.classList.add('idle-tilt');
+        }
+      }, 250);
+    });
+  });
+}
+
 // ---------------- Session Auto-Restore on Page Load ----------------
 window.addEventListener('DOMContentLoaded', () => {
+  // Initialize 3D Logo mouse-driven tilt and idle controller
+  init3DLogos();
+
   // Restore language preference
   const savedLang = localStorage.getItem('ps_lang') || 'en';
   setLanguage(savedLang);
