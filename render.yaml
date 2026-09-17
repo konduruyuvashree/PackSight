@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: packsight-api
+    runtime: docker
+    plan: starter
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PACKSIGHT_SECRET_KEY
+        generateValue: true
+      - key: PACKSIGHT_DB_DIR
+        value: /data
+      - key: PORT
+        value: "8000"
+    disk:
+      name: packsight-data
+      mountPath: /data
+      sizeGB: 1

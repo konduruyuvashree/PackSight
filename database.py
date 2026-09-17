@@ -1,7 +1,14 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./packsight.db"
+db_dir = os.environ.get("PACKSIGHT_DB_DIR")
+if db_dir:
+    os.makedirs(db_dir, exist_ok=True)
+    db_path = os.path.join(db_dir, "packsight.db").replace("\\", "/")
+    SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
+else:
+    SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./packsight.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

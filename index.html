@@ -6,6 +6,15 @@
 <title>PackSight — See. Verify. Comply.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var saved = localStorage.getItem('ps_theme');
+    if (!saved) {
+      saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
 
 <style>
   :root{
@@ -755,6 +764,443 @@
   .rule9-item .r9-val{font-family:'IBM Plex Mono', monospace; font-size:15px; font-weight:700; color:var(--deep);}
   .rule9-note{font-size:11.5px; color:var(--ink-soft); line-height:1.45;}
 
+  /* ===================== THEME ENGINE & DARK MODE ===================== */
+  body, .panel, .rule-item, .stat-card, .history-table, .hud-card, .drawer-panel, .drawer-head, .drawer-item, .manual-box {
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  [data-theme="dark"]{
+    --ink:#EDEBFB;
+    --ink-soft:#9A96C6;
+    --paper:#0B0C1E;
+    --paper-dim:#131428;
+    --paper-line:#242748;
+    --white:#161830;
+
+    --deep:#070814;
+    --deep2:#0F1026;
+    --deep3:#181938;
+
+    --shadow:0 20px 50px rgba(0,0,0,0.6);
+    --shadow-sm:0 6px 18px rgba(0,0,0,0.35);
+  }
+
+  [data-theme="dark"] header.letterhead{
+    background:#0E1024;
+    color:#EDEBFB;
+    border-bottom:1px solid #242748;
+  }
+  [data-theme="dark"] header.letterhead nav button{
+    color:#EDEBFB;
+  }
+  [data-theme="dark"] header.letterhead nav button:hover{
+    background:rgba(255,255,255,0.08);
+  }
+  [data-theme="dark"] header.letterhead nav button.active{
+    background:rgba(255,255,255,0.14);
+    border-color:rgba(255,255,255,0.25);
+  }
+
+  [data-theme="dark"] .btn-primary{
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    color:#0A0B1A;
+    border-color:transparent;
+    font-weight:700;
+  }
+  [data-theme="dark"] .btn-primary:hover{
+    filter:brightness(1.1);
+  }
+  [data-theme="dark"] .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .btn-ghost:hover{
+    background:rgba(255,255,255,0.06);
+  }
+
+  [data-theme="dark"] .dropzone{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .dropzone:hover, [data-theme="dark"] .dropzone.drag{
+    background:rgba(155,123,247,0.1);
+    border-color:var(--violet);
+  }
+
+  [data-theme="dark"] .field input{
+    background:var(--paper-dim);
+    color:var(--ink);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .field input:focus{
+    background:var(--white);
+    border-color:var(--violet);
+  }
+
+  [data-theme="dark"] .report-top{
+    background:#0E1024;
+    color:#EDEBFB;
+    border-bottom:1px solid #242748;
+  }
+  [data-theme="dark"] .field-table th{
+    border-bottom:1.5px solid var(--paper-line);
+  }
+  [data-theme="dark"] .raw-ocr{
+    background:var(--paper-dim);
+    border:1px solid var(--paper-line);
+  }
+
+  [data-theme="dark"] .quality-card{
+    background:var(--white);
+  }
+  [data-theme="dark"] .quality-rec{
+    background:rgba(224,169,58,0.15);
+    color:#F5C05E;
+  }
+  [data-theme="dark"] .hud-card.fail{
+    background:rgba(225,75,75,0.12);
+  }
+  [data-theme="dark"] .hud-card.review{
+    background:rgba(224,169,58,0.12);
+  }
+  [data-theme="dark"] .hud-card.pass{
+    background:rgba(34,184,136,0.08);
+  }
+  [data-theme="dark"] .hud-val{
+    color:var(--ink);
+  }
+  [data-theme="dark"] .filter-btn{
+    background:var(--paper-dim);
+    color:var(--ink-soft);
+  }
+  [data-theme="dark"] .filter-btn:hover{
+    background:var(--paper-line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .filter-btn.active{
+    background:var(--paper-line);
+    color:var(--ink);
+    border-color:var(--violet);
+  }
+  [data-theme="dark"] .search-rule-input{
+    background:var(--paper-dim);
+    color:var(--ink);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .zoom-ctl{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .zoom-ctl button{
+    color:var(--ink);
+  }
+  [data-theme="dark"] .btn-tool{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .btn-tool:hover{
+    background:var(--paper-line);
+  }
+  [data-theme="dark"] .view-switch{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .view-switch button.active{
+    background:var(--white);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .btn-inspect{
+    color:var(--cyan);
+    border-color:var(--violet);
+  }
+  [data-theme="dark"] .btn-manual-edit{
+    color:var(--cyan);
+    border-color:var(--violet);
+  }
+
+  [data-theme="dark"] .legal-liability-card{
+    background:linear-gradient(180deg, rgba(225,75,75,0.12) 0%, rgba(183,28,28,0.15) 100%);
+    border-color:rgba(225,75,75,0.4);
+    box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  }
+  [data-theme="dark"] .legal-clearance-card{
+    background:linear-gradient(180deg, rgba(34,184,136,0.12) 0%, rgba(20,120,90,0.15) 100%);
+    border-color:rgba(34,184,136,0.4);
+  }
+  [data-theme="dark"] .penalty-box{
+    background:var(--paper-dim);
+    border-color:rgba(225,75,75,0.3);
+  }
+  [data-theme="dark"] .penalty-box.highlight{
+    background:rgba(225,75,75,0.18);
+    border-color:var(--stamp-red);
+  }
+  [data-theme="dark"] .penalty-box .p-label{
+    color:#F87171;
+  }
+  [data-theme="dark"] .penalty-box .p-val{
+    color:#FCA5A5;
+  }
+  [data-theme="dark"] .infraction-summary{
+    color:#FCA5A5;
+    border-color:rgba(225,75,75,0.3);
+  }
+
+  [data-theme="dark"] .manual-box{
+    background:var(--white);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .manual-head{
+    background:#0E1024;
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .manual-foot{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .manual-field input,
+  [data-theme="dark"] .manual-field select,
+  [data-theme="dark"] .manual-field textarea{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .btn-pdf{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+    color:var(--ink);
+  }
+
+  [data-theme="dark"] .history-table th{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .rule9-card{
+    background:var(--white);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .rule9-item{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+  }
+  [data-theme="dark"] .rule9-item .r9-val{
+    color:var(--ink);
+  }
+  [data-theme="dark"] .intel-chip{
+    background:var(--paper-dim);
+    border-color:var(--paper-line);
+    color:var(--ink);
+  }
+  [data-theme="dark"] .intel-chip.veg{
+    border-color:rgba(163,207,187,0.3);
+    background:rgba(34,184,136,0.12);
+    color:#7EE2B8;
+  }
+  [data-theme="dark"] .intel-chip.nonveg{
+    border-color:rgba(241,174,181,0.3);
+    background:rgba(225,75,75,0.12);
+    color:#FCA5A5;
+  }
+  [data-theme="dark"] .intel-chip.fssai{
+    border-color:rgba(182,212,254,0.3);
+    background:rgba(63,232,208,0.12);
+    color:#3FE8D0;
+  }
+  [data-theme="dark"] .intel-chip.barcode{
+    border-color:rgba(197,179,249,0.3);
+    background:rgba(155,123,247,0.12);
+    color:#C5B3F9;
+  }
+  [data-theme="dark"] .auth-form-wrap{
+    background:#14162B;
+    color:#EDEBFB;
+    border:1px solid #242748;
+  }
+  [data-theme="dark"] .auth-tabs{
+    background:#0B0C1E;
+  }
+  [data-theme="dark"] .auth-tabs button.active{
+    background:#242748;
+    color:#EDEBFB;
+  }
+
+  /* ===================== SLIDE-IN SIDE PANEL (DRAWER) ===================== */
+  .drawer-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,11,26,0.6);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    z-index:9998;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .drawer-overlay.active{opacity:1; pointer-events:auto;}
+
+  .drawer-panel{
+    position:fixed; top:0; right:0; bottom:0;
+    width:360px; max-width:88vw; height:100vh;
+    background:var(--white); color:var(--ink);
+    border-left:1px solid var(--paper-line);
+    box-shadow:-12px 0 45px rgba(0,0,0,0.3);
+    z-index:9999;
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow:hidden;
+  }
+  .drawer-panel.active{transform:translateX(0);}
+
+  .drawer-head{
+    padding:20px 22px;
+    background:var(--paper);
+    border-bottom:1px solid var(--paper-line);
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .drawer-eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);
+    font-weight:600; display:block; margin-bottom:2px;
+  }
+  .drawer-title{
+    font-family:'Fraunces', serif; font-size:20px; font-weight:700; color:var(--ink);
+  }
+  .drawer-close-btn{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--paper-line); background:var(--white);
+    color:var(--ink-soft); font-size:14px; font-weight:bold;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .15s ease; flex-shrink:0;
+  }
+  .drawer-close-btn:hover{
+    color:var(--ink); border-color:var(--ink-soft); transform:scale(1.06);
+  }
+
+  .drawer-content{
+    flex:1; overflow-y:auto; padding:20px 22px;
+    display:flex; flex-direction:column; gap:22px;
+  }
+
+  .drawer-profile-card{
+    background:linear-gradient(135deg, rgba(63,232,208,0.12), rgba(155,123,247,0.15));
+    border:1.5px solid var(--paper-line); border-radius:14px;
+    padding:16px 18px; display:flex; align-items:center; gap:14px;
+  }
+  .drawer-avatar-lg{
+    width:50px; height:50px; border-radius:50%;
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    color:#0A0B1A; font-family:'Fraunces', serif; font-size:22px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 12px rgba(155,123,247,0.3); flex-shrink:0;
+  }
+  .drawer-user-details{display:flex; flex-direction:column; min-width:0; flex:1;}
+  .drawer-user-name{
+    font-family:'Fraunces', serif; font-size:17px; font-weight:700;
+    color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .drawer-user-id{
+    font-size:12px; color:var(--ink-soft); margin-top:1px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .drawer-user-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:10px; font-weight:600; color:var(--violet);
+    background:rgba(155,123,247,0.12); border:1px solid rgba(155,123,247,0.25);
+    border-radius:12px; padding:2px 8px; margin-top:5px; width:fit-content;
+  }
+  .drawer-badge-dot{width:5px; height:5px; border-radius:50%; background:var(--ok);}
+
+  .drawer-section{display:flex; flex-direction:column; gap:10px;}
+  .drawer-section-title{
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft);
+  }
+  .drawer-item{
+    background:var(--paper); border:1px solid var(--paper-line);
+    border-radius:12px; padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .drawer-item-left{display:flex; align-items:center; gap:10px;}
+  .drawer-item-icon{font-size:18px; flex-shrink:0;}
+  .drawer-item-label{font-size:13px; font-weight:600; color:var(--ink);}
+  .drawer-item-desc{font-size:11px; color:var(--ink-soft); margin-top:1px; line-height:1.3;}
+
+  .drawer-lang-select{
+    background:var(--white); border:1px solid var(--paper-line);
+    border-radius:10px; padding:6px 10px; color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif; font-size:12px; font-weight:600;
+    cursor:pointer; outline:none;
+  }
+  .drawer-lang-select option{background:var(--white); color:var(--ink);}
+
+  .drawer-info-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    background:var(--paper); border:1px solid var(--paper-line);
+    border-radius:12px; padding:12px;
+  }
+  .drawer-info-item{display:flex; flex-direction:column; gap:2px;}
+  .drawer-info-item .d-info-k{font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;}
+  .drawer-info-item .d-info-v{font-size:12px; font-weight:600; color:var(--ink);}
+
+  .drawer-footer{
+    padding:16px 22px; background:var(--paper);
+    border-top:1px solid var(--paper-line);
+  }
+  .drawer-logout-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px; border-radius:12px; border:1.5px solid rgba(225,75,75,0.35);
+    background:rgba(225,75,75,0.08); color:var(--stamp-red);
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:13.5px;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .drawer-logout-btn:hover{
+    background:var(--stamp-red); color:white; border-color:var(--stamp-red);
+    box-shadow:0 4px 12px rgba(225,75,75,0.3);
+  }
+
+  .drawer-trigger-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.22);
+    border-radius:22px; padding:3px 10px 3px 4px; cursor:pointer; color:var(--paper);
+    transition:all .15s ease;
+  }
+  .drawer-trigger-btn:hover{background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.4);}
+  .user-avatar-initial{
+    width:24px; height:24px; border-radius:50%;
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    color:var(--deep); font-weight:700; font-size:11.5px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .drawer-trigger-gear{font-size:13px; opacity:0.9;}
+
+  /* ---------- Theme Switch Slider ---------- */
+  .theme-switch{
+    position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0;
+  }
+  .theme-switch input{opacity:0; width:0; height:0;}
+  .theme-slider{
+    position:absolute; cursor:pointer; inset:0;
+    background:var(--paper-line); border-radius:26px;
+    transition:all .25s cubic-bezier(.4,0,.2,1);
+    border:1px solid var(--paper-line);
+  }
+  .theme-slider::before{
+    position:absolute; content:""; height:20px; width:20px; left:2px; bottom:2px;
+    background:white; border-radius:50%;
+    transition:all .25s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+  }
+  .theme-switch input:checked + .theme-slider{
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    border-color:transparent;
+  }
+  .theme-switch input:checked + .theme-slider::before{
+    transform:translateX(22px);
+    background:#0A0B1A;
+  }
+
 </style>
 </head>
 <body>
@@ -940,6 +1386,10 @@
       </select>
     </div>
     <span id="userChip" class="mono" style="opacity:0.6; font-size:12px; margin-left:8px;"></span>
+    <button id="drawerOpenBtn" class="drawer-trigger-btn" onclick="toggleDrawer(true)" aria-label="Open User Account and Settings" title="Account & Settings" data-i18n-title="drawer_open_aria">
+      <span class="user-avatar-initial" id="navAvatarInitial">I</span>
+      <span class="drawer-trigger-gear">⚙️</span>
+    </button>
     <button class="logout" onclick="logout()" data-i18n="nav_logout">Log out</button>
   </nav>
 </header>
@@ -1215,6 +1665,99 @@
     <img id="lightboxImg" src="" alt="High resolution inspection">
   </div>
 </div>
+
+<!-- ===================== SLIDE-IN SIDE PANEL (DRAWER) ===================== -->
+<div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false)" aria-hidden="true"></div>
+<aside id="drawerPanel" class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="drawer-head">
+    <div class="drawer-head-left">
+      <span class="drawer-eyebrow" data-i18n="drawer_eyebrow">PACKSIGHT ACCOUNT</span>
+      <h3 id="drawerTitle" class="drawer-title" data-i18n="drawer_title">Settings & Profile</h3>
+    </div>
+    <button class="drawer-close-btn" onclick="toggleDrawer(false)" aria-label="Close Settings" data-i18n-title="drawer_close_aria">✕</button>
+  </div>
+
+  <div class="drawer-content">
+    <!-- User Profile Card -->
+    <div class="drawer-profile-card">
+      <div class="drawer-avatar-lg" id="drawerAvatarInitial">I</div>
+      <div class="drawer-user-details">
+        <div class="drawer-user-name" id="drawerUserName">Inspector</div>
+        <div class="drawer-user-id mono" id="drawerUserId">@inspector</div>
+        <div class="drawer-user-badge">
+          <span class="drawer-badge-dot"></span>
+          <span data-i18n="drawer_role_label">LMPC Enforcement Officer</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme Mode Toggle Section -->
+    <div class="drawer-section">
+      <div class="drawer-section-title" data-i18n="drawer_appearance">Appearance</div>
+      <div class="drawer-item">
+        <div class="drawer-item-left">
+          <span class="drawer-item-icon" id="themeIcon">☀️</span>
+          <div>
+            <div class="drawer-item-label" data-i18n="drawer_dark_mode">Dark Theme</div>
+            <div class="drawer-item-desc" data-i18n="drawer_dark_mode_desc">High-contrast palette for low-light inspection</div>
+          </div>
+        </div>
+        <label class="theme-switch" aria-label="Toggle dark mode">
+          <input type="checkbox" id="themeToggleCheckbox" onchange="toggleTheme(this.checked)">
+          <span class="theme-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Language Switcher Section -->
+    <div class="drawer-section">
+      <div class="drawer-section-title" data-i18n="drawer_language">Language / भाषा</div>
+      <div class="drawer-item">
+        <div class="drawer-item-left">
+          <span class="drawer-item-icon">🌐</span>
+          <div>
+            <div class="drawer-item-label" data-i18n="drawer_lang_label">Interface Language</div>
+            <div class="drawer-item-desc" data-i18n="drawer_lang_desc">UI text, buttons, and system messages</div>
+          </div>
+        </div>
+        <select id="langSelectDrawer" onchange="setLanguage(this.value)" class="drawer-lang-select" aria-label="Interface Language">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- System & Legal Metrology Meta Section -->
+    <div class="drawer-section">
+      <div class="drawer-section-title" data-i18n="drawer_system">System & Standards</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item">
+          <span class="d-info-k">Standard</span>
+          <span class="d-info-v">LMPC Rules, 2011</span>
+        </div>
+        <div class="drawer-info-item">
+          <span class="d-info-k">Engine</span>
+          <span class="d-info-v">Rule 6 & Sched. 1-3</span>
+        </div>
+        <div class="drawer-info-item">
+          <span class="d-info-k">Build</span>
+          <span class="d-info-v mono">SIH-26034 v2.4</span>
+        </div>
+        <div class="drawer-info-item">
+          <span class="d-info-k">Mode</span>
+          <span class="d-info-v" id="drawerThemeIndicator">Light Mode</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="drawer-logout-btn" onclick="logoutFromDrawer()" data-i18n="drawer_logout">
+      <span>🚪</span>
+      <span data-i18n="nav_logout">Log out</span>
+    </button>
+  </div>
+</aside>
 
 <script>
 
@@ -1525,7 +2068,22 @@ const translations = {
     panel_single_selected: "1 Panel Selected",
     panels_multi_selected: "{count} Panels Selected",
     panel_title: "Panel {num}",
-    remove_panel_title: "Remove panel"
+    remove_panel_title: "Remove panel",
+
+    // Drawer & Account
+    drawer_eyebrow: "PACKSIGHT ACCOUNT",
+    drawer_title: "Settings & Profile",
+    drawer_role_label: "LMPC Enforcement Officer",
+    drawer_appearance: "Appearance",
+    drawer_dark_mode: "Dark Theme",
+    drawer_dark_mode_desc: "High-contrast palette for low-light inspection",
+    drawer_language: "Language / भाषा",
+    drawer_lang_label: "Interface Language",
+    drawer_lang_desc: "UI text, buttons, and system messages",
+    drawer_system: "System & Standards",
+    drawer_logout: "Log out",
+    drawer_open_aria: "Open user account and settings",
+    drawer_close_aria: "Close settings"
   },
 
   hi: {
@@ -1833,7 +2391,22 @@ const translations = {
     panel_single_selected: "1 पैनल चुना गया",
     panels_multi_selected: "{count} पैनल चुने गए",
     panel_title: "पैनल {num}",
-    remove_panel_title: "पैनल हटाएं"
+    remove_panel_title: "पैनल हटाएं",
+
+    // Drawer & Account
+    drawer_eyebrow: "PACKSIGHT खाता",
+    drawer_title: "सेटिंग्स और प्रोफ़ाइल",
+    drawer_role_label: "विधिक मापविज्ञान प्रवर्तन अधिकारी",
+    drawer_appearance: "दिखावट (Appearance)",
+    drawer_dark_mode: "डार्क थीम (Dark Mode)",
+    drawer_dark_mode_desc: "कम रोशनी में निरीक्षण हेतु उच्च-कंट्रास्ट पैलेट",
+    drawer_language: "भाषा / Language",
+    drawer_lang_label: "इंटरफ़ेस भाषा",
+    drawer_lang_desc: "यूआई टेक्स्ट, बटन और सिस्टम संदेश",
+    drawer_system: "सिस्टम और मानक",
+    drawer_logout: "लॉग आउट",
+    drawer_open_aria: "उपयोगकर्ता खाता और सेटिंग्स खोलें",
+    drawer_close_aria: "सेटिंग्स बंद करें"
   }
 };
 
@@ -1856,8 +2429,13 @@ function setLanguage(lang) {
   // Sync selectors
   const sel1 = document.getElementById('langSelectLanding');
   const sel2 = document.getElementById('langSelectApp');
+  const sel3 = document.getElementById('langSelectDrawer');
   if (sel1) sel1.value = lang;
   if (sel2) sel2.value = lang;
+  if (sel3) sel3.value = lang;
+  if (typeof updateThemeIndicator === 'function') {
+    updateThemeIndicator(document.documentElement.getAttribute('data-theme') || 'light');
+  }
 
   // Update elements with data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -2002,6 +2580,7 @@ async function handleAuth(e, mode){
     localStorage.setItem('ps_userid', data.user_id);
     document.getElementById('userChip').textContent = '@' + data.user_id;
     document.getElementById('homeUserName').textContent = currentUser;
+    if (typeof updateNavAvatar === 'function') updateNavAvatar(currentUser);
     goTo('home');
   }catch(networkErr){
     err.textContent = t('api_offline_err', `Can't reach the PackSight API at {api}. Is the backend running? (see README.md)`).replace('{api}', API_BASE);
@@ -2024,6 +2603,8 @@ function logout(){
   document.getElementById('formSignup').reset();
   document.getElementById('signinError').textContent = '';
   document.getElementById('signupError').textContent = '';
+  if (typeof toggleDrawer === 'function') toggleDrawer(false);
+  if (typeof updateNavAvatar === 'function') updateNavAvatar('I');
   goTo('landing');
 }
 
@@ -3136,10 +3717,113 @@ function init3DLogos() {
   });
 }
 
+// ===================== DRAWER & THEME CONTROLLER =====================
+function toggleDrawer(isOpen) {
+  const panel = document.getElementById('drawerPanel');
+  const overlay = document.getElementById('drawerOverlay');
+  if (!panel || !overlay) return;
+
+  if (isOpen === undefined) {
+    isOpen = !panel.classList.contains('active');
+  }
+
+  if (isOpen) {
+    // Populate user profile from active session
+    const uName = localStorage.getItem('ps_user') || currentUser || (currentLang === 'hi' ? 'निरीक्षक' : 'Inspector');
+    const uId = localStorage.getItem('ps_userid') || 'inspector';
+    const avatarChar = (uName && uName.length > 0) ? uName[0].toUpperCase() : 'I';
+
+    const dName = document.getElementById('drawerUserName');
+    const dId = document.getElementById('drawerUserId');
+    const dAvatar = document.getElementById('drawerAvatarInitial');
+    const navAvatar = document.getElementById('navAvatarInitial');
+
+    if (dName) dName.textContent = uName;
+    if (dId) dId.textContent = '@' + uId;
+    if (dAvatar) dAvatar.textContent = avatarChar;
+    if (navAvatar) navAvatar.textContent = avatarChar;
+
+    // Sync theme toggle state
+    const curTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const toggleCb = document.getElementById('themeToggleCheckbox');
+    if (toggleCb) toggleCb.checked = (curTheme === 'dark');
+    updateThemeIndicator(curTheme);
+
+    // Sync lang select in drawer
+    const dLang = document.getElementById('langSelectDrawer');
+    if (dLang) dLang.value = currentLang;
+
+    panel.classList.add('active');
+    overlay.classList.add('active');
+    panel.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  } else {
+    panel.classList.remove('active');
+    overlay.classList.remove('active');
+    panel.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+}
+
+function toggleTheme(isDark) {
+  const newTheme = isDark ? 'dark' : 'light';
+  setTheme(newTheme);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('ps_theme', theme);
+
+  const toggleCb = document.getElementById('themeToggleCheckbox');
+  if (toggleCb) toggleCb.checked = (theme === 'dark');
+
+  updateThemeIndicator(theme);
+}
+
+function updateThemeIndicator(theme) {
+  const indicator = document.getElementById('drawerThemeIndicator');
+  const icon = document.getElementById('themeIcon');
+  if (indicator) {
+    indicator.textContent = (theme === 'dark')
+      ? (currentLang === 'hi' ? 'डार्क थीम (Dark)' : 'Dark Mode')
+      : (currentLang === 'hi' ? 'लाइट थीम (Light)' : 'Light Mode');
+  }
+  if (icon) icon.textContent = (theme === 'dark') ? '🌙' : '☀️';
+}
+
+function updateNavAvatar(name) {
+  const char = (name && name.length > 0) ? name[0].toUpperCase() : 'I';
+  const navAvatar = document.getElementById('navAvatarInitial');
+  const dAvatar = document.getElementById('drawerAvatarInitial');
+  if (navAvatar) navAvatar.textContent = char;
+  if (dAvatar) dAvatar.textContent = char;
+}
+
+function logoutFromDrawer() {
+  toggleDrawer(false);
+  logout();
+}
+
+// Global listener for Escape key to close drawer
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const panel = document.getElementById('drawerPanel');
+    if (panel && panel.classList.contains('active')) {
+      toggleDrawer(false);
+    }
+  }
+});
+
 // ---------------- Session Auto-Restore on Page Load ----------------
 window.addEventListener('DOMContentLoaded', () => {
   // Initialize 3D Logo mouse-driven tilt and idle controller
   init3DLogos();
+
+  // Restore theme preference
+  const savedTheme = localStorage.getItem('ps_theme') || document.documentElement.getAttribute('data-theme') || 'light';
+  setTheme(savedTheme);
 
   // Restore language preference
   const savedLang = localStorage.getItem('ps_lang') || 'en';
@@ -3154,6 +3838,7 @@ window.addEventListener('DOMContentLoaded', () => {
     currentUser = savedUser || (savedLang === 'hi' ? 'निरीक्षक' : 'Inspector');
     document.getElementById('userChip').textContent = '@' + savedUserId;
     document.getElementById('homeUserName').textContent = currentUser;
+    updateNavAvatar(currentUser);
     goTo('home');
   }
 });

@@ -1,0 +1,24 @@
+# Exclude non-root scaffolds
+backend/
+frontend/
+sih26034-legal-metrology/
+docker-compose.yml
+
+# Dev and version control
+.git/
+.gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.pytest_cache/
+.coverage
+
+# Temp and local environment
+scratch/
+.tempmediaStorage/
+.env
+.venv/
+env/
+venv/
+node_modules/
