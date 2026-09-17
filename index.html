@@ -1243,8 +1243,9 @@
       <h1 class="land-title" data-i18n="land_title">See what's on the label.<br><span class="grad-text">Verify</span> what the law requires.<br>Comply, provably.</h1>
       <p class="lede" data-i18n="land_lede">PackSight scans a packaged-commodity label, extracts every mandatory declaration, checks it against Rule 6 and the font-height schedule, and hands an inspector a report — instead of a checklist filled in by hand.</p>
       <div class="btn-row">
-        <button class="pill-btn solid" onclick="openAuth('signup')" data-i18n="land_btn_start">Get started free →</button>
+        <button class="pill-btn solid" onclick="loginDemoInspector().then(()=>goTo('scan'))" data-i18n="land_btn_demo">⚡ Instant Demo Scan →</button>
         <button class="pill-btn" onclick="openAuth('signin')" data-i18n="nav_signin">Sign in</button>
+        <button class="pill-btn" onclick="openAuth('signup')" data-i18n="nav_create_account">Create account</button>
       </div>
       <div class="microcopy" data-i18n="land_microcopy">No credit card. Runs OCR in your browser — label photos never leave your device.</div>
     </div>
@@ -1327,6 +1328,9 @@
         <div class="side-foot" data-i18n="auth_foot">LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011</div>
       </div>
       <div class="auth-form-wrap">
+        <div style="margin-bottom:14px;">
+          <button type="button" class="btn btn-primary" style="width:100%; justify-content:center; padding:11px; font-weight:600;" onclick="loginDemoInspector().then(()=>goTo('scan'))">⚡ 1-Click Demo Inspector Sign In</button>
+        </div>
         <div class="auth-tabs">
           <button id="tabSignin" class="active" onclick="switchAuthTab('signin')" data-i18n="tab_signin">Sign in</button>
           <button id="tabSignup" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Create account</button>
@@ -2608,6 +2612,42 @@ function logout(){
   goTo('landing');
 }
 
+async function loginDemoInspector(){
+  const demoId = 'inspector.demo';
+  const demoPass = 'demo2026';
+  try{
+    let res = await fetch(API_BASE + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: demoId, password: demoPass })
+    });
+    if(!res.ok){
+      res = await fetch(API_BASE + '/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: 'Lead Inspector Demo', user_id: demoId, password: demoPass })
+      });
+    }
+    if(res.ok){
+      const data = await res.json();
+      authToken = data.access_token;
+      currentUser = data.full_name.split(' ')[0];
+      localStorage.setItem('ps_token', authToken);
+      localStorage.setItem('ps_user', currentUser);
+      localStorage.setItem('ps_userid', data.user_id);
+      const uc = document.getElementById('userChip');
+      if(uc) uc.textContent = '@' + data.user_id;
+      const un = document.getElementById('homeUserName');
+      if(un) un.textContent = currentUser;
+      if (typeof updateNavAvatar === 'function') updateNavAvatar(currentUser);
+      return true;
+    }
+  }catch(e){
+    console.error('Demo inspector login error:', e);
+  }
+  return false;
+}
+
 // ---------------- Multi-Image & Camera State ----------------
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -2802,10 +2842,18 @@ document.getElementById('runScanBtn').addEventListener('click', runScan);
 
 async function runScan(){
   if(!selectedFiles.length) return;
-  if(!authToken){ goTo('auth'); return; }
-
   const btn = document.getElementById('runScanBtn');
   const progress = document.getElementById('progressText');
+
+  if(!authToken){
+    progress.textContent = t('connecting_session', 'Connecting inspector session…');
+    const ok = await loginDemoInspector();
+    if(!ok || !authToken){
+      goTo('auth');
+      return;
+    }
+  }
+
   btn.disabled = true;
 
   const isMulti = selectedFiles.length > 1;
@@ -2822,7 +2870,7 @@ async function runScan(){
   }
 
   try{
-    progress.textContent = isMulti ? t('running_ocr_multi', `Running multi-panel OCR & rule engine ({count} panels)…`).replace('{count}', selectedFiles.length) : t('running_ocr_single', 'Running OCR + rule engine…');
+    progress.textContent = isMulti ? t('running_ocr_multi', `Running multi-panel OCR & rule engine ({count} panels)…`).replace('{count}', selectedFiles.length) : t('running_ocr_single', 'Processing OCR + Legal Metrology rule engine…');
     const res = await fetch(API_BASE + endpoint, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken },

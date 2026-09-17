@@ -383,10 +383,11 @@ STATUTORY_ORIENTATION_KEYWORDS = [
 def orientation_score(image: np.ndarray) -> float:
     """Score readable OCR to find the correct upright angle across 0°, 90°, 180°, 270°."""
     h, w = image.shape[:2]
-    scale = 800.0 / max(h, w) if max(h, w) > 800 else 1.0
+    max_d = max(h, w)
+    scale = 640.0 / max_d if max_d > 640 else 1.0
     preview = cv2.resize(image, (int(w * scale), int(h * scale)))
     gray = cv2.cvtColor(preview, cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8, 8)).apply(gray)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(gray)
 
     try:
         data = pytesseract.image_to_data(
@@ -427,14 +428,18 @@ def orientation_score(image: np.ndarray) -> float:
 
 def find_best_orientation(image: np.ndarray) -> tuple[str, np.ndarray, int]:
     """Rotate image across 0°, 90°, 180°, 270° and pick the most readable angle."""
+    # Fast path: check 0° first. If already readable and upright (score >= 450), avoid 3 extra full OCR passes
+    score_0 = orientation_score(image)
+    if score_0 >= 450:
+        return "0", image, 0
+
     views = {
-        "0": (image, 0),
         "90_CW": (cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE), 90),
         "180": (cv2.rotate(image, cv2.ROTATE_180), 180),
         "270_CW": (cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE), 270),
     }
 
-    best_score = float("-inf")
+    best_score = score_0
     selected_name = "0"
     selected_img = image
     selected_deg = 0
@@ -1054,8 +1059,16 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
 
     # 3. Adaptive Auto-Zoom for small letters & fine statutory typography
     min_dim = min(h, w)
-    zoom_factor = max(1.5, min(3.2, 1800.0 / min_dim))
-    zoomed = cv2.resize(oriented, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_CUBIC)
+    max_dim = max(h, w)
+    if max_dim > 1600:
+        zoom_factor = 1600.0 / max_dim
+        zoomed = cv2.resize(oriented, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_AREA)
+    elif min_dim < 800:
+        zoom_factor = min(2.0, 1100.0 / min_dim)
+        zoomed = cv2.resize(oriented, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_CUBIC)
+    else:
+        zoom_factor = 1.0
+        zoomed = oriented
 
     # Unsharp mask to sharpen small font edges
     blurred = cv2.GaussianBlur(zoomed, (0, 0), 1.2)
@@ -1063,7 +1076,7 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
     gray_zoom = cv2.cvtColor(sharpened, cv2.COLOR_BGR2GRAY)
     clahe_zoom = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8)).apply(gray_zoom)
 
-    # Multi-pass OCR passes on zoomed image
+    # Multi-pass OCR passes on preprocessed image
     passes = []
     # Pass A: Sparse layout / multi-panel
     try:
@@ -1077,13 +1090,15 @@ def run_advanced_scan(image_bytes: bytes) -> dict[str, Any]:
     except Exception:
         pass
 
-    # Pass C: Regional statutory crop (bottom 55% of packaging)
-    try:
-        bot_y_start = int(sharpened.shape[0] * 0.45)
-        bot_crop = clahe_zoom[bot_y_start:, :]
-        passes.append((pytesseract.image_to_data(bot_crop, output_type=Output.DICT, config="--oem 3 --psm 6"), bot_y_start))
-    except Exception:
-        pass
+    # Pass C: Regional statutory crop (bottom 55% of packaging) - run only if earlier passes yielded very few words
+    word_count_ab = sum(len(p[0].get("text", [])) for p in passes)
+    if word_count_ab < 25:
+        try:
+            bot_y_start = int(sharpened.shape[0] * 0.45)
+            bot_crop = clahe_zoom[bot_y_start:, :]
+            passes.append((pytesseract.image_to_data(bot_crop, output_type=Output.DICT, config="--oem 3 --psm 6"), bot_y_start))
+        except Exception:
+            pass
 
     # Collect, rescale to original image coordinates, and deduplicate words
     unified_words: list[dict[str, Any]] = []

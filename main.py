@@ -41,14 +41,38 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-def root():
-    return {"status": "ok", "service": "PackSight API"}
+@app.get("/", response_class=FileResponse)
+def root_webapp():
+    return FileResponse("index.html")
 
 
 @app.get("/app", response_class=FileResponse)
 def serve_webapp():
     return FileResponse("index.html")
+
+
+@app.get("/health")
+@app.get("/api/status")
+def health_status():
+    return {"status": "ok", "service": "PackSight API"}
+
+
+@app.get("/packsight-logo-transparent.png", response_class=FileResponse)
+def serve_logo():
+    return FileResponse(
+        "packsight-logo-transparent.png",
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=86400"}
+    )
+
+
+@app.get("/favicon.ico", response_class=FileResponse)
+def serve_favicon():
+    return FileResponse(
+        "packsight-logo-transparent.png",
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=86400"}
+    )
 
 
 # ---------------------------------------------------------------- auth ----
